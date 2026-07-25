@@ -332,8 +332,8 @@ p { margin: 0; max-width: var(--measure); }
 
 .more summary::-webkit-details-marker { display: none; }
 .more summary::marker { content: ""; }
-.more summary::before { content: "+ "; }
-.more[open] summary::before { content: "\2212 "; }   /* minus, not a hyphen */
+.more summary::before { content: "+\00a0"; }
+.more[open] summary::before { content: "\2212\00a0"; }   /* minus, not a hyphen */
 .more summary:hover { color: var(--text-0); }
 
 .more-body { display: grid; gap: var(--s4); margin-top: var(--s3); }

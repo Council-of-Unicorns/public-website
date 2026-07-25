@@ -31,7 +31,7 @@
     <span>Substrate</span>
   </a>
   <nav aria-label="Sections">
-    <a href="#deadline">Deadline</a>
+    <a href="#realtime">Real&#8209;time</a>
     <a href="#bet">Bet</a>
     <a href="#evidence">Evidence</a>
     <a href="#contact">Contact</a>
@@ -167,14 +167,14 @@
     </div>
   </section>
 
-  <section class="band" id="deadline">
-    <p class="label">01 &mdash; The deadline</p>
-    <h2>A late answer is a fall,<br />not a dropped frame.</h2>
+  <section class="band" id="realtime">
+    <p class="label">01 &mdash; The requirement</p>
+    <h2>Real time, on board,<br />in any environment.</h2>
     <p class="claim">A two&#8209;hundred&#8209;millisecond hard deadline, inside a fanless head. Neither constraint gives.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>The robot is already mid&#8209;step when the answer comes due. Miss it and you do not get a stutter, you get a stability event.</p>
+          <p>Low reaction latency matters; predictable reaction latency matters more. Ultra&#8209;high reliability means the answer arrives on the same schedule every time rather than on average &mdash; and that it behaves the same in a warehouse, a basement, or a field with no signal. A robot&rsquo;s competence should not depend on its connection.</p>
           <p class="muted">That budget has to be met in a head whose neck path can reject roughly forty watts. This is not a throughput problem with a latency footnote. It is a deadline problem with a power ceiling, and the two constraints fight each other.</p>
         </div>
       </details>
@@ -189,12 +189,12 @@
   <section class="band alt" id="today">
     <p class="label">02 &mdash; What it costs today</p>
     <h2>I built the wrong<br />solution first.</h2>
-    <p class="claim">Control rate took two B200s in a datacenter and a custom QUIC relay. That puts the radio inside the safety loop.</p>
+    <p class="claim">Control rate took two B200s in a datacenter and a custom QUIC relay. That puts the network inside the control loop.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
           <p>At 1X I was responsible for getting a fine&#8209;tuned action co&#8209;diffusion world model to control rate. It took the entire arsenal: sixteen&#8209;to&#8209;three&#8209;step distillation, classifier&#8209;free guidance split across two B200s, velocity caching between diffusion steps, graph capture to suppress kernel&#8209;launch overhead, and train&#8209;time chunking to fit the streaming regime. It worked &mdash; at two kilowatt&#8209;class GPUs per robot.</p>
-          <p class="muted">So I built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the shape of the mistake clear. No amount of transport engineering turns a wireless round trip into a certifiable miss rate. A humanoid that needs connectivity to keep its balance is a demo, not a product.</p>
+          <p class="muted">So I built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the shape of the mistake clear. No amount of transport engineering makes a wireless round trip predictable enough to design against. A humanoid whose competence depends on connectivity is a demo, not a product.</p>
         </div>
       </details>
   </section>
