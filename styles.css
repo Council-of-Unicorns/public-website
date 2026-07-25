@@ -356,6 +356,8 @@ p { margin: 0; max-width: var(--measure); }
 }
 
 .specs li {
+  position: relative;   /* tooltip anchors to the card, not to the asterisk,
+                           so a long tip cannot be pushed off a narrow screen */
   padding: var(--s4);
   background: var(--ground-2);
   border-left: var(--px) solid var(--warm-1);
@@ -372,6 +374,53 @@ p { margin: 0; max-width: var(--measure); }
 }
 
 .cap { display: block; margin-top: var(--s2); font-size: 14px; color: var(--text-2); }
+
+/* --- info asterisk + tooltip -------------------------------------------- */
+/* No JS: revealed on hover and on focus, so it also works by keyboard and by
+   tap (tapping the button focuses it). Snaps in — nothing fades. */
+
+.info { display: inline-block; }
+
+.info-mark {
+  appearance: none;
+  margin: 0 0 0 var(--s1);
+  padding: 0 var(--s1);
+  min-width: var(--s4);
+  min-height: var(--s4);
+  border: 0;
+  background: none;
+  color: var(--warm-0);
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;
+  cursor: help;
+}
+
+.info-mark:hover { color: var(--text-0); }
+
+.tip {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + var(--s2));
+  left: 0;
+  /* Bounded so a long tip can overhang its card without ever reaching the
+     viewport edge — the narrowest supported width is 320px. */
+  width: min(272px, calc(100vw - var(--s5)));
+  padding: var(--s3);
+  background: var(--ground-3);
+  color: var(--text-1);
+  border-left: var(--px) solid var(--warm-1);
+  box-shadow: var(--s1) var(--s1) 0 rgba(0, 0, 0, 0.45);   /* hard, zero blur */
+  font-family: var(--read);
+  font-size: 13px;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: 0;
+  visibility: hidden;
+}
+
+.info-mark:hover + .tip,
+.info-mark:focus + .tip { visibility: visible; }
 
 /* --------------------------------------------------------------- horizon */
 
