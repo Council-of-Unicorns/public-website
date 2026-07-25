@@ -1,0 +1,8 @@
+# Confidential source material — deliberately NOT published to the public repo.
+# The site is public; the raw pitch, strategy notes and internal positioning are not.
+# Remove a line (or use `git add -f`) if you want something tracked.
+docs/
+CLAUDE.md
+
+node_modules/
+.DS_Store

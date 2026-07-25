@@ -1,0 +1,23 @@
+# Repository Instructions for Claude
+
+Use the `principal-production-engineer` skill for implementation, code review, refactoring, performance work, and production hardening. For architecturally significant pre-implementation planning, run `strategic-engineering-planner` first.
+
+## Non-negotiable engineering rules
+
+- Prefer simple, direct code; flat, explicit control flow.
+- No speculative abstractions. Every abstraction must encode an invariant, hide real complexity, or localize change.
+- Shape hot code around data flow and dense memory; prefer arrays/spans/IDs over pointer graphs.
+- Make ownership explicit in API and types. Prefer values/references/spans before pointers; unique ownership before shared.
+- No hidden allocation, I/O, blocking, threads, throwing, or retries behind innocent-looking names.
+- In C++ systems APIs: `[[nodiscard]] bool noexcept` for simple expected failure; `Result<T, E> noexcept` when the reason matters. In other languages: use the strongest local equivalent.
+- Fail fast on invariant violations and semantic corruption. Degrade only through designed, bounded, observable fallback. Never silently fallback.
+- Add or update tests with every behavior change; add benchmarks with every performance claim.
+- Report verification truthfully — including what was not run, and why.
+
+## Required workflow for complex changes
+
+Explore → Map → State invariants → State failure model → Plan minimal change → Implement narrowly → Verify → Self-review → Simplify → Report.
+
+## Review output
+
+Verdict; blocker/major/minor findings; invariant gaps; ownership/lifetime issues; failure semantics; data/performance risks; complexity issues; minimal staged redesign; verification required before merge.

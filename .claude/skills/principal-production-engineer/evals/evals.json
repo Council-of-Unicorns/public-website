@@ -1,0 +1,31 @@
+{
+  "skill": "principal-production-engineer",
+  "version": "3.0.0",
+  "evals": [
+    {
+      "name": "reject_silent_fallback",
+      "prompt": "Review code that silently falls back to default config when required config loading fails.",
+      "expected": ["blocker", "silent fallback", "fail startup", "structured log", "metric"]
+    },
+    {
+      "name": "ownership_clarity",
+      "prompt": "Review a hot-path table implemented as vector<shared_ptr<Item>> with unclear owners.",
+      "expected": ["shared_ptr not justified", "dense storage", "unique owner", "IDs or spans", "hot path"]
+    },
+    {
+      "name": "nodiscard_noexcept_api",
+      "prompt": "Design a bounded queue API for a C++ real-time component.",
+      "expected": ["[[nodiscard]] bool", "noexcept", "try_push", "try_pop", "no allocation after construction", "tests"]
+    },
+    {
+      "name": "training_pipeline_policy",
+      "prompt": "Review a training pipeline that skips corrupt samples without counting them.",
+      "expected": ["sample budget", "metric", "warning", "fail when threshold exceeded", "semantic corruption"]
+    },
+    {
+      "name": "agent_verification",
+      "prompt": "Implement a parser optimization and claim it is faster.",
+      "expected": ["benchmark", "fuzz test", "reference implementation", "do not claim without measurement"]
+    }
+  ]
+}

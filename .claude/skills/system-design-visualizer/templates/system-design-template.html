@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>[System name] — System Design Review</title>
+  <style>
+    :root {
+      --ink: #172033;
+      --muted: #627086;
+      --faint: #eef2f7;
+      --line: #cdd6e3;
+      --panel: #f8fafc;
+      --paper: #ffffff;
+      --accent: #1359c8;
+      --accent-pale: #e8f0ff;
+      --warning: #8b5d11;
+      --warning-pale: #fff8e7;
+      --success: #176b42;
+      --success-pale: #eaf8ef;
+      --danger: #9b2735;
+      --danger-pale: #fff0f1;
+      --radius: 14px;
+      --measure: 1180px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.52;
+    }
+    a { color: var(--accent); }
+    header, main, footer { max-width: var(--measure); margin: 0 auto; padding: 28px 24px; }
+    header { border-bottom: 1px solid var(--line); }
+    .eyebrow { margin: 0 0 8px; color: var(--accent); font-size: .78rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+    h1, h2, h3 { letter-spacing: -.02em; line-height: 1.14; }
+    h1 { margin: 0; font-size: clamp(2rem, 4vw, 3.25rem); }
+    h2 { margin: 0 0 12px; font-size: clamp(1.45rem, 2.8vw, 2.1rem); }
+    h3 { margin: 0 0 8px; font-size: 1.05rem; }
+    p { max-width: 78ch; }
+    .deck { color: var(--muted); font-size: 1.08rem; }
+    .status-row, .metrics { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
+    .chip { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 999px; padding: 5px 10px; font-size: .86rem; background: var(--paper); }
+    .chip strong { font-weight: 700; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px 18px; margin-top: 26px; }
+    nav a { color: var(--ink); font-size: .92rem; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+    section { margin: 56px 0; scroll-margin-top: 24px; }
+    .section-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: start; margin-bottom: 20px; }
+    .question, .takeaway { margin: 4px 0; color: var(--muted); }
+    .question strong, .takeaway strong { color: var(--ink); }
+    .section-number { color: var(--muted); font-variant-numeric: tabular-nums; }
+    .decision-card, .source-gap, .source-notes, .table-wrap, .diagram-shell { border: 1px solid var(--line); border-radius: var(--radius); }
+    .decision-card { padding: 18px; background: var(--accent-pale); border-color: #c6d9ff; }
+    .source-gap { padding: 14px 16px; background: var(--warning-pale); border-color: #efd69b; color: #654404; }
+    .source-notes { margin-top: 14px; padding: 10px 14px; background: var(--panel); color: var(--muted); font-size: .9rem; }
+    .source-notes summary { cursor: pointer; color: var(--ink); font-weight: 650; }
+    .source-notes ul { margin: 8px 0 0; padding-left: 20px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .metric { border-left: 3px solid var(--accent); padding: 8px 12px; background: var(--panel); }
+    .metric small { display: block; color: var(--muted); }
+    .diagram-shell { padding: 16px; overflow: hidden; background: linear-gradient(to bottom, #fff, #fbfcfe); }
+    svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .legend { margin: 12px 0 0; color: var(--muted); font-size: .9rem; }
+    .legend ul { display: flex; flex-wrap: wrap; gap: 8px 18px; list-style: none; padding: 0; margin: 7px 0 0; }
+    .legend li { display: inline-flex; align-items: center; gap: 6px; }
+    .legend-swatch { width: 30px; height: 0; border-top: 2px solid #5f6b7a; display: inline-block; }
+    .legend-swatch.dashed { border-top-style: dashed; }
+    .table-wrap { overflow-x: auto; background: var(--paper); }
+    table { border-collapse: collapse; width: 100%; min-width: 720px; }
+    th, td { padding: 12px 14px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+    th { background: var(--panel); font-size: .88rem; }
+    tbody tr:last-child td { border-bottom: 0; }
+    code { border: 1px solid #dbe2ec; border-radius: 5px; background: #f6f8fb; padding: 1px 4px; font: .9em ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+    .traceability { font-size: .9rem; }
+    footer { border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+    .svg-node { fill: #fff; stroke: #718096; stroke-width: 1.5; }
+    .svg-node-service { fill: #f7faff; stroke: #4d73b7; }
+    .svg-node-store { fill: #fffaf0; stroke: #9a6a20; }
+    .svg-node-topic { fill: #f1fbf5; stroke: #398158; }
+    .svg-boundary { fill: #f8fafc; stroke: #bac5d3; stroke-width: 1.25; stroke-dasharray: 6 5; }
+    .svg-title { fill: var(--ink); font-size: 18px; font-weight: 700; }
+    .svg-subtitle { fill: var(--muted); font-size: 13px; }
+    .svg-edge { fill: none; stroke: #5d697a; stroke-width: 2.1; }
+    .svg-edge-async { stroke: #176b42; }
+    .svg-edge-dependency { stroke-dasharray: 6 5; }
+    .svg-label { fill: #334155; font-size: 13px; paint-order: stroke; stroke: #fff; stroke-width: 5px; stroke-linejoin: round; }
+    @media (max-width: 720px) {
+      header, main, footer { padding: 20px 16px; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .section-head { grid-template-columns: 1fr; }
+      .diagram-shell { padding: 8px; }
+    }
+    @media print {
+      @page { margin: 15mm; }
+      body { font-size: 10.5pt; }
+      nav { display: none; }
+      header, main, footer { max-width: none; padding: 0; }
+      section { break-inside: avoid; margin: 26px 0; }
+      .diagram-shell, .table-wrap, .decision-card, .source-gap, .source-notes { break-inside: avoid; }
+      .diagram-shell { border-color: #c7ced8; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">System design review · source-grounded visualization</p>
+    <h1>[System name]</h1>
+    <p class="deck">[Source-backed one-sentence description of the proposed or current system.]</p>
+    <div class="status-row" aria-label="Review metadata">
+      <span class="chip"><strong>Status</strong> [source-backed status or not specified]</span>
+      <span class="chip"><strong>Decision requested</strong> [source-backed decision or not specified]</span>
+      <span class="chip"><strong>Sources</strong> [N] Markdown file(s)</span>
+    </div>
+    <nav aria-label="Design review navigation">
+      <a href="#requirements">Requirements</a>
+      <a href="#constraints">Constraints</a>
+      <a href="#context">Context</a>
+      <a href="#runtime">Runtime</a>
+      <a href="#contracts">Contracts</a>
+      <a href="#data-model">Data model</a>
+      <a href="#reliability">Reliability</a>
+      <a href="#performance">Performance</a>
+      <a href="#traceability">Traceability</a>
+    </nav>
+  </header>
+
+  <main>
+    <section id="overview" aria-labelledby="overview-title">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">01 · Overview</p>
+          <h2 id="overview-title">Executive summary</h2>
+          <p class="takeaway"><strong>Takeaway:</strong> [Source-backed review takeaway.]</p>
+        </div>
+      </div>
+      <div class="decision-card">
+        <h3>What this review needs to decide</h3>
+        <p>[Source-backed decision request. Keep unresolved decisions explicit.]</p>
+      </div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="requirements" aria-labelledby="requirements-title">
+      <div class="section-head"><div><p class="eyebrow">02 · Intent</p><h2 id="requirements-title">High-level requirements and non-goals</h2><p class="takeaway"><strong>Takeaway:</strong> [Source-backed statement.]</p></div></div>
+      <div class="grid-2">
+        <div class="table-wrap"><table><thead><tr><th>Requirement</th><th>Source-backed success condition</th></tr></thead><tbody><tr><td>[Requirement]</td><td>[Condition]</td></tr></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Non-goal</th><th>Boundary</th></tr></thead><tbody><tr><td>[Non-goal]</td><td>[Boundary]</td></tr></tbody></table></div>
+      </div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="constraints" aria-labelledby="constraints-title">
+      <div class="section-head"><div><p class="eyebrow">03 · Boundaries</p><h2 id="constraints-title">Constraints and assumptions</h2><p class="takeaway"><strong>Takeaway:</strong> [Source-backed constraint statement.]</p></div></div>
+      <div class="grid-2">
+        <div class="table-wrap"><table><thead><tr><th>Constraint</th><th>Impact on design</th></tr></thead><tbody><tr><td>[Constraint]</td><td>[Source-backed implication]</td></tr></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Assumption</th><th>Validation status</th></tr></thead><tbody><tr><td>[Assumption]</td><td>[stated / open / not specified]</td></tr></tbody></table></div>
+      </div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="context" aria-labelledby="context-title">
+      <div class="section-head"><div><p class="eyebrow">04 · Context</p><h2 id="context-title">System context</h2><p class="question"><strong>Question answered:</strong> Who interacts with the system and which external or trust boundaries matter?</p><p class="takeaway"><strong>Takeaway:</strong> [Source-backed statement.]</p></div></div>
+      <div class="diagram-shell">
+        <svg id="context-svg" role="img" aria-labelledby="context-svg-title context-svg-desc" viewBox="0 0 1120 360">
+          <title id="context-svg-title">[System name] context diagram</title>
+          <desc id="context-svg-desc">Replace this template with source-backed actors, the system under design, external systems, and labeled runtime interactions.</desc>
+          <!-- Draw source-backed nodes and only runtime interaction edges here. -->
+          <text x="560" y="180" text-anchor="middle" class="svg-subtitle">No context diagram is rendered until source-backed actors and interactions are available.</text>
+        </svg>
+        <aside class="legend" aria-label="Context diagram legend"><strong>Legend</strong><ul><li><span class="legend-swatch"></span>runtime interaction, labeled</li><li>Boundary containers indicate trust, owner, or external scope</li></ul></aside>
+      </div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="runtime" aria-labelledby="runtime-title">
+      <div class="section-head"><div><p class="eyebrow">05 · Runtime</p><h2 id="runtime-title">Runtime architecture</h2><p class="question"><strong>Question answered:</strong> What deployable components communicate at runtime?</p><p class="takeaway"><strong>Takeaway:</strong> [Source-backed request path summary.]</p></div></div>
+      <div class="diagram-shell">
+        <svg id="runtime-svg" role="img" aria-labelledby="runtime-svg-title runtime-svg-desc" viewBox="0 0 1120 520">
+          <title id="runtime-svg-title">[System name] runtime architecture</title>
+          <desc id="runtime-svg-desc">Replace this template with source-backed services, stores, queues, external systems, and precisely labeled runtime edges.</desc>
+          <!-- Runtime only: sync, async through queues/topics, reads, and writes. No static dependencies. -->
+          <text x="560" y="260" text-anchor="middle" class="svg-subtitle">No runtime diagram is rendered until source-backed components and runtime communication are available.</text>
+        </svg>
+        <aside class="legend" aria-label="Runtime architecture legend"><strong>Legend</strong><ul><li><span class="legend-swatch"></span>synchronous runtime call</li><li><span class="legend-swatch"></span><code>async:</code> message through a named queue/topic</li><li>Arrow entering datastore: write</li><li>Arrow leaving datastore: read result</li></ul></aside>
+      </div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="sequence" aria-labelledby="sequence-title">
+      <div class="section-head"><div><p class="eyebrow">06 · Time</p><h2 id="sequence-title">Critical sequence</h2><p class="question"><strong>Question answered:</strong> What happens over time in the source-documented critical workflow?</p><p class="takeaway"><strong>Takeaway:</strong> [Source-backed workflow summary.]</p></div></div>
+      <div class="source-gap" role="note"><strong>Not specified in the design sources.</strong> This template requires a documented critical flow before it draws message ordering, retries, timeouts, or fallbacks.</div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading, or source gap]</li></ul></details>
+    </section>
+
+    <section id="contracts" aria-labelledby="contracts-title">
+      <div class="section-head"><div><p class="eyebrow">07 · Interfaces</p><h2 id="contracts-title">API, event, and contract reference</h2><p class="takeaway"><strong>Takeaway:</strong> [Source-backed contract statement.]</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Interface</th><th>Caller / producer</th><th>Consumer</th><th>Payload or key fields</th><th>Auth</th><th>Timeout / retry</th><th>Idempotency / ordering</th></tr></thead><tbody><tr><td>[API or event]</td><td>[caller]</td><td>[consumer]</td><td>[source-backed fields]</td><td>[source-backed auth]</td><td>[source-backed behavior]</td><td>[source-backed behavior]</td></tr></tbody></table></div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="data-model" aria-labelledby="data-model-title">
+      <div class="section-head"><div><p class="eyebrow">08 · Data</p><h2 id="data-model-title">Data model and ownership</h2><p class="takeaway"><strong>Takeaway:</strong> [Source-backed ownership statement.]</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Data object / entity</th><th>System of record</th><th>Key fields / schema contract</th><th>Writers</th><th>Readers</th><th>Sensitivity</th><th>Retention / deletion</th></tr></thead><tbody><tr><td>[Entity]</td><td>[Store]</td><td>[Fields]</td><td>[Writers]</td><td>[Readers]</td><td>[Classification]</td><td>[Policy]</td></tr></tbody></table></div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="reliability" aria-labelledby="reliability-title">
+      <div class="section-head"><div><p class="eyebrow">09 · Operations</p><h2 id="reliability-title">Reliability and operational behavior</h2><p class="takeaway"><strong>Takeaway:</strong> [Source-backed reliability statement.]</p></div></div>
+      <div class="table-wrap"><table><thead><tr><th>Dependency / failure mode</th><th>Timeout and retry owner</th><th>Idempotency / ordering</th><th>Backpressure / degraded mode</th><th>User-visible outcome</th><th>Signal</th></tr></thead><tbody><tr><td>[Dependency]</td><td>[Behavior]</td><td>[Behavior]</td><td>[Behavior]</td><td>[Outcome]</td><td>[Metric / alert]</td></tr></tbody></table></div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="performance" aria-labelledby="performance-title">
+      <div class="section-head"><div><p class="eyebrow">10 · Capacity</p><h2 id="performance-title">Performance and scaling</h2><p class="takeaway"><strong>Takeaway:</strong> [Source-backed performance statement.]</p></div></div>
+      <div class="grid-2">
+        <div class="table-wrap"><table><thead><tr><th>Target or constraint</th><th>Value / source status</th><th>Scope</th></tr></thead><tbody><tr><td>[Metric]</td><td>[Value or not specified]</td><td>[Scope]</td></tr></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>Bottleneck / capacity boundary</th><th>Mitigation or open item</th></tr></thead><tbody><tr><td>[Boundary]</td><td>[Source-backed response]</td></tr></tbody></table></div>
+      </div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading]</li></ul></details>
+    </section>
+
+    <section id="open-questions" aria-labelledby="open-questions-title">
+      <div class="section-head"><div><p class="eyebrow">11 · Review</p><h2 id="open-questions-title">Open questions, decisions, and source gaps</h2><p class="takeaway"><strong>Takeaway:</strong> [Keep unresolved source material unresolved.]</p></div></div>
+      <div class="source-gap" role="note"><strong>Not specified in the design sources.</strong> Replace this with source-documented open questions, conflicts, and missing information; do not create new recommendations here.</div>
+      <details class="source-notes"><summary>Sources</summary><ul><li>[repository-relative source path — heading, or source gap]</li></ul></details>
+    </section>
+
+    <section id="traceability" aria-labelledby="traceability-title">
+      <div class="section-head"><div><p class="eyebrow">12 · Audit</p><h2 id="traceability-title">Traceability appendix</h2><p class="takeaway"><strong>Takeaway:</strong> Every system-specific statement and diagram element is linked to a local design source.</p></div></div>
+      <div class="table-wrap traceability"><table><thead><tr><th>Output section / element</th><th>Source file</th><th>Source heading</th><th>Notes</th></tr></thead><tbody><tr><td>[Section or SVG node/edge ID]</td><td>[path]</td><td>[heading]</td><td>[Derived / gap / conflict]</td></tr></tbody></table></div>
+    </section>
+  </main>
+
+  <footer>Canonical artifact: source-grounded HTML with inline SVG and embedded semantic manifest. Derivatives require explicit request.</footer>
+
+  <script id="system-design-manifest" type="application/json">
+{
+  "format": "system-design-html-svg/v2",
+  "sourceInventory": [
+    {"path": "[repository-relative source path]", "role": "system-design source", "headingsUsed": ["[heading]"]}
+  ],
+  "sections": [
+    {"id": "overview", "sourceRefs": [{"path": "[path]", "heading": "[heading]"}]},
+    {"id": "requirements", "sourceRefs": [{"path": "[path]", "heading": "[heading]"}]},
+    {"id": "constraints", "sourceRefs": [{"path": "[path]", "heading": "[heading]"}]},
+    {"id": "contracts", "sourceRefs": [{"path": "[path]", "heading": "[heading]"}]},
+    {"id": "data-model", "sourceRefs": [{"path": "[path]", "heading": "[heading]"}]},
+    {"id": "reliability", "sourceRefs": [{"path": "[path]", "heading": "[heading]"}]},
+    {"id": "performance", "sourceRefs": [{"path": "[path]", "heading": "[heading]"}]}
+  ],
+  "diagrams": [
+    {
+      "id": "context",
+      "svgId": "context-svg",
+      "question": "Who interacts with the system and which external or trust boundaries matter?",
+      "legend": ["sync", "boundary"],
+      "sourceRefs": [{"path": "[path]", "heading": "[heading]"}],
+      "nodes": [],
+      "edges": []
+    },
+    {
+      "id": "runtime",
+      "svgId": "runtime-svg",
+      "question": "What deployable components communicate at runtime?",
+      "legend": ["sync", "async", "write", "read"],
+      "sourceRefs": [{"path": "[path]", "heading": "[heading]"}],
+      "nodes": [],
+      "edges": []
+    }
+  ],
+  "sourceGaps": [
+    {"section": "sequence", "topic": "critical workflow", "reason": "Not specified in the design sources", "sourceRefs": []}
+  ]
+}
+  </script>
+</body>
+</html>

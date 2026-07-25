@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Substrate &mdash; Inference silicon for embodied AI</title>
+<meta name="description" content="We etch the robot's world model into silicon: real-time world-model inference inside a 30 W robot head, with deterministic timing." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<meta name="theme-color" content="#100E18" />
+<meta property="og:title" content="Substrate &mdash; Inference silicon for embodied AI" />
+<meta property="og:description" content="Real-time world-model inference inside a 30 W robot head, with deterministic timing." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav">
+  <a class="wordmark" href="#top">
+    <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+      <rect x="0" y="0" width="8" height="8" fill="currentColor" opacity=".18"/>
+      <rect x="1" y="1" width="2" height="2" fill="currentColor"/>
+      <rect x="5" y="1" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
+    </svg>
+    <span>Substrate</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="#deadline">Deadline</a>
+    <a href="#bet">Bet</a>
+    <a href="#evidence">Evidence</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main id="main" tabindex="-1">
+
+  <section class="hero" id="top">
+    <div class="hero-copy">
+      <p class="label">FM&#8209;RPU</p>
+      <h1>We etch the robot&rsquo;s world model into silicon.</h1>
+      <p class="lede">Real&#8209;time world&#8209;model inference, inside the head, on a 30&#8202;watt budget.</p>
+      <details class="more">
+        <summary>Detail</summary>
+        <div class="more-body">
+          <p>Humanoid control is converging on world models: a fourteen&#8209;billion&#8209;parameter diffusion transformer that imagines the next two seconds, acts, and re&#8209;plans five times a second. Today that takes a datacenter. We build the chip that runs it in the head.</p>
+        </div>
+      </details>
+    </div>
+    <div class="hero-art" role="img" aria-label="Pixel-art chip die: a grid of compute tiles activating in a diagonal wave">
+      <svg class="die" viewBox="0 0 64 64" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+        <rect x="4" y="4" width="56" height="56" class="pkg"/>
+        <rect x="6" y="6" width="52" height="52" class="pkg-in"/>
+        <g class="pads">
+          <rect x="10" y="1" width="3" height="3"/>
+          <rect x="10" y="60" width="3" height="3"/>
+          <rect x="1" y="10" width="3" height="3"/>
+          <rect x="60" y="10" width="3" height="3"/>
+          <rect x="18" y="1" width="3" height="3"/>
+          <rect x="18" y="60" width="3" height="3"/>
+          <rect x="1" y="18" width="3" height="3"/>
+          <rect x="60" y="18" width="3" height="3"/>
+          <rect x="26" y="1" width="3" height="3"/>
+          <rect x="26" y="60" width="3" height="3"/>
+          <rect x="1" y="26" width="3" height="3"/>
+          <rect x="60" y="26" width="3" height="3"/>
+          <rect x="34" y="1" width="3" height="3"/>
+          <rect x="34" y="60" width="3" height="3"/>
+          <rect x="1" y="34" width="3" height="3"/>
+          <rect x="60" y="34" width="3" height="3"/>
+          <rect x="42" y="1" width="3" height="3"/>
+          <rect x="42" y="60" width="3" height="3"/>
+          <rect x="1" y="42" width="3" height="3"/>
+          <rect x="60" y="42" width="3" height="3"/>
+          <rect x="50" y="1" width="3" height="3"/>
+          <rect x="50" y="60" width="3" height="3"/>
+          <rect x="1" y="50" width="3" height="3"/>
+          <rect x="60" y="50" width="3" height="3"/>
+        </g>
+        <rect x="9" y="9" width="46" height="46" class="die-body"/>
+        <g class="trace">
+          <rect x="21" y="16" width="2" height="1"/>
+          <rect x="16" y="21" width="1" height="2"/>
+          <rect x="21" y="27" width="2" height="1"/>
+          <rect x="27" y="21" width="1" height="2"/>
+          <rect x="21" y="38" width="2" height="1"/>
+          <rect x="38" y="21" width="1" height="2"/>
+          <rect x="21" y="49" width="2" height="1"/>
+          <rect x="49" y="21" width="1" height="2"/>
+          <rect x="32" y="16" width="2" height="1"/>
+          <rect x="16" y="32" width="1" height="2"/>
+          <rect x="32" y="27" width="2" height="1"/>
+          <rect x="27" y="32" width="1" height="2"/>
+          <rect x="32" y="38" width="2" height="1"/>
+          <rect x="38" y="32" width="1" height="2"/>
+          <rect x="32" y="49" width="2" height="1"/>
+          <rect x="49" y="32" width="1" height="2"/>
+          <rect x="43" y="16" width="2" height="1"/>
+          <rect x="16" y="43" width="1" height="2"/>
+          <rect x="43" y="27" width="2" height="1"/>
+          <rect x="27" y="43" width="1" height="2"/>
+          <rect x="43" y="38" width="2" height="1"/>
+          <rect x="38" y="43" width="1" height="2"/>
+          <rect x="43" y="49" width="2" height="1"/>
+          <rect x="49" y="43" width="1" height="2"/>
+        </g>
+        <g class="tiles-base">
+          <rect x="12" y="12" width="9" height="9"/>
+          <rect x="23" y="12" width="9" height="9"/>
+          <rect x="34" y="12" width="9" height="9"/>
+          <rect x="45" y="12" width="9" height="9"/>
+          <rect x="12" y="23" width="9" height="9"/>
+          <rect x="23" y="23" width="9" height="9"/>
+          <rect x="34" y="23" width="9" height="9"/>
+          <rect x="45" y="23" width="9" height="9"/>
+          <rect x="12" y="34" width="9" height="9"/>
+          <rect x="23" y="34" width="9" height="9"/>
+          <rect x="34" y="34" width="9" height="9"/>
+          <rect x="45" y="34" width="9" height="9"/>
+          <rect x="12" y="45" width="9" height="9"/>
+          <rect x="23" y="45" width="9" height="9"/>
+          <rect x="34" y="45" width="9" height="9"/>
+          <rect x="45" y="45" width="9" height="9"/>
+        </g>
+        <g class="tiles-hot">
+          <rect x="12" y="12" width="9" height="9" style="--d:0"/>
+          <rect x="23" y="12" width="9" height="9" style="--d:1"/>
+          <rect x="34" y="12" width="9" height="9" style="--d:2"/>
+          <rect x="45" y="12" width="9" height="9" style="--d:3"/>
+          <rect x="12" y="23" width="9" height="9" style="--d:1"/>
+          <rect x="23" y="23" width="9" height="9" style="--d:2"/>
+          <rect x="34" y="23" width="9" height="9" style="--d:3"/>
+          <rect x="45" y="23" width="9" height="9" style="--d:4"/>
+          <rect x="12" y="34" width="9" height="9" style="--d:2"/>
+          <rect x="23" y="34" width="9" height="9" style="--d:3"/>
+          <rect x="34" y="34" width="9" height="9" style="--d:4"/>
+          <rect x="45" y="34" width="9" height="9" style="--d:5"/>
+          <rect x="12" y="45" width="9" height="9" style="--d:3"/>
+          <rect x="23" y="45" width="9" height="9" style="--d:4"/>
+          <rect x="34" y="45" width="9" height="9" style="--d:5"/>
+          <rect x="45" y="45" width="9" height="9" style="--d:6"/>
+        </g>
+        <g class="tiles-core">
+          <rect x="15" y="15" width="3" height="3"/>
+          <rect x="26" y="15" width="3" height="3"/>
+          <rect x="37" y="15" width="3" height="3"/>
+          <rect x="48" y="15" width="3" height="3"/>
+          <rect x="15" y="26" width="3" height="3"/>
+          <rect x="26" y="26" width="3" height="3"/>
+          <rect x="37" y="26" width="3" height="3"/>
+          <rect x="48" y="26" width="3" height="3"/>
+          <rect x="15" y="37" width="3" height="3"/>
+          <rect x="26" y="37" width="3" height="3"/>
+          <rect x="37" y="37" width="3" height="3"/>
+          <rect x="48" y="37" width="3" height="3"/>
+          <rect x="15" y="48" width="3" height="3"/>
+          <rect x="26" y="48" width="3" height="3"/>
+          <rect x="37" y="48" width="3" height="3"/>
+          <rect x="48" y="48" width="3" height="3"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="band" id="deadline">
+    <p class="label">01 &mdash; The deadline</p>
+    <h2>A late answer is a fall,<br />not a dropped frame.</h2>
+    <p class="claim">A two&#8209;hundred&#8209;millisecond hard deadline, inside a fanless head. Neither constraint gives.</p>
+    <details class="more">
+        <summary>Detail</summary>
+        <div class="more-body">
+          <p>The robot is already mid&#8209;step when the answer comes due. Miss it and you do not get a stutter, you get a stability event.</p>
+          <p class="muted">That budget has to be met in a head whose neck path can reject roughly forty watts. This is not a throughput problem with a latency footnote. It is a deadline problem with a power ceiling, and the two constraints fight each other.</p>
+        </div>
+      </details>
+    <ul class="specs">
+      <li><span class="fig">200&#8202;ms</span><span class="cap">hard control deadline</span></li>
+      <li><span class="fig">5&#8202;Hz</span><span class="cap">re-plan rate</span></li>
+      <li><span class="fig">30&#8202;W</span><span class="cap">chip budget in-head</span></li>
+      <li><span class="fig">14&#8202;B</span><span class="cap">parameters to serve</span></li>
+    </ul>
+  </section>
+
+  <section class="band alt" id="today">
+    <p class="label">02 &mdash; What it costs today</p>
+    <h2>I built the wrong<br />solution first.</h2>
+    <p class="claim">Control rate took two B200s in a datacenter and a custom QUIC relay. That puts the radio inside the safety loop.</p>
+    <details class="more">
+        <summary>Detail</summary>
+        <div class="more-body">
+          <p>At 1X I was responsible for getting a fine&#8209;tuned action co&#8209;diffusion world model to control rate. It took the entire arsenal: sixteen&#8209;to&#8209;three&#8209;step distillation, classifier&#8209;free guidance split across two B200s, velocity caching between diffusion steps, graph capture to suppress kernel&#8209;launch overhead, and train&#8209;time chunking to fit the streaming regime. It worked &mdash; at two kilowatt&#8209;class GPUs per robot.</p>
+          <p class="muted">So I built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the shape of the mistake clear. No amount of transport engineering turns a wireless round trip into a certifiable miss rate. A humanoid that needs connectivity to keep its balance is a demo, not a product.</p>
+        </div>
+      </details>
+  </section>
+
+  <section class="band" id="bet">
+    <p class="label">03 &mdash; The bet</p>
+    <h2>Etch the dataflow.<br />Start with a systolic array.</h2>
+    <div class="split">
+      <div class="split-copy">
+        <p class="claim">Fixed graph, fixed shapes, weights resident, deterministic latency. The bet Google made with the TPU &mdash; aimed at the head.</p>
+        <details class="more">
+        <summary>Detail</summary>
+        <div class="more-body">
+          <p>The first chip is not exotic. It is a systolic array at the edge &mdash; the same bet Etched made for the datacenter and Groq made with the LPU, aimed at the one place none of them are looking. A fixed graph and fixed tensor shapes buy static scheduling, no kernel dispatch, and timing you can put in a safety case.</p>
+          <p class="muted">The generality is what costs you. A general&#8209;purpose SoC spends die area and power on rasterization, display, and a CPU complex a fixed policy will never call. Reallocate that to tensor arrays and on&#8209;chip SRAM and the same watts do considerably more useful work.</p>
+        </div>
+      </details>
+      </div>
+      <div class="split-art" role="img" aria-label="Pixel-art systolic array: operands enter from the top and left edges and a diagonal wavefront of multiply-accumulate moves through the grid">
+        <svg class="array" viewBox="0 0 64 64" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+        <g class="feed">
+          <rect x="10" y="2" width="3" height="3" style="--d:0"/>
+          <rect x="2" y="10" width="3" height="3" style="--d:0"/>
+          <rect x="19" y="2" width="3" height="3" style="--d:1"/>
+          <rect x="2" y="19" width="3" height="3" style="--d:1"/>
+          <rect x="28" y="2" width="3" height="3" style="--d:2"/>
+          <rect x="2" y="28" width="3" height="3" style="--d:2"/>
+          <rect x="37" y="2" width="3" height="3" style="--d:3"/>
+          <rect x="2" y="37" width="3" height="3" style="--d:3"/>
+          <rect x="46" y="2" width="3" height="3" style="--d:4"/>
+          <rect x="2" y="46" width="3" height="3" style="--d:4"/>
+          <rect x="55" y="2" width="3" height="3" style="--d:5"/>
+          <rect x="2" y="55" width="3" height="3" style="--d:5"/>
+        </g>
+        <g class="pe-base">
+          <rect x="8" y="8" width="7" height="7"/>
+          <rect x="17" y="8" width="7" height="7"/>
+          <rect x="26" y="8" width="7" height="7"/>
+          <rect x="35" y="8" width="7" height="7"/>
+          <rect x="44" y="8" width="7" height="7"/>
+          <rect x="53" y="8" width="7" height="7"/>
+          <rect x="8" y="17" width="7" height="7"/>
+          <rect x="17" y="17" width="7" height="7"/>
+          <rect x="26" y="17" width="7" height="7"/>
+          <rect x="35" y="17" width="7" height="7"/>
+          <rect x="44" y="17" width="7" height="7"/>
+          <rect x="53" y="17" width="7" height="7"/>
+          <rect x="8" y="26" width="7" height="7"/>
+          <rect x="17" y="26" width="7" height="7"/>
+          <rect x="26" y="26" width="7" height="7"/>
+          <rect x="35" y="26" width="7" height="7"/>
+          <rect x="44" y="26" width="7" height="7"/>
+          <rect x="53" y="26" width="7" height="7"/>
+          <rect x="8" y="35" width="7" height="7"/>
+          <rect x="17" y="35" width="7" height="7"/>
+          <rect x="26" y="35" width="7" height="7"/>
+          <rect x="35" y="35" width="7" height="7"/>
+          <rect x="44" y="35" width="7" height="7"/>
+          <rect x="53" y="35" width="7" height="7"/>
+          <rect x="8" y="44" width="7" height="7"/>
+          <rect x="17" y="44" width="7" height="7"/>
+          <rect x="26" y="44" width="7" height="7"/>
+          <rect x="35" y="44" width="7" height="7"/>
+          <rect x="44" y="44" width="7" height="7"/>
+          <rect x="53" y="44" width="7" height="7"/>
+          <rect x="8" y="53" width="7" height="7"/>
+          <rect x="17" y="53" width="7" height="7"/>
+          <rect x="26" y="53" width="7" height="7"/>
+          <rect x="35" y="53" width="7" height="7"/>
+          <rect x="44" y="53" width="7" height="7"/>
+          <rect x="53" y="53" width="7" height="7"/>
+        </g>
+        <g class="pe-hot">
+          <rect x="8" y="8" width="7" height="7" style="--d:0"/>
+          <rect x="17" y="8" width="7" height="7" style="--d:1"/>
+          <rect x="26" y="8" width="7" height="7" style="--d:2"/>
+          <rect x="35" y="8" width="7" height="7" style="--d:3"/>
+          <rect x="44" y="8" width="7" height="7" style="--d:4"/>
+          <rect x="53" y="8" width="7" height="7" style="--d:5"/>
+          <rect x="8" y="17" width="7" height="7" style="--d:1"/>
+          <rect x="17" y="17" width="7" height="7" style="--d:2"/>
+          <rect x="26" y="17" width="7" height="7" style="--d:3"/>
+          <rect x="35" y="17" width="7" height="7" style="--d:4"/>
+          <rect x="44" y="17" width="7" height="7" style="--d:5"/>
+          <rect x="53" y="17" width="7" height="7" style="--d:6"/>
+          <rect x="8" y="26" width="7" height="7" style="--d:2"/>
+          <rect x="17" y="26" width="7" height="7" style="--d:3"/>
+          <rect x="26" y="26" width="7" height="7" style="--d:4"/>
+          <rect x="35" y="26" width="7" height="7" style="--d:5"/>
+          <rect x="44" y="26" width="7" height="7" style="--d:6"/>
+          <rect x="53" y="26" width="7" height="7" style="--d:7"/>
+          <rect x="8" y="35" width="7" height="7" style="--d:3"/>
+          <rect x="17" y="35" width="7" height="7" style="--d:4"/>
+          <rect x="26" y="35" width="7" height="7" style="--d:5"/>
+          <rect x="35" y="35" width="7" height="7" style="--d:6"/>
+          <rect x="44" y="35" width="7" height="7" style="--d:7"/>
+          <rect x="53" y="35" width="7" height="7" style="--d:8"/>
+          <rect x="8" y="44" width="7" height="7" style="--d:4"/>
+          <rect x="17" y="44" width="7" height="7" style="--d:5"/>
+          <rect x="26" y="44" width="7" height="7" style="--d:6"/>
+          <rect x="35" y="44" width="7" height="7" style="--d:7"/>
+          <rect x="44" y="44" width="7" height="7" style="--d:8"/>
+          <rect x="53" y="44" width="7" height="7" style="--d:9"/>
+          <rect x="8" y="53" width="7" height="7" style="--d:5"/>
+          <rect x="17" y="53" width="7" height="7" style="--d:6"/>
+          <rect x="26" y="53" width="7" height="7" style="--d:7"/>
+          <rect x="35" y="53" width="7" height="7" style="--d:8"/>
+          <rect x="44" y="53" width="7" height="7" style="--d:9"/>
+          <rect x="53" y="53" width="7" height="7" style="--d:10"/>
+        </g>
+        <g class="pe-core">
+          <rect x="10" y="10" width="3" height="3"/>
+          <rect x="19" y="10" width="3" height="3"/>
+          <rect x="28" y="10" width="3" height="3"/>
+          <rect x="37" y="10" width="3" height="3"/>
+          <rect x="46" y="10" width="3" height="3"/>
+          <rect x="55" y="10" width="3" height="3"/>
+          <rect x="10" y="19" width="3" height="3"/>
+          <rect x="19" y="19" width="3" height="3"/>
+          <rect x="28" y="19" width="3" height="3"/>
+          <rect x="37" y="19" width="3" height="3"/>
+          <rect x="46" y="19" width="3" height="3"/>
+          <rect x="55" y="19" width="3" height="3"/>
+          <rect x="10" y="28" width="3" height="3"/>
+          <rect x="19" y="28" width="3" height="3"/>
+          <rect x="28" y="28" width="3" height="3"/>
+          <rect x="37" y="28" width="3" height="3"/>
+          <rect x="46" y="28" width="3" height="3"/>
+          <rect x="55" y="28" width="3" height="3"/>
+          <rect x="10" y="37" width="3" height="3"/>
+          <rect x="19" y="37" width="3" height="3"/>
+          <rect x="28" y="37" width="3" height="3"/>
+          <rect x="37" y="37" width="3" height="3"/>
+          <rect x="46" y="37" width="3" height="3"/>
+          <rect x="55" y="37" width="3" height="3"/>
+          <rect x="10" y="46" width="3" height="3"/>
+          <rect x="19" y="46" width="3" height="3"/>
+          <rect x="28" y="46" width="3" height="3"/>
+          <rect x="37" y="46" width="3" height="3"/>
+          <rect x="46" y="46" width="3" height="3"/>
+          <rect x="55" y="46" width="3" height="3"/>
+          <rect x="10" y="55" width="3" height="3"/>
+          <rect x="19" y="55" width="3" height="3"/>
+          <rect x="28" y="55" width="3" height="3"/>
+          <rect x="37" y="55" width="3" height="3"/>
+          <rect x="46" y="55" width="3" height="3"/>
+          <rect x="55" y="55" width="3" height="3"/>
+        </g>
+      </svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="band alt" id="evidence">
+    <p class="label">04 &mdash; Evidence</p>
+    <h2>We built the instrument<br />before the chip.</h2>
+    <p class="claim">Calibrated against measured Blackwell silicon to within 0.7&ndash;4.6&#8202;percent. It tells us FP8 buys 1.77&times;, not 2&times;.</p>
+    <details class="more">
+        <summary>Detail</summary>
+        <div class="more-body">
+          <p>Before claiming anything, we built a simulator that has to reproduce real silicon first. Every hardware configuration shares one utilization model, so the comparisons stay honest rather than flattering the part we want to build.</p>
+          <p class="muted">It also tells us things we would rather not hear. Voltage and frequency scaling buys essentially nothing. Hitting 5&#8202;Hz on the nose will need model&#8209;side compression as well as silicon &mdash; that is a measurement, not an assumption. We would rather publish the ceiling than discover it in fab.</p>
+        </div>
+      </details>
+  </section>
+
+  <section class="band horizon" id="horizon">
+    <p class="label">05 &mdash; Horizon</p>
+    <h2>A brain holds a hundred trillion parameters.<br />It does not need a rack.</h2>
+    <p class="claim">Closing the distance between a GPU rack and biology is the only version of this future that arrives.</p>
+  </section>
+
+  <section class="band contact" id="contact">
+    <p class="label">Contact</p>
+    <h2>Get in touch.</h2>
+    <p class="claim">Roboticists, silicon architects, and inference engineers who have felt this constraint firsthand.</p>
+    <a class="mailto" href="mailto:hello@example.com">hello@example.com</a>
+    <p class="placeholder-note">Placeholder address &mdash; swap before launch.</p>
+  </section>
+
+</main>
+
+<footer>
+  <span>Substrate</span>
+  <span class="foot-tag">Inference silicon for embodied AI</span>
+</footer>
+
+</body>
+</html>

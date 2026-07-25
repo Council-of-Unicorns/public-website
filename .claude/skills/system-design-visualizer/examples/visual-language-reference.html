@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System Design Visual Language Reference</title>
+  <style>
+    body { max-width: 1080px; margin: 0 auto; padding: 32px 20px 64px; font: 16px/1.5 system-ui, sans-serif; color: #172033; }
+    h1, h2 { letter-spacing: -.02em; } svg { display:block; width:100%; height:auto; border:1px solid #d5dde8; border-radius:12px; margin:18px 0; }
+    .note { border-left:4px solid #155eef; background:#eff5ff; padding:12px 16px; } code { background:#f4f6f8; padding:2px 4px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <h1>System Design Visual Language</h1>
+  <p>Use one semantic vocabulary per diagram. The same visual relationship must not mean different things in different places.</p>
+  <div class="note"><strong>Rule:</strong> An arrow is never self-explanatory. Label every material edge and show a visible legend.</div>
+
+  <h2>Runtime architecture: source-backed runtime traffic only</h2>
+  <svg role="img" aria-labelledby="runtime-title runtime-desc" viewBox="0 0 1040 470">
+    <title id="runtime-title">Runtime architecture arrow conventions</title>
+    <desc id="runtime-desc">A gateway synchronously calls a service. The service writes to a datastore, retrieves a result, publishes through a topic, and a worker consumes the event.</desc>
+    <defs><marker id="solid" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#596579" /></marker><marker id="async" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0 0L10 5L0 10Z" fill="#176b42" /></marker></defs>
+    <rect x="40" y="38" width="925" height="265" rx="12" fill="#fbfcfe" stroke="#d5dde8" />
+    <text x="65" y="70" font-size="15" font-weight="700">Runtime architecture — What deployable components communicate at runtime?</text>
+    <g><rect x="75" y="140" width="145" height="68" rx="12" fill="#fff" stroke="#6f7d91"/><text x="147" y="170" text-anchor="middle" font-size="16" font-weight="700">API Gateway</text><text x="147" y="190" text-anchor="middle" font-size="12" fill="#627086">service</text></g>
+    <g><rect x="360" y="140" width="165" height="68" rx="12" fill="#f7faff" stroke="#4d73b7"/><text x="442" y="170" text-anchor="middle" font-size="16" font-weight="700">Job Service</text><text x="442" y="190" text-anchor="middle" font-size="12" fill="#627086">service</text></g>
+    <g><path d="M360 326 C360 306 515 306 515 326V392C515 412 360 412 360 392Z" fill="#fffaf0" stroke="#9a6a20"/><ellipse cx="437" cy="326" rx="77" ry="15" fill="#fffaf0" stroke="#9a6a20"/><text x="437" y="360" text-anchor="middle" font-size="15" font-weight="700">Jobs DB</text></g>
+    <g><rect x="645" y="320" width="170" height="65" fill="#f1fbf5" stroke="#398158"/><path d="M645 340H815M645 365H815" stroke="#398158"/><text x="730" y="360" text-anchor="middle" font-size="15" font-weight="700">Topic: jobs</text></g>
+    <g><rect x="820" y="140" width="115" height="68" rx="12" fill="#fff" stroke="#6f7d91"/><text x="878" y="170" text-anchor="middle" font-size="16" font-weight="700">Worker</text><text x="878" y="190" text-anchor="middle" font-size="12" fill="#627086">consumer</text></g>
+    <path d="M220 174H360" fill="none" stroke="#596579" stroke-width="2.2" marker-end="url(#solid)"/><text x="290" y="154" text-anchor="middle" font-size="13">HTTPS POST /jobs</text>
+    <path d="M413 208V310" fill="none" stroke="#596579" stroke-width="2.2" marker-end="url(#solid)"/><text x="289" y="259" font-size="13">writes job record</text>
+    <path d="M465 310V208" fill="none" stroke="#596579" stroke-width="2.2" marker-end="url(#solid)"/><text x="472" y="259" font-size="13">read result: job</text>
+    <path d="M525 175C575 186 606 274 680 320" fill="none" stroke="#176b42" stroke-width="2.2" marker-end="url(#async)"/><text x="570" y="246" font-size="13" fill="#176b42">async: publishes JobRequested</text>
+    <path d="M790 320C832 281 850 225 861 208" fill="none" stroke="#176b42" stroke-width="2.2" marker-end="url(#async)"/><text x="761" y="262" font-size="13" fill="#176b42">async: consumes JobRequested</text>
+    <text x="65" y="345" font-size="14" font-weight="700">Legend</text><text x="65" y="372" font-size="13">Solid arrow = synchronous runtime call · green labeled edge through topic = asynchronous message · into store = write · out of store = read result</text>
+  </svg>
+
+  <h2>Dependency view: static relationships only</h2>
+  <svg role="img" aria-labelledby="dep-title dep-desc" viewBox="0 0 1040 250">
+    <title id="dep-title">Dependency arrow convention</title><desc id="dep-desc">A service imports an authentication client interface. This is a static dependency, not a runtime call.</desc>
+    <defs><marker id="open" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="#596579" stroke-width="1.5" /></marker></defs>
+    <rect x="65" y="85" width="190" height="68" rx="8" fill="#fff" stroke="#6f7d91"/><text x="160" y="126" text-anchor="middle" font-size="16" font-weight="700">Job Service module</text>
+    <rect x="720" y="85" width="220" height="68" rx="8" fill="#fff" stroke="#6f7d91"/><text x="830" y="126" text-anchor="middle" font-size="16" font-weight="700">AuthClient interface</text>
+    <path d="M255 119H720" fill="none" stroke="#596579" stroke-width="2.2" stroke-dasharray="7 5" marker-end="url(#open)"/><text x="488" y="96" text-anchor="middle" font-size="13">imports AuthClient interface</text>
+    <text x="65" y="204" font-size="13">Legend: dashed open-arrow = static import, interface use, schema dependency, or build-time dependency. Runtime messages are forbidden in this view.</text>
+  </svg>
+</body>
+</html>

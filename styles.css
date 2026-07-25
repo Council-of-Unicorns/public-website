@@ -1,0 +1,479 @@
+/* ==========================================================================
+   Substrate — house stylesheet
+   Governed by .claude/skills/pixel-craft. Mobile-first; every dimension is a
+   multiple of --px; all sprite motion is stepped, never tweened.
+   ========================================================================== */
+
+:root {
+  /* --- pixel grid --- */
+  --px: 4px;
+  --s1: calc(var(--px) * 1);    /*   4 */
+  --s2: calc(var(--px) * 2);    /*   8 */
+  --s3: calc(var(--px) * 4);    /*  16 */
+  --s4: calc(var(--px) * 6);    /*  24 */
+  --s5: calc(var(--px) * 10);   /*  40 */
+  --s6: calc(var(--px) * 16);   /*  64 */
+  --s7: calc(var(--px) * 22);   /*  88 */
+  --s8: calc(var(--px) * 32);   /* 128 */
+
+  /* --- palette: 14 committed colours, hue-shifted ramps --- */
+  --ground-0: #100E18;
+  --ground-1: #171522;
+  --ground-2: #221E30;
+  --ground-3: #2E2941;
+
+  --text-3:   #948CAB;   /* 6.0:1 on ground-0 — headroom for 8px pixel type */
+  --text-2:   #A79FB5;
+  --text-1:   #D2CBBF;
+  --text-0:   #F4EFE4;
+
+  --warm-2:   #8A4526;
+  --warm-1:   #C4762F;
+  --warm-0:   #E8A552;
+
+  --cool-2:   #24404A;
+  --cool-1:   #35606B;
+  --cool-0:   #5C97A0;
+
+  --die-floor: #1C2A33;
+
+  /* --- type --- */
+  --pixel: "Silkscreen", ui-monospace, "Courier New", monospace;
+  --read:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pixel-native: 8px;
+
+  --measure: 64ch;
+  --wrap: 1088px;
+  --gutter: var(--s4);
+
+  /* One shared content column for every top-level region. Deriving it from
+     padding (not auto margins) keeps narrow children left-aligned; using the
+     SAME formula everywhere keeps hero, bands and footer in register. */
+  --pad-inline: max(var(--gutter), calc((100% - var(--wrap)) / 2));
+
+  /* Deliberate exception to the --px grid: a 1-device-pixel rule is a
+     typographic hairline, not a layout dimension. Used only for dividers. */
+  --hairline: 1px;
+}
+
+@media (min-width: 700px) { :root { --gutter: var(--s5); } }
+
+/* --------------------------------------------------------------- reset -- */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+  scroll-padding-top: var(--s8);   /* sticky nav must not cover anchor targets */
+}
+
+body {
+  margin: 0;
+  background: var(--ground-0);
+  color: var(--text-1);
+  font-family: var(--read);
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+@media (min-width: 700px) { body { font-size: 17px; } }
+
+img, svg { display: block; max-width: 100%; }
+
+a { color: inherit; }
+
+::selection { background: var(--warm-1); color: var(--ground-0); }
+
+:focus-visible { outline: var(--px) solid var(--warm-0); outline-offset: var(--px); }
+
+.skip {
+  position: absolute;
+  left: -9999px;
+  top: var(--s3);
+  padding: var(--s2) var(--s3);
+  background: var(--warm-0);
+  color: var(--ground-0);
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;
+  z-index: 10;
+}
+.skip:focus { left: var(--s3); }
+
+/* ------------------------------------------------------------ typography */
+
+h1, h2 {
+  margin: 0;
+  color: var(--text-0);
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+
+h1 { font-size: clamp(32px, 5.6vw, 60px); }
+h2 { font-size: clamp(26px, 3.9vw, 42px); }
+
+p { margin: 0; max-width: var(--measure); }
+
+.muted { color: var(--text-2); }
+
+/* Pixel face: accents only, never body copy. Integer multiples of 8px. */
+.label {
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--warm-0);
+  margin: 0 0 var(--s4);
+  max-width: none;
+}
+
+/* ------------------------------------------------------------------- nav */
+
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--s2) var(--s4);
+  padding: var(--s2) var(--gutter);
+  /* Opaque, not blurred: the house style has no soft effects, and a solid
+     ground also avoids the Safari backdrop-filter inconsistency. */
+  background: var(--ground-0);
+  border-bottom: var(--hairline) solid var(--ground-2);
+}
+
+.wordmark {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: var(--s2) 0;
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;              /* whole pixels — never inherit 1.65 */
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-0);
+  text-decoration: none;
+}
+
+.mark { width: var(--s4); height: var(--s4); color: var(--warm-0); flex: none; }
+
+.nav nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s1);
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;              /* whole pixels — never inherit 1.65 */
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+@media (min-width: 700px) { .nav nav { gap: var(--s2); } }
+
+/* Padding carries the hit area: 8px text in a >=44px tall target on mobile,
+   >=36px on desktop. Without it the links are ~21px and barely tappable. */
+.nav nav a {
+  display: block;
+  color: var(--text-2);
+  text-decoration: none;
+  padding: var(--s4) var(--s2) calc(var(--s4) - var(--px));
+  border-bottom: var(--px) solid transparent;
+}
+
+@media (min-width: 700px) {
+  .nav nav a { padding: var(--s3) var(--s2) calc(var(--s3) - var(--px)); }
+}
+.nav nav a:hover { color: var(--text-0); border-bottom-color: var(--warm-1); }
+
+/* ------------------------------------------------------------------ hero */
+
+.hero {
+  padding-block: var(--s6) var(--s7);
+  padding-inline: var(--pad-inline);
+  display: grid;
+  gap: var(--s6);
+  align-items: center;
+}
+
+.hero-copy .lede {
+  margin-top: var(--s4);
+  font-size: 1.06em;
+  color: var(--text-2);
+  max-width: 48ch;
+}
+
+.hero-art { display: flex; justify-content: flex-start; }
+
+/* ------------------------------------------------------ pixel renderings */
+/* Integer scaling only — a fractional factor resamples the grid. */
+
+.die, .array {
+  --scale: 3;
+  width:  calc(64px * var(--scale));
+  height: calc(64px * var(--scale));
+  image-rendering: pixelated;
+  flex: none;
+}
+
+.die .pkg      { fill: var(--ground-3); }
+.die .pkg-in   { fill: var(--ground-2); }
+.die .die-body { fill: var(--die-floor); }
+.die .pads     { fill: var(--cool-1); }
+.die .trace    { fill: var(--cool-1); }
+
+.die .tiles-base rect,
+.array .pe-base rect { fill: var(--cool-2); }
+
+.die .tiles-core rect,
+.array .pe-core rect { fill: var(--ground-0); opacity: 0.5; }
+
+.array .feed rect { fill: var(--cool-1); }
+
+/* Activation wavefront. Warm over cool is the entire effect. */
+.die .tiles-hot rect,
+.array .pe-hot rect,
+.array .feed rect {
+  animation: cell-pulse var(--cycle, 2s) steps(1, end) infinite;
+  /* The delay spread must exceed the active window, or every cell fires at
+     once and the wave reads as a flood rather than a sweep. */
+  animation-delay: calc(var(--d) * var(--step, 0.16s));
+}
+
+.die .tiles-hot rect { fill: var(--warm-0); opacity: 0; }
+
+.array .pe-hot rect  { fill: var(--warm-0); opacity: 0; }
+
+.array { --cycle: 2.4s; --step: 0.13s; }
+
+/* Operands entering the array edges: same wave, cooler and dimmer. */
+.array .feed rect {
+  fill: var(--cool-0);
+  opacity: 0.25;
+  animation-name: feed-pulse;
+}
+
+@keyframes cell-pulse {
+  0%   { opacity: 0; }
+  3%   { opacity: 1; }
+  9%   { opacity: 0.62; }
+  15%  { opacity: 0.30; }
+  21%  { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes feed-pulse {
+  0%   { opacity: 0.25; }
+  3%   { opacity: 1; }
+  12%  { opacity: 0.5; }
+  21%  { opacity: 0.25; }
+  100% { opacity: 0.25; }
+}
+
+@media (min-width: 480px) { .die, .array { --scale: 4; } }
+
+/* ----------------------------------------------------------------- bands */
+/* The centred column comes from the band's own padding, not auto margins on
+   children — otherwise anything narrower than --wrap centres itself and
+   drifts out of alignment with the headings. */
+
+.band {
+  padding-block: var(--s7);
+  padding-inline: var(--pad-inline);
+  border-top: var(--hairline) solid var(--ground-2);
+}
+
+.band > * { margin-left: 0; margin-right: 0; }
+
+.band.alt { background: var(--ground-1); }
+
+.split { display: grid; gap: var(--s6); margin-top: var(--s5); align-items: start; }
+
+.split-copy { display: block; }
+
+.split-art { display: flex; justify-content: flex-start; }
+
+/* ------------------------------------------------------ claim + details  */
+/* The default read is a sequence of claims. Everything wordy lives behind a
+   native <details> so it stays available without crowding the page. */
+
+.claim {
+  margin-top: var(--s4);
+  font-size: 1.12em;
+  line-height: 1.5;
+  color: var(--text-1);
+  max-width: 54ch;
+}
+
+.more { margin-top: var(--s4); }
+
+.more summary {
+  display: inline-block;
+  padding: var(--s2) 0;
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--warm-0);
+  cursor: pointer;
+  list-style: none;
+}
+
+.more summary::-webkit-details-marker { display: none; }
+.more summary::marker { content: ""; }
+.more summary::before { content: "+ "; }
+.more[open] summary::before { content: "\2212 "; }   /* minus, not a hyphen */
+.more summary:hover { color: var(--text-0); }
+
+.more-body { display: grid; gap: var(--s4); margin-top: var(--s3); }
+
+/* Two columns only for full-width band details — never inside the hero or
+   the split, where the column is already narrow. */
+@media (min-width: 820px) {
+  .band > .more .more-body { grid-template-columns: 1fr 1fr; gap: var(--s6); }
+}
+
+/* ----------------------------------------------------------------- specs */
+
+.specs {
+  list-style: none;
+  margin: var(--s6) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--s3);
+  grid-template-columns: repeat(auto-fit, minmax(152px, 1fr));
+}
+
+.specs li {
+  padding: var(--s4);
+  background: var(--ground-2);
+  border-left: var(--px) solid var(--warm-1);
+  box-shadow: var(--s2) var(--s2) 0 rgba(0, 0, 0, 0.32);   /* hard, zero blur */
+}
+
+/* The numbers are the persuasive content — set them in the pixel face. */
+.fig {
+  display: block;
+  font-family: var(--pixel);
+  font-size: calc(var(--pixel-native) * 3);     /* 24 */
+  line-height: 32px;
+  color: var(--text-0);
+}
+
+.cap { display: block; margin-top: var(--s2); font-size: 14px; color: var(--text-2); }
+
+/* --------------------------------------------------------------- horizon */
+
+.horizon h2 { color: var(--warm-0); }
+
+/* --------------------------------------------------------------- contact */
+
+.contact { padding-bottom: var(--s8); }
+
+.mailto {
+  display: inline-block;
+  margin-top: var(--s5);
+  padding: var(--s3) var(--s4);
+  background: var(--warm-1);
+  color: var(--ground-0);
+  font-family: var(--pixel);
+  font-size: calc(var(--pixel-native) * 2);     /* 16 */
+  line-height: 24px;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  box-shadow: var(--s1) var(--s1) 0 var(--warm-2);
+}
+
+.mailto:hover {
+  background: var(--warm-0);
+  transform: translate(calc(var(--px) * -1), calc(var(--px) * -1));
+  box-shadow: var(--s2) var(--s2) 0 var(--warm-2);
+}
+
+.placeholder-note { margin-top: var(--s3); font-size: 13px; color: var(--text-3); }
+
+/* ---------------------------------------------------------------- footer */
+
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s2) var(--s4);
+  justify-content: space-between;
+  padding-block: var(--s5);
+  padding-inline: var(--pad-inline);
+  border-top: var(--hairline) solid var(--ground-2);
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-0);
+}
+
+/* Too long to sit in the pixel face — set it in the reading face. */
+.foot-tag {
+  font-family: var(--read);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-3);
+}
+
+/* ------------------------------------------------------------- >= 820px  */
+
+@media (min-width: 820px) {
+  .cols { grid-template-columns: 1fr 1fr; gap: var(--s6); }
+}
+
+/* ------------------------------------------------------------- >= 940px  */
+
+@media (min-width: 940px) {
+  .hero {
+    grid-template-columns: 1fr auto;
+    padding-top: var(--s7);
+    gap: var(--s7);
+  }
+  .hero-art { justify-content: flex-end; }
+  .die { --scale: 5; }
+
+  .split { grid-template-columns: 1fr auto; gap: var(--s7); }
+  .split-art { justify-content: flex-end; }
+  .array { --scale: 5; }
+}
+
+@media (min-width: 1200px) {
+  .die, .array { --scale: 6; }   /* both artworks share one art-pixel size */
+}
+
+/* -------------------------------------------------------- reduced motion */
+/* Freeze to a representative frame — keep the art, drop the motion. */
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+
+  .die .tiles-hot rect,
+  .array .pe-hot rect { animation: none; opacity: 0; }
+
+  .die .tiles-hot rect:nth-child(6),
+  .die .tiles-hot rect:nth-child(11),
+  .array .pe-hot rect:nth-child(8),
+  .array .pe-hot rect:nth-child(15),
+  .array .pe-hot rect:nth-child(22) { opacity: 0.85; }
+
+  .array .feed rect { animation: none; opacity: 0.4; }
+
+  .mailto:hover { transform: none; box-shadow: var(--s1) var(--s1) 0 var(--warm-2); }
+}

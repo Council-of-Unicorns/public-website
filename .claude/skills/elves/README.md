@@ -1,0 +1,829 @@
+# Elves
+
+![Elves - they work while you sleep](assets/elves-banner.jpeg)
+
+**They work while you sleep.**
+
+Elves is an open-source Agent Skill for autonomous, multi-batch development. It gives AI coding agents (Claude Code, Codex, or any agent that supports the Agent Skills standard) the ability to execute large development plans unattended (with testing, review, and documentation) while surviving context compaction across long runs.
+
+You write the plan and do the final merge. The agent does everything in between.
+
+**This is still early.** The system I use in production at [Aigora](https://aigora.ai) is more elaborate than what you see here. It includes custom review tools, proprietary verification infrastructure, and integration with our internal deployment pipeline. I've extracted the key ideas and patterns into something that works with standard tools (git, GitHub PRs, CI) so it's useful to anyone, not just people with my exact setup. I'll be using this open-source version myself going forward (with my additional tooling bolted on), so it will continue to improve from real production use. But this is scaffolding, not a finished product. It may not work for you out of the box. Your model, your stack, your test infrastructure, and your review setup will all be different from mine. I'm relying on community feedback to make this skill more generalizable. If something doesn't work, [open an issue](https://github.com/aigorahub/elves/issues). Your experience makes this better for everyone.
+
+---
+
+## Why "Elves"?
+
+In the old fairy tale, a tired shoemaker goes to bed with work undone and wakes to find it finished. That story is the premise of this skill.
+
+Throughout economic history, wealth creation has followed a consistent pattern: a resource sits idle until someone builds a tool that makes it useful. Coal sat in the ground until the steam engine. Cars sat in driveways until Uber. Spare bedrooms sat empty until Airbnb. The resource already existed. What was missing was the mechanism.
+
+Every knowledge worker has 12 to 14 hours each day when they are not working: evenings, nights, weekends. For most of history, that time was genuinely unproductive. AI agents change that. A well-configured agent can execute code, run tests, conduct reviews, and document decisions while its owner is asleep. The sleeping hours are now a resource. They weren't before.
+
+The question is no longer "what can I have my AI do today?" It's "what will my AI be doing at 2am on Saturday?"
+
+Elves is the mechanism. It converts idle hours into shipped code.
+
+The core pattern is the Ralph Loop: try, check, feed back, repeat. An AI doesn't return correct or incorrect answers. It returns drafts. Judging AI on its first attempt is like judging a tree by its first day of growth. The people who get extraordinary results aren't writing better prompts. They are running better loops.
+
+Elves is the harness that lets the Ralph Loop run for hours without supervision, with a Survival Guide so the agent knows what it's doing, a Learnings file so reusable lessons survive the night, an Execution Log so it can recover after a restart, and test gates so it knows whether its work is actually correct before it moves on.
+
+*Part of a series by John Ennis: [The Shoemaker's Elves](https://x.com/johnennis/status/2025904571311141215) (the 14-hour resource), [The Survival Guide](https://x.com/johnennis/status/2028960113646604794) (keeping agents on track), and [Water the Tree](https://x.com/johnennis/status/2034300044212351114) (the Ralph Loop).*
+
+---
+
+## How it works
+
+```
+Orient → Verify Green → Tag → Contract → Implement → Validate → Review →
+Judge → Document → Update → Push → Re-read → PR Loop → Entropy Check → Continue
+```
+
+Elves runs a tight loop. For each batch of planned work, the agent implements the changes, runs validation gates, reads PR review comments, fixes any blocking findings, updates the documentation, and pushes a checkpoint, then immediately starts the next batch. No waiting, no prompting, no drift.
+
+### The layered memory system
+
+AI agents are stateless. Context compaction erases working memory. Elves solves this with a small
+stack of persistent documents instead of one giant scratchpad:
+
+| Document | Purpose |
+|---|---|
+| **Plan** | What needs to be built (the authoritative scope) |
+| **Survival Guide** | Standing brief: mission, rules, tool config, current phase, next batch |
+| **Learnings** | Durable, reusable lessons that should survive this run and future runs |
+| **Execution Log** | Running record of every batch completed, every decision made, every commit pushed |
+| **`.ai-docs/*` (optional)** | Curated durable docs for architecture, conventions, and gotchas once a learning becomes a stable repo truth |
+
+The promotion flow is `execution log -> learnings -> .ai-docs`.
+
+After any compaction or restart, the agent reads the stack in order and resumes without losing its
+place: survival guide, `.elves-session.json`, learnings, plan, execution log, then
+`.ai-docs/manifest.md` if it exists. The survival guide is marked
+`# READ THIS FILE FIRST AFTER ANY COMPACTION OR RESTART` so the agent can't miss it.
+
+Elves also practices **strategic forgetting**. Giant chats should not become permanent memory.
+Chats are for execution, handoff docs are for memory, archives are for history, and fresh threads
+are for speed. During long runs, the agent keeps the survival guide concise, archives old
+execution-log entries in place, promotes durable lessons, reconciles idle resources, and leaves a
+reactivation handoff so the next session can start from small durable docs instead of a bloated
+conversation.
+
+### Elves Reports
+
+As of `1.10.1`, at the end of a substantial finite run, Elves creates a temporary **Elves Report**:
+a static HTML report from the workers to their manager. It explains what happened while you were
+away. The report is meant for the morning-after moment when you want the answer to "what did the
+elves do?" without reading every line of the execution log first.
+
+The report is generated from the durable run documents and live PR/CI state, not from the agent's
+memory. It should summarize:
+
+- final or checkpoint status, branch, PR, head SHA, and checks
+- the original request and actual scope completed
+- major problems found, including bugs, UX gaps, review blockers, and repeated failure patterns
+- lessons learned and durable docs promoted during the run
+- a batch-by-batch timeline of fixes and validation
+- review loops, subagent findings, and known non-fatal warnings
+- residual risks and concrete human next steps
+- source links back to the plan, survival guide, learnings file, execution log, PR, and commits
+
+The batch timeline should use collapsible sections, one per batch, so the manager can skim the
+whole night and expand the work that deserves closer review.
+
+Elves Reports are temporary by default and are not committed unless you explicitly ask for a
+durable artifact. Elves prefers HTML/Markdown for this because dense accountability needs precise
+text, links, and validation evidence. The page should still feel designed for the project that
+produced it: use local brand assets, match the repo's tone, and avoid generic AI-dashboard patterns.
+Image infographics are optional and should only be generated when you ask for them.
+
+See [`docs/elves-report-proof-of-concept.html`](docs/elves-report-proof-of-concept.html) for a
+committed proof of concept and [`references/elves-report-template.html`](references/elves-report-template.html)
+for the reusable starting template. GitHub's normal file browser displays HTML files as source;
+open them locally or serve them with GitHub Pages to see the rendered pages.
+
+Committed examples should use non-identifying sample content. Real reports in `/tmp` may describe
+the actual run, but public proof-of-concept pages should avoid private product names, client names,
+people, or project-specific workflows.
+
+### Stage, then launch
+
+Most "the elves stopped" failures come from one mistake: combining a giant plan and the launch
+instructions into a single overloaded message. The plan already lives on disk. The launch prompt
+should not try to carry the whole project again.
+
+Elves works best as a two-call handoff:
+
+1. **Stage the run.** Clean up the plan, refresh the survival guide, learnings file, and execution log, open the
+   branch and PR, run preflight, and stop only when the run is launch-ready.
+2. **Launch the run.** In a fresh call, send a short hard prompt that points at the prepared docs
+   and reinforces behavior: don't stop unless genuinely blocked, use judgment, work in small
+   batches, commit frequently, validate aggressively, read PR comments after every push, and watch
+   for regressions.
+
+Think of staging as winding the spring. The launch call should feel small because the energy is
+already loaded into the repo artifacts.
+
+### Codex Goals
+
+Codex Goals can be a useful continuation backend for Elves. Goals keeps Codex working across turns;
+Elves tells it what "working well" means: staged docs, batch contracts, validation gates, PR review
+loops, memory hygiene, and a final Readiness Gate.
+
+If your Codex install supports `/goal`, stage the Elves run normally, then launch the prepared
+Elves prompt inside a goal:
+
+```text
+/goal The run is staged. Start now.
+Read docs/elves/survival-guide.md first, then `.elves-session.json` if it exists, then
+docs/elves/learnings.md if it exists, then docs/plans/my-plan.md, then the execution log at
+docs/elves/execution-log.md, then `.ai-docs/manifest.md` if it exists.
+Use the survival guide Stop Gate and Elves Readiness Gate as the definition of completion.
+If the goal budget is exhausted before readiness is clean, write a reactivation handoff, push, and
+do not claim the run is complete.
+```
+
+Do not replace the Elves loop with Goals. Goals handles continuation; Elves handles planning,
+review, documentation, strategic forgetting, and merge-readiness. See
+[`references/codex-goals.md`](references/codex-goals.md) for the full pattern.
+
+### Common launch failures to head off
+
+- **Big plan plus "run now" in one message:** the agent should stage first and wait for a final
+  launch command instead of starting implementation immediately.
+- **Plan still changing during launch:** keep staging. Do not launch from unstable docs.
+- **No branch, PR, or preflight yet:** still staging. Get the runway clear first.
+- **Launch prompt repeats the whole plan:** trim it. The plan lives on disk; the launch prompt
+  should mostly reinforce behavior.
+- **No return time given:** Elves defaults to an 8-hour window unless the run is explicitly
+  open-ended.
+
+### The human sandwich
+
+The shape of productive work is changing. The human operates on both ends: specifying problems and reviewing output, while the agent runs loops in the middle.
+
+- **Front end (human):** Decide what's worth working on. Write the plan. Specify the problem fully. 30 minutes to an hour.
+- **Middle (agent):** Open a branch, commit the plans, open a PR, then run the loop: implement, validate, review, fix, iterate. For each batch, the agent builds the code, runs the tests, reads the PR review comments (from bots or humans), fixes what the reviews found, pushes, and iterates until the batch is tight. Then it moves to the next batch. This runs for hours or days while you sleep.
+- **Back end (human):** Review the output. By the time you look at the PR, every batch has already been through multiple rounds of implement-test-review-fix. Your review is a final pass on work that's already tight, not a first look at raw output. 30 minutes to an hour.
+
+The agent never merges. That gate stays with you.
+
+### What to expect
+
+**The elves won't do the job perfectly.** That isn't the goal. The goal is leverage. AI returns drafts, not finished products. But the drafts are refined through dozens of Ralph Loop iterations, and by the time you review the work, it's far closer to done than anything you could have produced in the same wall-clock time. See [Water the Tree](https://x.com/johnennis/status/2034300044212351114) for the full philosophy.
+
+The math is striking. You spend 30 minutes writing a plan. The agent runs for 10-20 hours. You spend 30-60 minutes reviewing the PR. In that 1-2 hours of your time, you may get weeks or months of equivalent human output. The exact multiplier depends on your project, your plan quality, and your test infrastructure, but ratios of 100:1 to 500:1 (agent hours per human hour) are real. In practice, users have reported getting 6-9 months of equivalent work done in a total of 3-4 hours of human time across planning, monitoring, and review.
+
+This is the leverage that makes the setup cost worth it. A half hour of planning unlocks days of autonomous execution.
+
+### Riding along
+
+You don't have to leave. You can watch the agent work, check in, give it additional context, or adjust priorities on the fly. Prefix your message with **`ra:`** or **`[ride-along]`** and the agent will handle your input and keep going without stopping.
+
+`ra:` is the quick everyday shorthand. `[ride-along]` and `ride-along:` also work if you want something more explicit. Think of it as a walkie-talkie: press the button, say your piece, release — the agent keeps working. It responds in 1-3 sentences and resumes immediately. No follow-up questions, no pause.
+
+Good: `[ride-along] The payment tests are expected to fail. Ignore them.`
+Good: `[ride-along] Quick question: did you update the migration?`
+Good: `[ride-along] Skip batch 4, do batch 6 next.`
+Good: `ra: skip batch 4, do batch 6 next.`
+Bad: "What do you think we should do about the database schema?" (no tag, agent may pause)
+Bad: "Looks good so far." (no tag, no instruction to continue)
+
+---
+
+## Quick start
+
+**1. Install the skill**
+
+See [Installation](#installation) below for full details. The short version:
+
+- **Claude Code:** copy the `elves/` directory into `.claude/skills/elves/` in your repo
+- **Codex:** copy the skill bundle into `~/.codex/skills/elves/` (at minimum `SKILL.md`,
+  `references/`, and the runtime scripts `scripts/preflight.sh`, `scripts/notify.sh`, and
+  `scripts/install_doctor.py`)
+- **Claude.ai:** zip the `elves/` directory and upload via Settings > Features > Skills
+
+**2. Write a plan**
+
+Use [`references/plan-template.md`](references/plan-template.md) as your starting point. The plan describes what needs to be built, broken into logical batches. Commit it to your repo (e.g., `docs/plans/my-feature.md`).
+
+**3. Stage the run**
+
+Use [`references/kickoff-prompt-template.md`](references/kickoff-prompt-template.md) to stage the run first. This call cleans the plan up, generates or refreshes the survival guide, learnings file, and execution log, opens or updates the branch and PR, runs preflight, and leaves you with a short launch prompt for the next call.
+
+**4. Launch in a new call**
+
+Use the launch template from the same reference file in a fresh call. The launch prompt should be short and behavior-heavy, not a second copy of the plan.
+
+If you are using Codex Goals, wrap the same launch prompt in `/goal` and tell Codex that Elves'
+Readiness Gate, not goal continuation alone, defines completion.
+
+**5. Walk away**
+
+The launch prompt starts unattended execution. Elves re-reads the prepared docs, confirms the run state, and enters the batch loop. From there it won't stop until the plan is complete, the user stops it, or it hits a genuine blocker.
+
+---
+
+## Features
+
+- **Multi-batch execution** with configurable batch sizing (default: 4 developers × 2-week sprint)
+- **Two-step operator flow**: stage the run first, then launch it in a fresh short call so the agent starts with momentum instead of a giant overloaded prompt
+- **Codex Goals compatibility**: use `/goal` as an optional continuation backend while Elves keeps
+  ownership of planning, review, memory hygiene, and readiness
+- **Layered memory system**: reads survival guide, `.elves-session.json`, learnings, plan, execution log, and `.ai-docs/manifest.md` (if present) after compaction
+- **Strategic forgetting**: keeps active docs and sessions lean during long runs, archives old log
+  history in place, promotes durable knowledge, and leaves reactivation handoffs for fresh threads
+- **Elves Reports**: substantial finite runs end with a temporary static HTML worker-to-manager
+  report that highlights status, problems found, lessons learned, collapsible batch timeline,
+  validation, residual risks, and human next steps
+- **Documentation freshness in the loop**: review can raise `PENDING-DOCS`, learnings promote reusable lessons, and stable truths can move into `.ai-docs/*`
+- **Auto-discovered validation gates** for Node.js, Python, Go, Rust, and Makefile projects. No configuration required.
+- **Pluggable review**: GitHub PR comments by default (zero config), custom review API opt-in, additional custom checks
+- **Subagent delegation** for long runs (Claude Code): coordinator manages the loop, subagents do the deep work
+- **Rollback safety**: `git tag elves/pre-batch-N` before every batch, so any batch can be cleanly unwound
+- **Scout mode**: after all planned work is done, the agent looks for adjacent improvements, test gaps, and documentation holes. Prioritizes risk-reducing fixes first, then quality, then leaves ambiguous items. Commits tagged `[branch · Scout]`, with validation gates required and clear stop rules.
+- **Proof scope**: touched-surface proof per batch (only test what you changed), broad regression at entropy checks and before readiness. Re-earn proof after each push — don't inherit from prior commits.
+- **High-risk regression pass**: batches with medium/high blast radius can trigger a second,
+  regression-only review pass that traces changed shared surfaces to their consumers and asks only
+  "what could this break?"
+- **Final readiness review**: before handoff, the agent runs a fresh cumulative review of
+  `git diff <default-branch>...HEAD`, PR feedback, checks, docs, and memory hygiene so the branch
+  is ready to merge and the workspace is clean to resume
+- **Lightweight process retro**: entropy checks can tune the loop itself when the same friction
+  repeats, for example by tightening the survival guide, templates, or tool config after repeated
+  review findings
+- **Merge conflict handling**: when `git push` fails due to a diverged remote, the agent fetches and merges (never rebases), resolves conflicts or triggers a Hard Stop
+- **Two run modes**: finite (deadline-based, default) or open-ended (continue until explicitly stopped). Open-ended mode also covers "checkpointed continuation" runs like "have something by 8am, then keep going." A morning checkpoint, return time, or delivery target is not a stop condition unless the survival guide explicitly marks it as a hard stop.
+- **Live operator brief**: the survival guide is rewritten in place as the run evolves. `Run Control`, `Current Phase`, `Active Compute`, `Stop Gate`, and `Next Exact Batch` stay current; the execution log carries history.
+- **Explicit Stop Gate**: the survival guide records whether stopping is currently allowed, why, and what the next required action is. Stopping is positive permission, not a guess.
+- **Explicit Effort Standard**: the survival guide and launch prompt tell the model not to be lazy, to work as hard as it can for the full run, and to avoid coasting after the first green check or checkpoint.
+- **Time-aware pacing**: tracks how long each batch takes and uses that to decide whether to start another batch or wrap up cleanly (finite mode)
+- **Slack notifications** (or any custom command): know when your run finishes without watching the terminal
+- **Constitution and legality check**: human-authored deal-breaker behaviors (`docs/constitution.md`) verified by a read-only judge after each batch. Three quality layers: correctness (tests), plan compliance (review), legality (judge). Success criteria the agent didn't author.
+- **PR Loop**: poll PR comments, inline reviews, and check status after every push — not just at batch boundaries
+- **Readiness Gate**: branch-level checklist before declaring review-ready (local proof on current tip, preview proof on exact runtime tip, final cumulative review, PR comments polled, legality check clean, strategic forgetting complete, git status clean, execution log current)
+- **Structured session data** in `.elves-session.json` for tooling, dashboards, and analytics
+- **Install doctor and update advisory**: startup can flag newer published releases and explain
+  when a project-local install differs from the global one that you thought you were using
+- **Ride-along protocol**: prefix messages with `ra:`, `ride-along:`, or `[ride-along]` to interact during a run without stopping the agent. The agent responds in 1-3 sentences and resumes immediately.
+- **Comprehensive preflight checks**: git remote, push access, GitHub CLI auth, test gates, sleep prevention, Slack webhook, stale branch detection
+
+---
+
+## Preventing sleep / shutdown
+
+This is the most common failure mode for overnight runs. If your machine sleeps, the session stops. Handle this before you walk away.
+
+### macOS
+
+```bash
+# Prevent display, idle, and system sleep for the duration of your terminal session
+caffeinate -dims &
+```
+
+Or wrap your agent command: `caffeinate -dims <your-agent-command>`
+
+Elves preflight will warn you if `caffeinate` isn't running and if you are on battery power.
+
+### Linux
+
+```bash
+systemd-inhibit --what=idle <your-agent-command>
+```
+
+### Windows (WSL)
+
+Open Power Options → Change plan settings → set "Put the computer to sleep" to **Never** for the duration of the run. Restore it afterward.
+
+### Cloud / remote (recommended for reliability)
+
+Running on a cloud VM, GitHub Codespaces, or a remote server eliminates the sleep problem entirely. The session runs independently of your local machine. This is the most reliable option for very long runs.
+
+### SSH sessions
+
+If you're running over SSH, your session dies when the connection drops. Always use a terminal multiplexer:
+
+```bash
+# Start a new tmux session
+tmux new -s elves
+
+# Run your agent inside tmux, then detach with Ctrl+B, D
+# Reconnect later with:
+tmux attach -t elves
+```
+
+`screen` works the same way: `screen -S elves`, detach with `Ctrl+A, D`, reattach with `screen -r elves`.
+
+### Suppress surveys and popups
+
+Some coding tools show survey popups, feedback requests, or update prompts during sessions. These will stall an unattended run. Configure your tools before starting:
+
+- **Claude Code:** add to your CLAUDE.md: `"Do not show surveys, popups, or update prompts during this session."`
+- **Codex:** add to your AGENTS.md: `"Never pause for surveys, feedback requests, or update prompts."`
+- **Cursor / other tools:** check settings for telemetry, notifications, and update checks. Disable anything interactive.
+
+### Pre-run checklist
+
+- [ ] Agent has the permissions it needs (file access, git push, `gh` auth, any tool approvals). If your platform requires you to approve actions (file writes, terminal commands, etc.), grant those permissions before you walk away. A permission prompt at 3am with nobody to click "allow" will stall the entire run. You're granting these permissions at your own risk. See [Disclaimer](#disclaimer).
+- [ ] Machine is plugged in (not on battery)
+- [ ] Sleep / display sleep is disabled or caffeinate running
+- [ ] Terminal is in tmux/screen (if SSH) or won't be closed
+- [ ] Surveys and popups disabled in your coding tool's settings
+- [ ] Notifications are configured so you know when the run finishes
+- [ ] Preflight passed (Elves will verify the above automatically)
+
+---
+
+## Monitoring your run
+
+You don't need to watch the terminal. Here's how to check in from elsewhere.
+
+**GitKraken** is the recommended way to monitor visually. Open it on the working branch and watch:
+- **Commit graph**: steady commit cadence means the agent is making progress. A long gap may mean a slow test suite, a stuck review cycle, or an unexpected blocker.
+- **Branch activity**: new commits appear as the agent completes each batch and pushes a checkpoint.
+- **PR status**: review comments arriving on the PR means the review step is working.
+
+**Slack notifications** deliver a completion message when the session ends (or when a batch completes, if you configure that). You can check your phone without opening a terminal.
+
+**The execution log** is the most detailed view. Each batch entry records what changed, what commands ran, what the test results were, how long each phase took, and what decisions were made autonomously. Read it when you return to understand exactly what happened.
+
+---
+
+## Setting up notifications
+
+### Slack (recommended)
+
+1. Go to [api.slack.com/apps](https://api.slack.com/apps) and create a new app (from scratch).
+2. Under **Features**, select **Incoming Webhooks** and enable it.
+3. Click **Add New Webhook to Workspace** and select the channel where you want notifications.
+4. Copy the webhook URL (it looks like `https://hooks.slack.com/services/T.../B.../...`).
+5. Set the environment variable before starting your session:
+
+```bash
+export ELVES_SLACK_WEBHOOK="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+```
+
+Elves preflight will send a test message to confirm the webhook works before you walk away.
+
+### Custom notifications
+
+Set `ELVES_NOTIFY_CMD` to any shell command you want run at session completion:
+
+```bash
+# Example: send a push notification via ntfy
+export ELVES_NOTIFY_CMD='curl -d "Elves done" ntfy.sh/your-topic'
+
+# Example: send an email via sendmail
+export ELVES_NOTIFY_CMD='echo "Elves session complete" | sendmail you@example.com'
+```
+
+If neither `ELVES_SLACK_WEBHOOK` nor `ELVES_NOTIFY_CMD` is set, Elves falls back to leaving a comment on the PR.
+
+---
+
+## Configuration
+
+### Tool configuration
+
+Tool-specific configuration lives in the survival guide under `## Tool Configuration`. This keeps the agent's instructions with the session rather than scattered across environment variables.
+
+See [`references/tool-config-examples.md`](references/tool-config-examples.md) for full examples covering Node.js, Python, Go, Rust, monorepos, and custom review APIs.
+
+**Minimal Node.js example** (add to survival guide):
+
+```markdown
+## Tool Configuration
+
+### Validation Gates
+- lint: `npm run lint`
+- typecheck: `npm run typecheck`
+- build: `npm run build`
+- test: `npm test`
+
+### Review
+- method: github-pr-comments
+```
+
+If you don't configure validation gates, Elves auto-discovers them from your project files (`package.json`, `Makefile`, `pyproject.toml`, `Cargo.toml`, `go.mod`).
+
+### Batch sizing
+
+The default batch size is what a team of 4 developers would accomplish in a 2-week sprint: roughly 40 person-days of effort. This limits blast radius and makes compaction recovery tractable.
+
+Override in your plan or survival guide:
+
+```markdown
+## Batch Sizing
+- team-size: 2
+- sprint-length: 1 week
+```
+
+Each batch must be independently shippable: code, tests, docs, and passing review before moving on.
+
+### Review methods
+
+| Tier | Method | Configuration |
+|---|---|---|
+| **Tier 1** | GitHub PR comments + built-in review | Default (zero config). Agent uses a review subagent when supported; otherwise it performs the same analysis directly. It reads PR comments, the diff, and the plan, fixes blockers, and iterates until the batch is clean. |
+| **Tier 2** | Custom review API | Set `method: custom-api` and `review-api-url` in survival guide. |
+| **Tier 3** | Additional checks | Smoke tests, screenshot diffs, doc checks, or any custom script returning 0/non-zero. |
+
+The agent uses the highest tier you have configured. Non-blocking findings are logged; persistent false positives (3+ cycles) are assessed and dismissed with a written explanation in the execution log.
+
+### Memory hygiene
+
+Long runs should clean up as they go. The default behavior is conservative: keep live docs concise,
+archive old execution-log entries in place, promote durable lessons, stop idle resources, and write
+a reactivation handoff when a fresh thread would be faster. Elves does **not** delete local app
+state, chat databases, installed skills, plugins, or automations as part of a coding run.
+
+If you want a local Codex/Claude cleanup routine, run it as explicit maintenance: inspect first,
+back up important state, archive rather than delete, close the app before touching local state
+databases, and verify config/state afterward. See
+[`references/autonomy-guide.md`](references/autonomy-guide.md) for the full safe-maintenance
+pattern.
+
+---
+
+## File structure
+
+```
+elves/
+├── SKILL.md                              # Portable skill instructions (Claude Code, Codex, Claude.ai)
+├── AGENTS.md                             # Codex-facing repo-local instructions for working on Elves itself
+├── README.md
+├── CHANGELOG.md                          # Version history
+├── TODO.md                               # Project backlog and deferred tasks
+├── LICENSE
+├── config.json.example                   # Persistent preferences template
+├── assets/
+│   ├── elves-banner.jpeg                 # README banner image
+│   └── elves-social-preview.png          # GitHub social preview
+├── references/
+│   ├── survival-guide-template.md        # Bootstrap template for new projects
+│   ├── execution-log-template.md         # Log entry template
+│   ├── plan-template.md                  # How to write a good plan
+│   ├── kickoff-prompt-template.md        # Copy-paste prompts for staging and launching a run
+│   ├── codex-goals.md                    # How to launch Elves inside Codex Goals
+│   ├── tool-config-examples.md           # Configs for Node, Python, Go, Rust, etc.
+│   ├── validation-guide.md               # Detailed validation gates and auto-discovery
+│   ├── autonomy-guide.md                 # Non-interactive operation and mid-run protocols
+│   ├── review-subagent.md                # Built-in review protocol and adversarial review
+│   ├── verification-patterns.md          # Headless browser, video recording, state assertions
+│   └── open-ended-guide.md              # Open-ended mode patterns, QA/audit expansion rules
+├── scripts/
+│   ├── install_doctor.py                 # Update + installation-precedence advisory
+│   ├── preflight.sh                      # Pre-run checklist
+│   ├── notify.sh                         # Notification helper
+│   └── validate_survival_guide.py        # Advisory survival-guide completeness check
+└── .github/
+    └── ISSUE_TEMPLATE/                   # Bug report, feature request, overnight run report
+```
+
+---
+
+## Platform support
+
+| Platform | File | Subagents | Notes |
+|---|---|---|---|
+| Claude Code | SKILL.md | Yes | Full feature set |
+| Codex | SKILL.md | Varies | Use review subagents when available; otherwise do the review directly. `AGENTS.md` remains the repo-local Codex companion |
+| Claude.ai | SKILL.md (zip upload) | No | Upload as skill |
+| Any Agent Skills compatible | SKILL.md | Varies | Open standard |
+
+---
+
+## Philosophy
+
+- **The human sandwich.** The human operates on both ends: specifying problems and reviewing output. The agent runs the loop in the middle. Your working hours become morning for reviewing last night's output, afternoon for setting up the next run.
+- **The Ralph Loop.** Try, check, feed back, repeat. AI returns drafts, not answers. A dumb, stubborn loop beats over-engineered sophistication because AI is non-deterministic. Any single attempt might fail. But if you keep trying, checking, and feeding back, the process converges.
+- **The 14-hour resource.** Every knowledge worker has 12-14 hours per day when they're not working. Elves converts those hours into shipped code. A two-hour planning session on Friday can produce a week's worth of output before you touch your keyboard on Monday.
+- **Three documents are the agent's memory.** Without them, long runs drift and repeat work. With them, a restarted agent picks up exactly where it left off. These aren't overhead: they're the minimum viable infrastructure for the loop to run unsupervised.
+- **Strategic forgetting keeps memory useful.** Permanent memory should be curated, not accumulated. Preserve decisions and reusable knowledge in handoff docs, learnings, and `.ai-docs`; archive raw history; start fresh threads when huge chats become the bottleneck.
+- **Tests are the watch.** An agent working overnight has no one watching. The tests are the watch. Without them, you wake up to code that compiles, passes lint, and does the wrong thing.
+- **Never merge.** The PR is for review, not for merging. That gate stays with the human.
+- **Document every decision.** Anything the agent decides without user input goes in the execution log under *Decisions made*. The human reviews these choices when they return.
+- **Fail safely, not silently.** If the agent is genuinely blocked, it stops and says so. If a test gate fails, it fixes the issue before continuing. It doesn't skip gates or paper over failures.
+- **Rollback before every batch.** `elves/pre-batch-N` tags mean any batch can be cleanly unwound without touching other work.
+- **Agent infrastructure is real engineering.** Developers who treat agent infrastructure as a real engineering concern (tight code review systems, organized work trees, failure handling) end up with something that functions like a tireless junior team working every hour they're away from their desk.
+- **Quality is not an afterthought.** Agents naturally spend 80% of batch time implementing and rush through validation and review. Elves treats implement, validate, and review as roughly equal phases. Implementation produces a draft. Validation and review produce something shippable.
+- **The philosophy applies everywhere, not just review.** The nine code quality principles (root cause over band-aids, centralize over duplicate, extend over create, etc.) aren't just a reviewer's checklist. They inform how batches are planned (architecture-aware ordering), how contracts are written (what to build on), how implementation begins (pre-implementation survey), and how review verifies (did you actually use what you found?). A principle enforced only at review time creates rework. Applied from planning onward, it prevents the rework from happening.
+- **The constitution is the law of the app.** Tests check whether code works. The constitution checks whether the app keeps its promises. Agents can write code that passes every test and still miss the point — because the agent authored the tests. The constitution provides success criteria from outside the agent's control: human-written intentions at a level of abstraction that requires genuine understanding to verify. You can game a unit test. You can't game "a failed payment never results in a fulfilled order." See *Here Comes the Judge* for the full framework.
+
+### Prior art and convergence
+
+Elves was developed independently, without drawing on any of the work cited below. After v1.0.0 shipped, we discovered that multiple teams had independently converged on the same core patterns. This is a good sign — like the proliferation of steam engines at the beginning of the Industrial Revolution, when multiple inventors arrived at the same design because the underlying problem demanded it. The problems of autonomous agent orchestration (persistent state, iterative refinement, quality enforcement, entropy management) have a natural shape, and that shape is emerging independently across the industry.
+
+[Anthropic's harness design for long-running applications](https://www.anthropic.com/engineering/harness-design-long-running-apps) describes a three-agent architecture (planner, generator, evaluator) with grading criteria that separate generation from evaluation — the same generator/evaluator split behind Elves' contract step and review loop. Their key insight that harnesses should be *simplified* as models improve (stripping away scaffolding that is no longer necessary) matches Elves' design as configurable scaffolding, not a rigid framework.
+
+[OpenAI's harness engineering](https://openai.com/index/harness-engineering/) describes building an entire production system with zero human-written code using Codex agents, and articulates principles Elves independently embodies: progressive disclosure for context (short entry point with pointers to deeper docs), plans as first-class versioned artifacts, the repository as single source of truth, continuous entropy management (cross-batch quality sweeps), and favoring "boring" technology that agents can model reliably.
+
+[Factory AI's Missions](https://factory.ai/news/missions) is a commercial platform that independently arrived at the same workflow: user describes a high-level goal, approves a generated plan, and the agent works autonomously — spawning worker sessions, coordinating git handoffs, and recovering from failures. Their median session runs 2 hours, with some tasks running up to 16 days. Their [Agent Readiness framework](https://factory.ai/news/agent-readiness) evaluates repositories across nine technical pillars (style/validation, build, testing, documentation, dev environment, observability, security, task discovery, experimentation) with five maturity levels — a structured version of the same insight behind Elves' progressive repo conditioning principle: agent performance is bottlenecked by the codebase environment, not just the model. Where Elves and Factory diverge is in approach: Factory is a hosted platform with proprietary tooling; Elves is an open skill that runs on whatever agent you already use. Factory conditions the repo as a one-time assessment; Elves conditions it continuously, batch by batch.
+
+All three teams found the same thing: coding agents become reliable only when you build the right harness around them. Better models make harness engineering *more* important, not less.
+
+---
+
+## What can go wrong
+
+Overnight agent runs fail in predictable ways. Knowing the failure modes makes them preventable.
+
+| Failure | What happens | Mitigation |
+|---|---|---|
+| **Machine sleeps** | Session stops silently. You wake up to 45 minutes of work instead of 8 hours. | `caffeinate` (macOS), `systemd-inhibit` (Linux), or run in cloud. Elves preflight warns you. |
+| **Agent runs destructive git commands** | `git reset --hard` wipes hours of uncommitted work. This has happened to real users. | Elves explicitly forbids `git reset --hard`, `git checkout .`, `git push --force`, and `git clean -fd`. The survival guide template includes these as non-negotiables. |
+| **Agent disables or weakens tests** | Agent comments out failing tests, weakens assertions, or shortens timeouts to make the gate pass. You wake up to code that "passes" but is broken. | Elves has a Test Integrity rule: never modify a test to make it pass. Fix the code, not the test. If the agent thinks a test is wrong, it logs the issue and moves on without changing it. |
+| **Context compaction loses instructions** | Long sessions hit memory limits. The agent's conversation gets summarized, and safety instructions disappear. | Elves stores its run memory on disk (survival guide, `.elves-session.json`, learnings, plan, execution log, and optionally `.ai-docs/*`), not in conversation memory. The agent re-reads the survival guide after every commit/push, and the Stop Gate plus `continuation_guard` make "keep going or stop?" explicit. Compaction can't erase files. |
+| **Interactive prompt stalls the session** | A tool asks for confirmation, a survey pops up, or `npm install` wants input. Nobody is there to click yes. | Elves surfaces the recommended non-interactive env vars during preflight, and the skill requires `--yes` flags plus tool-level survey suppression before unattended runs. |
+| **Flaky tests block progress** | A test passes locally but fails intermittently. The agent loops trying to fix a non-bug. | The agent logs flaky tests in the execution log and moves on after 3 failed attempts on the same non-deterministic failure. |
+| **Terminal closes (SSH disconnect)** | The SSH connection drops and the session dies. | Use `tmux` or `screen`. Elves mentions this in the pre-run checklist. |
+| **Agent drifts from the plan** | After many batches, the agent starts making changes that weren't in the plan. | The agent re-reads the survival guide after every commit/push, checks the plan hash to detect modifications, and keeps durable lessons in `learnings.md` so the same confusion doesn't have to be rediscovered. The layered memory system anchors every decision. The survival guide should be rewritten in place as a live control surface, not treated as an append-only history log. |
+| **Merge conflicts on push** | `git push` fails because the remote has diverged. The agent may rebase and lose work, or stall. | Elves instructs the agent to fetch and merge (never rebase on shared branches). If conflicts can't be resolved cleanly, the agent triggers a Hard Stop rather than risking data loss. |
+
+Most of these are prevented by the preflight checks. Run preflight, fix the warnings, and most overnight failures never happen.
+
+---
+
+## Advanced: Claude Code SessionStart hook
+
+For Claude Code users, you can make compaction recovery fully automatic by adding a SessionStart hook that loads the survival guide at the beginning of every session.
+
+Add this to your `.claude/settings.json`:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "echo '=== ELVES CONTEXT ===' && cat docs/plans/*-survival-guide.md 2>/dev/null && echo '' && echo '=== GIT STATUS ===' && git status --short && echo '' && echo '=== RECENT COMMITS ===' && git log --oneline -5"
+      }
+    ]
+  }
+}
+```
+
+This injects the survival guide, current git status, and recent commits into Claude's context at session start, even after a compaction or restart. The agent gets its bearings immediately without needing to be told to read the files.
+
+Adjust the `cat` path to match where your survival guide lives.
+
+### Enforce forbidden commands with hooks
+
+Elves tells the agent not to run destructive git commands, but instructions can be forgotten after context compaction. For bulletproof enforcement, add a PreToolUse hook that blocks them deterministically:
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "case \"$TOOL_INPUT\" in *'git reset --hard'*|*'git checkout .'*|*'git clean -fd'*|*'git push --force'*|*'git push -f '*|*'rm -rf /'*) echo 'BLOCKED: Forbidden command detected. Elves does not allow destructive git operations.' >&2; exit 1;; esac",
+        "matcher": "Bash"
+      }
+    ]
+  }
+}
+```
+
+This runs before every Bash command and blocks the operation if it matches a forbidden pattern. Unlike instructions (which can be compacted away), hooks are deterministic. The agent can't forget them and can't override them.
+
+This pattern comes from Anthropic's internal practices. Their `/careful` hook uses the same approach to block destructive operations in production environments.
+
+---
+
+## The daily briefing
+
+Block time at the end of your workday (even 30 minutes) to brief your agents. Load them with enough well-defined work to keep them running through the night. Before you go offline, everything needs to be provisioned and pointed in the right direction.
+
+Friday afternoons deserve more deliberate treatment. The weekend is roughly 60 hours of potential agent runtime. A two-hour planning session on Friday, setting up plans, configuring the survival guide, and queuing batch work, can produce a week's worth of output before Monday morning.
+
+The people who start treating their idle hours as the asset they've suddenly become will have a real advantage.
+
+---
+
+## Installation
+
+Elves can be installed globally (applies to all your projects) or per-project (lives in the repo).
+
+### Global installation (recommended to start)
+
+Global installation means the skill is always available, no matter which project you're in. Install it once, use it everywhere, and customize it as you learn.
+
+**Claude Code:**
+```bash
+# Create the global skills directory if it doesn't exist
+mkdir -p ~/.claude/skills/elves/scripts
+
+# Clone and copy
+git clone https://github.com/aigorahub/elves.git /tmp/elves
+cp -r /tmp/elves/SKILL.md /tmp/elves/references ~/.claude/skills/elves/
+cp /tmp/elves/scripts/preflight.sh /tmp/elves/scripts/notify.sh /tmp/elves/scripts/install_doctor.py /tmp/elves/scripts/validate_survival_guide.py ~/.claude/skills/elves/scripts/
+rm -rf /tmp/elves
+```
+
+**Codex:**
+```bash
+mkdir -p ~/.codex/skills/elves/scripts
+git clone https://github.com/aigorahub/elves.git /tmp/elves
+cp /tmp/elves/SKILL.md /tmp/elves/AGENTS.md ~/.codex/skills/elves/
+cp -r /tmp/elves/references ~/.codex/skills/elves/
+cp /tmp/elves/scripts/preflight.sh /tmp/elves/scripts/notify.sh /tmp/elves/scripts/install_doctor.py /tmp/elves/scripts/validate_survival_guide.py ~/.codex/skills/elves/scripts/
+rm -rf /tmp/elves
+```
+
+### Per-project installation
+
+Per-project installation puts the skill in your repo so it's versioned with your code and visible to collaborators.
+
+**Claude Code:**
+```bash
+# From your project root
+mkdir -p .claude/skills
+git clone https://github.com/aigorahub/elves.git .claude/skills/elves
+rm -rf .claude/skills/elves/.git  # remove the nested git repo
+```
+
+**Codex** (if your setup supports project-local skills):
+```bash
+mkdir -p .codex/skills
+git clone https://github.com/aigorahub/elves.git .codex/skills/elves
+rm -rf .codex/skills/elves/.git
+```
+
+### Claude.ai (upload)
+
+1. Download or clone this repo
+2. Zip the `elves/` directory
+3. Go to Settings > Features > Skills > Upload
+4. Upload the zip file
+
+### Validating your installation
+
+```bash
+pip install -q skills-ref
+agentskills validate ~/.claude/skills/elves/  # or wherever you installed it
+```
+
+You should see: `Valid skill: ...`
+
+### Stay updated
+
+Star the repo to bookmark it and show support:
+```bash
+gh repo star aigorahub/elves
+```
+
+Watch for releases to get notified when the skill is updated:
+```bash
+gh api repos/aigorahub/elves/subscription --method PUT --field subscribed=true
+```
+
+If you keep a local checkout of this repo and want your installed Claude/Codex copies to match it,
+use the built-in sync helper:
+```bash
+python3 scripts/sync_installed_skills.py --check
+python3 scripts/sync_installed_skills.py --apply
+```
+
+By default, `--target all` syncs or checks only the installed copies it actually finds. Use
+`--target claude` or `--target codex` if you want to inspect or create a specific platform install
+explicitly.
+
+This mirrors the managed skill bundle files from the repo into `~/.claude/skills/elves/` and
+`~/.codex/skills/elves/`. It intentionally ships the installable bundle only: `SKILL.md`,
+`AGENTS.md` (Codex), `references/`, and the runtime scripts `scripts/preflight.sh`,
+`scripts/notify.sh`, `scripts/install_doctor.py`, and
+`scripts/validate_survival_guide.py`. Repo-only maintenance helpers such as
+`scripts/check_repo_consistency.py` stay in the checkout. If you maintain hand-edited local
+customizations, prefer the manual diff workflow below instead of blindly applying the sync.
+
+To inspect what is actually installed and whether a newer published release exists:
+```bash
+python3 ~/.claude/skills/elves/scripts/install_doctor.py --doctor
+python3 ~/.codex/skills/elves/scripts/install_doctor.py --doctor
+```
+
+The install doctor reports the active version, published release, and any project-local installs
+that differ from the global copies. `scripts/preflight.sh` now runs it in startup mode
+automatically when the helper is present in the bundle.
+
+---
+
+## Making it your own
+
+**Elves is scaffolding, not a finished product.** It gives you the framework: the loop, the documents, the gates. But every project is different. You'll need to customize it for your own purposes, and you'll learn your own lessons along the way.
+
+### What to customize first
+
+**The survival guide template** is where most customization happens. When you generate a survival guide for your project, you'll fill in:
+- Your specific test commands (not every project uses `npm run lint`)
+- Your non-negotiables (what must never happen in your codebase)
+- Your review method (PR comments, a custom API, manual checks)
+- Your notification preference (Slack, email, PR comment)
+- Your batch sizing (maybe your team is 2 people, not 4)
+- Your checkpoint semantics and actual stop conditions
+- Your active compute picture if the run uses paid pods, remote jobs, or long-lived servers
+- Your Stop Gate defaults and the next required action at launch
+- Your Effort Standard if you want to reinforce "do not be lazy / work as hard as you can" behavior for long unattended runs
+
+Treat the survival guide as a live operator brief. Rewrite `Run Control`, `Current Phase`, `Active Compute`, `Stop Gate`, `Effort Standard`, and `Next Exact Batch` in place as the run evolves. Do not stack stale "next action updates" there; put history in the execution log instead.
+
+If the run has a morning checkpoint, return time, paid pods, remote jobs, or long-lived servers,
+say so explicitly in the survival guide. The agent should never have to guess whether a time is a
+delivery checkpoint or a hard stop, or whether compute should be shut down, paused, or kept warm.
+
+For real runs, I recommend exporting `ELVES_SURVIVAL_GUIDE_PATH` before `./scripts/preflight.sh`.
+Preflight will run `python3 scripts/validate_survival_guide.py "$ELVES_SURVIVAL_GUIDE_PATH"` as a
+warning-only check. It won't block launch, but it will catch half-filled Stop Gate / Run Control
+fields before you go offline.
+
+**The validation gates** will be different for every project. A Python data pipeline has different gates than a React web app. Edit the survival guide's `## Tool Configuration` section to match your stack. See [`references/tool-config-examples.md`](references/tool-config-examples.md) for examples across Node, Python, Go, Rust, and monorepos.
+
+**The plan template** is a starting point. Some teams want more structure (acceptance criteria per batch, risk statements). Others want less (just a task list). Make the plan format work for how you think, not how the template thinks. One thing worth keeping even in lighter plans: if a batch changes existing behavior, include at least one acceptance criterion that proves old behavior still works.
+
+### What you'll learn by doing
+
+The first time you run Elves overnight, you'll discover things no template can predict:
+
+- Which of your test suites is flaky and needs to be fixed before agents can rely on it
+- Which commands in your toolchain prompt for input and need `--yes` flags
+- How long your batches actually take (probably longer than you estimate)
+- Where your plan was vague and the agent had to guess
+- What non-negotiables you forgot to list
+
+This is normal. After each run, read the execution log (especially the **Decisions made** sections) and update your survival guide template with what you learned. The skill gets better every time you use it because *you* get better at writing plans and configuring the harness.
+
+### Editing your global installation
+
+If you installed globally, your customized skill lives at `~/.claude/skills/elves/SKILL.md` (Claude Code) or `~/.codex/skills/elves/SKILL.md` (Codex). Edit these files directly. Add your own defaults, remove sections that don't apply to your work, add project-type-specific guidance. This is your copy. Make it yours.
+
+If you are not sure which copy is winning, run the install doctor first. It will show the active
+bundle and whether a project-local install is differing from the global one:
+```bash
+python3 ~/.claude/skills/elves/scripts/install_doctor.py --doctor
+python3 ~/.codex/skills/elves/scripts/install_doctor.py --doctor
+```
+
+When you want to update from upstream (new features, fixes), you have two options:
+
+1. Mirror this checkout directly into your installed copies:
+```bash
+python3 scripts/sync_installed_skills.py --check
+python3 scripts/sync_installed_skills.py --apply
+```
+
+2. If you keep local customizations, pull the latest and merge manually:
+```bash
+git clone https://github.com/aigorahub/elves.git /tmp/elves-update
+diff ~/.claude/skills/elves/SKILL.md /tmp/elves-update/SKILL.md
+# Review the diff, merge what you want, skip what you don't
+```
+
+For Codex, compare `~/.codex/skills/elves/SKILL.md` against `/tmp/elves-update/SKILL.md`.
+
+### Per-project overrides
+
+If you have a global installation but one project needs different behavior, put a project-level
+copy in `.claude/skills/elves/` (Claude Code) or `.codex/skills/elves/` (Codex, if supported by
+your setup) inside that repo. The project-level skill takes precedence over the global one.
+
+That flexibility is useful, but it can also be confusing. If a project-local copy drifts from the
+global install, you may think you upgraded Elves and still be running the older local version in
+that repo. The install doctor is meant to catch exactly that situation.
+
+This is useful when:
+- One project uses Python while your default is Node
+- A project has specific non-negotiables ("never touch the billing module")
+- You want to experiment with a modified workflow without affecting other projects
+
+---
+
+## Contributing
+
+Issues and pull requests are welcome. If you find a bug, have a feature idea, or want to add support for a new platform or tool, open an issue to discuss it first.
+
+When submitting a PR:
+- Keep changes focused: one concern per PR.
+- Update the relevant template or reference file if your change affects agent behavior.
+- Test your change with at least one real overnight run if possible.
+- For cross-file skill/doc changes, run:
+  ```bash
+  python3 scripts/check_repo_consistency.py
+  ```
+
+---
+
+## Disclaimer
+
+This software is provided "as is", without warranty of any kind, express or implied. Neither Aigora nor John Ennis are liable for any claims, damages, or other liability arising from using this software. That includes code changes, data loss, security incidents, infrastructure costs, or anything else that happens. The [MIT license](LICENSE) already says this, but we want to be clear about it here too.
+
+Elves expects you to grant your AI agent the permissions it needs to run autonomously. That might mean file system access, git push, GitHub CLI auth, shell command execution, or other tool approvals depending on your platform. If the agent has to pause and wait for permission during an unattended run, it'll stall. So the skill works best when you pre-approve what the agent will need. You're granting those permissions at your own risk. Know what you're allowing before you walk away.
+
+There's nothing uniquely dangerous about Elves. It uses standard tools (git, GitHub, your existing test suite) and it has safety measures (forbidden commands, test integrity rules, rollback tags). But no software is foolproof, and an agent running for hours with broad permissions can make mistakes. Always review the PR before merging.
+
+---
+
+## License
+
+MIT, see [LICENSE](LICENSE).
+
+Copyright (c) 2026 Aigora.
