@@ -229,7 +229,13 @@ button[aria-pressed="true"] { border-color: var(--fmrpu); color: var(--fmrpu); }
   font-family: var(--mono) !important;
 }
 
-.banner { border-left: var(--px) solid var(--critical) !important; }
+.banner {
+  border-left: var(--px) solid var(--warning) !important;
+  flex-wrap: wrap;            /* long banner text must wrap on a phone */
+  min-width: 0;
+}
+.banner .why { min-width: 0; }
+.banner .tag { color: var(--warning) !important; }
 
 table { font-variant-numeric: tabular-nums; }
 th { font-family: var(--pixel) !important; font-size: 8px !important; letter-spacing: 1px; color: var(--fmrpu) !important; }
