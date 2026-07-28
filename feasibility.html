@@ -1,0 +1,2077 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FM-RPU — Feasibility Readout</title>
+<meta name="description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<meta name="theme-color" content="#100E18" />
+<meta property="og:title" content="FM-RPU — Feasibility Readout" />
+<meta property="og:description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="ported">
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="wordmark" href="index.html">
+    <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+      <rect x="0" y="0" width="8" height="8" fill="currentColor" opacity=".18"/>
+      <rect x="1" y="1" width="2" height="2" fill="currentColor"/>
+      <rect x="5" y="1" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
+    </svg>
+    <span>FM-RPU</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html">Chip</a><a href="feasibility.html" aria-current="page">Feasibility</a><a href="index.html#about">About</a>
+  </nav>
+</header>
+
+<div id="main" tabindex="-1">
+
+
+<style>
+  :root {
+    --surface: #fbfbf9;
+    --surface-2: #f2f2ee;
+    --ink: #16181d;
+    --ink-2: #5a5e66;
+    --ink-3: #8b8f98;
+    --hair: #e4e4de;
+    --fmrpu: #2a78d6;
+    --b200: #1baf7a;
+    --thor: #eda100;
+    --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
+    --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
+    --good: #0ca30c;
+    --warning: #b97f00;
+    --critical: #d03b3b;
+    --critical-bg: #fbeaea;
+    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface: #16181c; --surface-2: #1e2126;
+      --ink: #f2f2ee; --ink-2: #a8adb8; --ink-3: #767b85;
+      --hair: #2a2d33;
+      --fmrpu: #3987e5; --b200: #199e70; --thor: #c98500;
+      --seq-100: #0d366b; --seq-250: #184f95; --seq-400: #256abf;
+      --seq-500: #3987e5; --seq-600: #6da7ec; --seq-700: #b7d3f6;
+      --good: #2fbf2f; --warning: #fab219;
+      --critical: #e05252; --critical-bg: #33191b;
+    }
+  }
+  :root[data-theme="light"] {
+    --surface: #fbfbf9; --surface-2: #f2f2ee;
+    --ink: #16181d; --ink-2: #5a5e66; --ink-3: #8b8f98;
+    --hair: #e4e4de;
+    --fmrpu: #2a78d6; --b200: #1baf7a; --thor: #eda100;
+    --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
+    --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
+    --good: #0ca30c; --warning: #b97f00;
+    --critical: #d03b3b; --critical-bg: #fbeaea;
+  }
+  :root[data-theme="dark"] {
+    --surface: #16181c; --surface-2: #1e2126;
+    --ink: #f2f2ee; --ink-2: #a8adb8; --ink-3: #767b85;
+    --hair: #2a2d33;
+    --fmrpu: #3987e5; --b200: #199e70; --thor: #c98500;
+    --seq-100: #0d366b; --seq-250: #184f95; --seq-400: #256abf;
+    --seq-500: #3987e5; --seq-600: #6da7ec; --seq-700: #b7d3f6;
+    --good: #2fbf2f; --warning: #fab219;
+    --critical: #e05252; --critical-bg: #33191b;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--surface); color: var(--ink);
+    font: 15px/1.55 var(--sans);
+    margin: 0; padding: 0 20px 72px;
+  }
+  main { max-width: 1080px; margin: 0 auto; }
+
+  .banner {
+    display: flex; gap: 12px; align-items: baseline;
+    background: var(--critical-bg);
+    border-left: 3px solid var(--critical);
+    padding: 12px 16px; margin: 20px 0 28px;
+    font-family: var(--mono); font-size: 13px;
+  }
+  .banner .tag { color: var(--critical); font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
+  .banner .why { color: var(--ink-2); }
+
+  header h1 {
+    font-family: var(--mono); font-size: 26px; font-weight: 600;
+    letter-spacing: -0.01em; margin: 0 0 4px; text-wrap: balance;
+  }
+  header .sub { color: var(--ink-2); margin: 0 0 16px; max-width: 68ch; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .chip {
+    font-family: var(--mono); font-size: 12px;
+    background: var(--surface-2); border: 1px solid var(--hair);
+    padding: 3px 10px; border-radius: 3px; color: var(--ink-2);
+    white-space: nowrap;
+  }
+  .chip b { color: var(--ink); font-weight: 600; }
+
+  section { margin: 44px 0 0; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 11px; font-weight: 600;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+    margin: 0 0 4px;
+  }
+  h2 { font-size: 19px; margin: 0 0 6px; text-wrap: balance; }
+  .note { color: var(--ink-2); font-size: 14px; max-width: 72ch; margin: 0 0 16px; }
+  .note b { color: var(--ink); }
+
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .tile {
+    border: 1px solid var(--hair); border-radius: 4px;
+    padding: 14px 16px; background: var(--surface);
+  }
+  .tile .lbl { font-size: 12.5px; color: var(--ink-2); }
+  .tile .val { font-family: var(--mono); font-size: 30px; font-weight: 650; line-height: 1.15; margin-top: 2px; }
+  .tile .cmp { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
+  .tile .val.crit { color: var(--critical); }
+
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th {
+    text-align: left; font-family: var(--mono); font-size: 11px;
+    text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3);
+    font-weight: 600; padding: 8px 12px 6px; border-bottom: 1px solid var(--hair);
+  }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--hair); font-variant-numeric: tabular-nums; }
+  td.num, th.num { text-align: right; }
+  .rowkey { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
+  .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono); font-size: 12px; font-weight: 600;
+    padding: 2px 8px; border-radius: 3px; white-space: nowrap;
+  }
+  .pill.fail { color: var(--critical); background: color-mix(in srgb, var(--critical) 10%, transparent); }
+  .pill.pass { color: var(--good); background: color-mix(in srgb, var(--good) 10%, transparent); }
+
+  .chart-box { border: 1px solid var(--hair); border-radius: 4px; padding: 16px; overflow-x: auto; }
+  .chart-box svg { display: block; width: 100%; height: auto; }
+  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 12px; font-size: 13px; color: var(--ink-2); }
+  .legend .key { display: inline-flex; align-items: center; gap: 7px; }
+  .legend .line { width: 16px; height: 2px; border-radius: 1px; }
+  .legend .box { width: 11px; height: 11px; border-radius: 2px; }
+
+  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 860px) { .duo { grid-template-columns: 1fr; } }
+
+  #tooltip {
+    position: fixed; pointer-events: none; z-index: 10; display: none;
+    background: var(--ink); color: var(--surface);
+    font: 12.5px/1.5 var(--mono);
+    padding: 8px 11px; border-radius: 4px; max-width: 320px;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+  }
+  #tooltip .t-title { font-weight: 700; margin-bottom: 3px; }
+  #tooltip .t-row { display: flex; gap: 10px; justify-content: space-between; }
+  #tooltip .t-row b { font-weight: 650; }
+
+  svg text { font-family: var(--mono); fill: var(--ink-2); }
+  svg .axis-lbl { font-size: 11px; }
+  svg .tick-lbl { font-size: 10.5px; fill: var(--ink-3); }
+  svg .d-lbl { font-size: 11px; fill: var(--ink); font-weight: 600; }
+  svg .grid { stroke: var(--hair); stroke-width: 1; }
+  svg .mark:focus { outline: none; }
+  svg .mark:focus-visible { stroke: var(--ink); stroke-width: 2; }
+
+  footer {
+    margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--hair);
+    font-family: var(--mono); font-size: 12px; color: var(--ink-3);
+  }
+  footer div { margin: 2px 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .tile, .chart-box { transition: border-color .15s ease; }
+    .tile:hover, .chart-box:hover { border-color: var(--ink-3); }
+  }
+
+/* ---- house palette override (site design system) ---------------------- */
+:root, :root[data-theme="light"], :root[data-theme="dark"] {
+  --surface:   #100E18;
+  --surface-2: #221E30;
+  --inset:     #171522;
+  --ink:       #F4EFE4;
+  --ink-2:     #A79FB5;
+  --ink-3:     #948CAB;
+  --hair:      #2E2941;
+
+  --fmrpu:     #E8A552;
+  --thor:      #5C97A0;
+  --mem:       #6FB3AE;
+  --b200:      #9A8CC4;
+  --tax:       #C0998C;
+  --blk-face:  #BDB6C6;
+  --blk-face-on: #E4DECF;
+
+  --seq-100:   #4A2338;
+  --seq-250:   #7A3B22;
+  --seq-400:   #B5652F;
+  --seq-500:   #D98E4A;
+  --seq-600:   #E8A552;
+  --seq-700:   #F0C176;
+
+  --good:      #5FA36B;
+  --warning:   #C4762F;
+  --critical:  #D2685A;
+  --critical-bg: #2A1A22;
+
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --px: 4px;
+  --pixel: "Silkscreen", ui-monospace, monospace;
+}
+
+/* ---- house treatment: hard edges, no blur, pixel accents -------------- */
+body { background: var(--surface); color: var(--ink); }
+
+*, *::before, *::after { border-radius: 0 !important; }
+svg rect, svg circle { rx: 0; }
+
+h1 {
+  font-family: var(--sans) !important;
+  font-weight: 300 !important;
+  font-size: clamp(28px, 4.4vw, 44px) !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.14 !important;
+  color: var(--ink);
+}
+
+h2 { font-family: var(--sans); font-weight: 400; }
+
+.eyebrow {
+  font-family: var(--pixel) !important;
+  font-size: 8px !important;
+  line-height: 16px !important;
+  letter-spacing: 1px !important;
+  color: var(--fmrpu) !important;
+}
+
+.chip, button, .pill, .tile .val, .readout, footer {
+  font-family: var(--pixel) !important;
+  font-size: 8px !important;
+  line-height: 16px !important;
+  letter-spacing: 1px;
+}
+
+.tile .val { font-size: 24px !important; line-height: 32px !important; }
+
+button {
+  padding: var(--px) calc(var(--px) * 3) !important;
+  min-height: calc(var(--px) * 8);
+  background: var(--surface-2);
+  border: var(--px) solid var(--hair);
+  color: var(--ink);
+  cursor: pointer;
+}
+button:hover { border-color: var(--fmrpu); color: var(--fmrpu); }
+button[aria-pressed="true"] { border-color: var(--fmrpu); color: var(--fmrpu); }
+
+.chip { padding: var(--px) calc(var(--px) * 2) !important; }
+
+.panel, .chart-box, .tile { border: 1px solid var(--hair); background: var(--surface); }
+
+#tooltip {
+  background: var(--surface-2) !important;
+  color: var(--ink) !important;
+  border-left: var(--px) solid var(--fmrpu);
+  box-shadow: var(--px) var(--px) 0 rgba(0,0,0,.55) !important;
+  font-family: var(--mono) !important;
+}
+
+.banner { border-left: var(--px) solid var(--critical) !important; }
+
+table { font-variant-numeric: tabular-nums; }
+th { font-family: var(--pixel) !important; font-size: 8px !important; letter-spacing: 1px; color: var(--fmrpu) !important; }
+
+input[type="range"] { accent-color: var(--fmrpu); }
+
+::selection { background: var(--fmrpu); color: var(--surface); }
+:focus-visible { outline: var(--px) solid var(--fmrpu); outline-offset: var(--px); }
+
+main { max-width: 1088px; }
+
+svg .blk-lbl { fill: #14121C !important; }
+svg .blk-sub { fill: #3A3348 !important; }
+svg .die-lbl { fill: var(--ink) !important; }
+</style>
+
+<main>
+  <div class="banner" role="alert">
+    <span class="tag">NOT AUTHORITATIVE</span>
+    <span class="why">Calibration gate is red — every anchor is a placeholder (D1). Figures exercise
+    the pipeline under declared placeholder constants and are <b>not</b> a feasibility conclusion (P6).</span>
+  </div>
+
+  <header>
+    <p class="eyebrow">etched · Tier-1 analytical roofline instrument</p>
+    <h1>FM-RPU feasibility readout</h1>
+    <p class="sub">Can a head-resident accelerator run a 14B DreamZero world model at 5 Hz
+    (200 ms deadline, 2 s horizon) inside ~30 W — where Jetson Thor and a head-power B200 cannot?
+    This is what the instrument currently reads.</p>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <section id="verdict-sec">
+    <p class="eyebrow">Constraint verdicts · shared utilization model (P1)</p>
+    <h2>No row clears all three constraints</h2>
+    <p class="note">Every hardware row is scored under the <b>one identical utilization model</b> —
+    the design-under-test is never granted ideal utilization. Feasibility requires all of:
+    deadline-miss-rate ≤ 10⁻⁴, average power within TDP, and the fanless neck path able to reject the heat.</p>
+    <div class="chart-box" style="padding:0"><table id="verdict"></table></div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Headline readings</p>
+    <div class="kpis" id="kpis"></div>
+  </section>
+
+  <section id="roofline-sec">
+    <p class="eyebrow">Roofline · regime is a computed output (P5)</p>
+    <h2>The workload is compute-bound on every real row</h2>
+    <p class="note">Chunk-wise video diffusion re-diffuses <b>N_new × CFG ≈ 6,240 tokens</b> per weight
+    fetch — not the low-batch decode the bandwidth-bound intuition assumes. Every DiT operator sits far
+    right of every row's ridge point: the binding resource is <b>compute</b>, not the HBM wall.
+    Operator dots are placed on the FM-RPU roofline; hover for all three rows' regimes.</p>
+    <div class="legend" id="roofline-legend"></div>
+    <div class="chart-box"><svg id="roofline" viewBox="0 0 1040 420" role="img"
+      aria-label="Log-log roofline chart: three hardware rows' rooflines with DiT operators plotted by arithmetic intensity"></svg></div>
+  </section>
+
+  <section id="latency-sec">
+    <p class="eyebrow">Latency · A4 sensor-to-action loop</p>
+    <h2>Where the 200 ms budget goes</h2>
+    <p class="note">Per-stage chunk time against the control deadline (ink rule at 200 ms).
+    The FM-RPU sweep point misses by ~15×; B200 alone fits the deadline — at datacenter power.
+    Segment shade encodes pipeline phase; hover any segment.</p>
+    <div class="legend" id="latency-legend"></div>
+    <div class="chart-box"><svg id="latency" viewBox="0 0 1040 240" role="img"
+      aria-label="Stacked horizontal bars of per-stage latency per hardware row versus the 200 millisecond deadline"></svg></div>
+  </section>
+
+  <section id="energy-sec">
+    <p class="eyebrow">Energy · byte-vs-FLOP split is an output (F4)</p>
+    <h2>FLOP energy dominates the chunk — a placeholder-constant finding</h2>
+    <p class="note">Under the placeholder e_flop (0.20 pJ/FLOP), compute energy is ~99% of every chunk
+    and <b>every row exceeds its own TDP</b> — including B200 exceeding 1,000 W, a physical
+    self-contradiction that real anchor calibration must resolve. Byte energy (~0.9 J) is nearly
+    invisible at this scale; hover for exact values. Static/leakage term: Part C.3.</p>
+    <div class="legend" id="energy-legend"></div>
+    <div class="chart-box"><svg id="energy" viewBox="0 0 1040 200" role="img"
+      aria-label="Stacked horizontal bars of FLOP, byte, and static energy per chunk per hardware row"></svg></div>
+  </section>
+
+  <section id="heatmap-sec">
+    <p class="eyebrow">Design-space screen · (FP4 compute × HBM bandwidth)</p>
+    <h2>Feasibility moves with compute, not bandwidth</h2>
+    <p class="note">Chunk p50 latency over the FM-RPU sweep grid (darker = slower, log-scaled color).
+    Cells outlined in green clear the deadline-miss target — they form <b>vertical stripes</b>: at
+    1-step distilled, ≥ 2 PF clears at <i>any</i> bandwidth, even Thor's 273 GB/s.
+    <b>No cell clears the 30 W power budget</b> under placeholder constants.</p>
+    <div class="legend" id="heatmap-legend"></div>
+    <div class="duo">
+      <div class="chart-box"><svg id="hm0" viewBox="0 0 500 360" role="img" aria-label="Latency heatmap, 3-step CFG schedule"></svg></div>
+      <div class="chart-box"><svg id="hm1" viewBox="0 0 500 360" role="img" aria-label="Latency heatmap, 1-step distilled schedule"></svg></div>
+    </div>
+  </section>
+
+  <section id="sens-sec">
+    <p class="eyebrow">Sensitivity · one-at-a-time over the binding feasibility margin (A6.4)</p>
+    <h2>Step compression and token count carry the conclusion</h2>
+    <p class="note">Spread each uncertain input injects into the binding feasibility margin while the
+    others are held at point mass. The two workload-compression knobs dominate; realized bandwidth
+    utilization barely registers — consistent with the compute-bound regime.</p>
+    <div class="chart-box"><svg id="sens" viewBox="0 0 1040 190" role="img"
+      aria-label="Horizontal bar chart of sensitivity scores per uncertain input"></svg></div>
+  </section>
+
+  <section id="wall-sec">
+    <p class="eyebrow">Thor wall · bandwidth isolated with infinite compute</p>
+    <h2>Even with unlimited compute, 273 GB/s misses the deadline</h2>
+    <p class="note">Deadline-miss-rate vs HBM bandwidth on a synthetic row with compute removed as a
+    constraint. The wall sits at <b id="wall-num"></b> — Thor's 273 GB/s is on the miss side.
+    Bandwidth is an independent kill for Thor; compute is simply the one that binds first.</p>
+    <div class="chart-box"><svg id="wall" viewBox="0 0 1040 300" role="img"
+      aria-label="Line chart of deadline miss rate versus HBM bandwidth with Thor's bandwidth and the wall marked"></svg></div>
+  </section>
+
+  <section id="avsb-sec">
+    <p class="eyebrow">Simulator B · cost of generality (Part C), priced not assumed</p>
+    <h2 id="avsb-h2"></h2>
+    <p class="note">The union point (1.5× FP4 for the JEPA-MPC batch, 35 W TDP) vs the DreamZero-specialized
+    point, both running the identical DreamZero hot path (P8b). The gap decomposes into leakage on the
+    extra silicon (Part C.3) and the ~2% programmable update engine (Part C.2). The wide band is honest:
+    placeholder priors are wide by design.</p>
+    <div class="chart-box"><svg id="avsb" viewBox="0 0 1040 150" role="img"
+      aria-label="Dot with confidence interval showing the A versus B perf-per-watt gap"></svg></div>
+  </section>
+
+  <footer id="foot"></footer>
+</main>
+<div id="tooltip" role="status"></div>
+
+<script>
+const DATA = {
+ "calibration": {
+  "passed": false,
+  "tol": 0.15,
+  "anchors": [
+   {
+    "anchor_name": "b200_dreamzero_3step",
+    "latency_rel_err": 0.0,
+    "energy_rel_err": 0.0,
+    "within_tol": true
+   },
+   {
+    "anchor_name": "dreamzero_public_16step",
+    "latency_rel_err": 0.0,
+    "energy_rel_err": 0.0,
+    "within_tol": true
+   },
+   {
+    "anchor_name": "thor_point",
+    "latency_rel_err": 0.0,
+    "energy_rel_err": 0.0,
+    "within_tol": true
+   }
+  ]
+ },
+ "workload": {
+  "params_b": 14000000000.0,
+  "n_ctx": 18720,
+  "n_new": 3120,
+  "diffusion_steps": 3,
+  "cfg_pair": true,
+  "control_period_ms": 200.0,
+  "horizon_s": 2.0,
+  "weight_gb": 7.0,
+  "kv_gb": 7.7725696,
+  "act_gb": 0.51249152,
+  "flops_per_step": 247173106892800.0,
+  "chunk_flops": 741519320678400.0,
+  "required_eff_pflops_160ms": 4.63449575424
+ },
+ "util": {
+  "compute_util": 0.5,
+  "bw_util": 0.7,
+  "e_flop_fp4_pj": 0.2,
+  "e_byte_hbm_pj": 20.0,
+  "static_fraction": 0.1
+ },
+ "rows": [
+  {
+   "name": "jetson_thor",
+   "is_dut": false,
+   "fp4_peak_flops": 2070000000000000.0,
+   "hbm_bw": 273000000000.0,
+   "tdp_w": 130.0,
+   "eff_compute": 1035000000000000.0,
+   "eff_bw": 191100000000.0,
+   "ridge": 5416.012558869702,
+   "p50_ms": 812.2214940011276,
+   "p999_ms": 880.10795043681,
+   "miss_rate": 1.0,
+   "stages_ms": [
+    0.02,
+    0.02,
+    11.961644965013111,
+    40.703420340265275,
+    246.57403003123034,
+    4.797207084062388,
+    246.57403003123034,
+    4.797207084062388,
+    246.57403003123034,
+    4.797207084062388,
+    4.797207084062388,
+    0.02
+   ],
+   "stage_labels": [
+    "capture",
+    "ISP",
+    "VAE encode",
+    "prefill (KV)",
+    "DiT step 1",
+    "flow 1",
+    "DiT step 2",
+    "flow 2",
+    "DiT step 3",
+    "flow 3",
+    "action head",
+    "emit"
+   ],
+   "flop_energy_j": 205.71984494592,
+   "byte_energy_j": 0.887584155648,
+   "static_energy_j": 10.558879422014657,
+   "avg_power_w": 267.3732597912278,
+   "thermal_limited": true,
+   "p_feasible": 0.0,
+   "quantiles_ms": {
+    "0.5": 631.5790552827043,
+    "0.9": 907.890494999701,
+    "0.99": 1059.2046215963426
+   },
+   "margin_ci_ms": [
+    -787.9282047017253,
+    -164.1317798125703
+   ]
+  },
+  {
+   "name": "b200",
+   "is_dut": false,
+   "fp4_peak_flops": 9000000000000000.0,
+   "hbm_bw": 8000000000000.0,
+   "tdp_w": 1000.0,
+   "eff_compute": 4500000000000000.0,
+   "eff_bw": 5600000000000.0,
+   "ridge": 803.5714285714286,
+   "p50_ms": 174.28903139915928,
+   "p999_ms": 189.45745179471436,
+   "miss_rate": 0.0,
+   "stages_ms": [
+    0.005,
+    0.005,
+    2.7514593707073014,
+    1.3942148077714287,
+    55.197068136431746,
+    1.1036386580886348,
+    55.197068136431746,
+    1.1036386580886348,
+    55.197068136431746,
+    1.1036386580886348,
+    1.1036386580886348,
+    0.005
+   ],
+   "stage_labels": [
+    "capture",
+    "ISP",
+    "VAE encode",
+    "prefill (KV)",
+    "DiT step 1",
+    "flow 1",
+    "DiT step 2",
+    "flow 2",
+    "DiT step 3",
+    "flow 3",
+    "action head",
+    "emit"
+   ],
+   "flop_energy_j": 205.71984494592,
+   "byte_energy_j": 0.887584155648,
+   "static_energy_j": 17.428903139915928,
+   "avg_power_w": 1285.4299002235696,
+   "thermal_limited": true,
+   "p_feasible": 0.0,
+   "quantiles_ms": {
+    "0.5": 130.1056364266596,
+    "0.9": 194.17717925892634,
+    "0.99": 225.27981945214353
+   },
+   "margin_ci_ms": [
+    -10.04184439060328,
+    127.20535826323875
+   ]
+  },
+  {
+   "name": "fm_rpu_14",
+   "is_dut": true,
+   "fp4_peak_flops": 500000000000000.0,
+   "hbm_bw": 1200000000000.0,
+   "tdp_w": 30.0,
+   "eff_compute": 250000000000000.0,
+   "eff_bw": 840000000000.0,
+   "ridge": 297.6190476190476,
+   "p50_ms": 3111.423786738904,
+   "p999_ms": 3383.3954938551046,
+   "miss_rate": 1.0,
+   "stages_ms": [
+    0.01,
+    0.01,
+    49.44498744393143,
+    9.272853870933332,
+    990.4647274630095,
+    19.784214616795428,
+    990.4647274630095,
+    19.784214616795428,
+    990.4647274630095,
+    19.784214616795428,
+    19.784214616795428,
+    0.01
+   ],
+   "stage_labels": [
+    "capture",
+    "ISP",
+    "VAE encode",
+    "prefill (KV)",
+    "DiT step 1",
+    "flow 1",
+    "DiT step 2",
+    "flow 2",
+    "DiT step 3",
+    "flow 3",
+    "action head",
+    "emit"
+   ],
+   "flop_energy_j": 205.71984494592,
+   "byte_energy_j": 0.887584155648,
+   "static_energy_j": 9.334271360216711,
+   "avg_power_w": 69.40285710424362,
+   "thermal_limited": true,
+   "p_feasible": 0.0,
+   "quantiles_ms": {
+    "0.5": 2309.843841267539,
+    "0.9": 3466.2519974920356,
+    "0.99": 4025.4894823283944
+   },
+   "margin_ci_ms": [
+    -3541.620769316783,
+    -1091.275826842549
+   ]
+  }
+ ],
+ "ops": [
+  {
+   "name": "vae_encode",
+   "flops": 654311424000.0,
+   "total_bytes": 84377600.0,
+   "intensity": 7754.563106796117,
+   "regimes": {
+    "jetson_thor": "compute_bound",
+    "b200": "compute_bound",
+    "fm_rpu_14": "compute_bound"
+   },
+   "time_ms_fmrpu": 2.627245696
+  },
+  {
+   "name": "patch_embed",
+   "flops": 163577856000.0,
+   "total_bytes": 45056000.0,
+   "intensity": 3630.5454545454545,
+   "regimes": {
+    "jetson_thor": "bandwidth_bound",
+    "b200": "compute_bound",
+    "fm_rpu_14": "compute_bound"
+   },
+   "time_ms_fmrpu": 0.6643114240000001
+  },
+  {
+   "name": "qkv_proj",
+   "flops": 19629342720000.0,
+   "total_bytes": 1604812800.0,
+   "intensity": 12231.546707503829,
+   "regimes": {
+    "jetson_thor": "compute_bound",
+    "b200": "compute_bound",
+    "fm_rpu_14": "compute_bound"
+   },
+   "time_ms_fmrpu": 78.52737088
+  },
+  {
+   "name": "self_attn",
+   "flops": 47846522880000.0,
+   "total_bytes": 7699660800.0,
+   "intensity": 6214.107883817427,
+   "regimes": {
+    "jetson_thor": "compute_bound",
+    "b200": "compute_bound",
+    "fm_rpu_14": "compute_bound"
+   },
+   "time_ms_fmrpu": 191.39609152
+  },
+  {
+   "name": "out_proj",
+   "flops": 6543114240000.0,
+   "total_bytes": 556236800.0,
+   "intensity": 11763.18114874816,
+   "regimes": {
+    "jetson_thor": "compute_bound",
+    "b200": "compute_bound",
+    "fm_rpu_14": "compute_bound"
+   },
+   "time_ms_fmrpu": 26.18245696
+  },
+  {
+   "name": "cross_attn",
+   "flops": 13413384192000.0,
+   "total_bytes": 1185382400.0,
+   "intensity": 11315.6599861783,
+   "regimes": {
+    "jetson_thor": "compute_bound",
+    "b200": "compute_bound",
+    "fm_rpu_14": "compute_bound"
+   },
+   "time_ms_fmrpu": 53.663536768
+  },
+  {
+   "name": "ffn",
+   "flops": 35332816896000.0,
+   "total_bytes": 2863104000.0,
+   "intensity": 12340.738197424893,
+   "regimes": {
+    "jetson_thor": "compute_bound",
+    "b200": "compute_bound",
+    "fm_rpu_14": "compute_bound"
+   },
+   "time_ms_fmrpu": 141.341267584
+  },
+  {
+   "name": "flow_update",
+   "flops": 127795200.0,
+   "total_bytes": 31948800.0,
+   "intensity": 4.0,
+   "regimes": {
+    "jetson_thor": "bandwidth_bound",
+    "b200": "bandwidth_bound",
+    "fm_rpu_14": "bandwidth_bound"
+   },
+   "time_ms_fmrpu": 0.04803428571428572
+  },
+  {
+   "name": "action_head",
+   "flops": 3355443200.0,
+   "total_bytes": 13762560.0,
+   "intensity": 243.8095238095238,
+   "regimes": {
+    "jetson_thor": "bandwidth_bound",
+    "b200": "bandwidth_bound",
+    "fm_rpu_14": "bandwidth_bound"
+   },
+   "time_ms_fmrpu": 0.026384000000000005
+  },
+  {
+   "name": "backbone_residual",
+   "flops": 0.0,
+   "total_bytes": 944473600.0,
+   "intensity": 0.0,
+   "regimes": {
+    "jetson_thor": "bandwidth_bound",
+    "b200": "bandwidth_bound",
+    "fm_rpu_14": "bandwidth_bound"
+   },
+   "time_ms_fmrpu": 1.1343733333333332
+  }
+ ],
+ "heatmap": {
+  "fp4_axis": [
+   250000000000000.0,
+   500000000000000.0,
+   1000000000000000.0,
+   2000000000000000.0,
+   4000000000000000.0,
+   6000000000000000.0,
+   9000000000000000.0
+  ],
+  "bw_axis": [
+   273000000000.0,
+   600000000000.0,
+   1200000000000.0,
+   2400000000000.0,
+   4800000000000.0,
+   8000000000000.0
+  ],
+  "grids": {
+   "3-step CFG (default)": [
+    {
+     "fp4": 250000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 6257.586454125474,
+     "miss_rate": 1.0,
+     "power_w": 36.01711140808239,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 6222.712338134767,
+     "miss_rate": 1.0,
+     "power_w": 36.2021501034865,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 6208.131973884716,
+     "miss_rate": 1.0,
+     "power_w": 36.28012838172384,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 6200.812583836538,
+     "miss_rate": 1.0,
+     "power_w": 36.319411981604645,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 6197.120305807612,
+     "miss_rate": 1.0,
+     "power_w": 36.3392638687273,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 6195.641176708813,
+     "miss_rate": 1.0,
+     "power_w": 36.34722318624009,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 3160.9080015530594,
+     "miss_rate": 1.0,
+     "power_w": 68.36331617372441,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 3126.0139777985887,
+     "miss_rate": 1.0,
+     "power_w": 69.09293194749746,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 3111.423786738904,
+     "miss_rate": 1.0,
+     "power_w": 69.40285710424362,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 3104.133387935776,
+     "miss_rate": 1.0,
+     "power_w": 69.55881152032589,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 3100.4741869647605,
+     "miss_rate": 1.0,
+     "power_w": 69.63736468769906,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 3098.9910206246486,
+     "miss_rate": 1.0,
+     "power_w": 69.66925709901642,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 1612.5635662257741,
+     "miss_rate": 1.0,
+     "power_w": 131.12358745344554,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 1577.6058976280622,
+     "miss_rate": 1.0,
+     "power_w": 133.962637381239,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 1563.0754576287818,
+     "miss_rate": 1.0,
+     "power_w": 135.1800736446824,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 1555.7795110409722,
+     "miss_rate": 1.0,
+     "power_w": 135.7999421738926,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 1552.1340949613063,
+     "miss_rate": 1.0,
+     "power_w": 136.11184244472034,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 1550.6771518323317,
+     "miss_rate": 1.0,
+     "power_w": 136.2369080549319,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 838.2828122395824,
+     "miss_rate": 1.0,
+     "power_w": 249.46506654429567,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 803.4442608893179,
+     "miss_rate": 1.0,
+     "power_w": 260.1521624572662,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 788.8722139944318,
+     "miss_rate": 1.0,
+     "power_w": 264.90227699289494,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 781.6061975438786,
+     "miss_rate": 1.0,
+     "power_w": 267.33698933147116,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 777.958228355583,
+     "miss_rate": 1.0,
+     "power_w": 268.57650728662713,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 776.4947817826992,
+     "miss_rate": 1.0,
+     "power_w": 269.07703483497045,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 451.17906684726427,
+     "miss_rate": 1.0,
+     "power_w": 460.9277814134713,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 416.33749273142615,
+     "miss_rate": 1.0,
+     "power_w": 499.24987590259553,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 401.78996415775725,
+     "miss_rate": 1.0,
+     "power_w": 517.2174955381576,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 394.5053721776168,
+     "miss_rate": 1.0,
+     "power_w": 526.7125871344227,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 390.8717148181163,
+     "miss_rate": 1.0,
+     "power_w": 531.5811719523075,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 389.415798548358,
+     "miss_rate": 1.0,
+     "power_w": 533.557388456625,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 322.1560330034692,
+     "miss_rate": 1.0,
+     "power_w": 644.3272077364546,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 287.3069715821787,
+     "miss_rate": 1.0,
+     "power_w": 722.1173536924491,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 272.7548955730321,
+     "miss_rate": 1.0,
+     "power_w": 760.4838525537936,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 265.48808247198383,
+     "miss_rate": 1.0,
+     "power_w": 781.2173390904303,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 261.8362823717014,
+     "miss_rate": 1.0,
+     "power_w": 792.0710455790431,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 260.3846605248809,
+     "miss_rate": 1.0,
+     "power_w": 796.4700480630877,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 296.67889834557275,
+     "miss_rate": 1.0,
+     "power_w": 699.4008234279975,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 201.27745320728454,
+     "miss_rate": 0.59555,
+     "power_w": 1029.4807399405754,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 186.72244157721954,
+     "miss_rate": 0.0044,
+     "power_w": 1109.4948988262076,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 179.46407680545383,
+     "miss_rate": 0.0,
+     "power_w": 1154.246716219083,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 175.8210146597761,
+     "miss_rate": 0.0,
+     "power_w": 1178.1008802978724,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 174.36235118840173,
+     "miss_rate": 0.0,
+     "power_w": 1187.93142409123,
+     "clears_deadline": true,
+     "within_power": false
+    }
+   ],
+   "1-step distilled (best case)": [
+    {
+     "fp4": 250000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 1126.1904833100114,
+     "miss_rate": 1.0,
+     "power_w": 33.7073250266566,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 1099.8258960173102,
+     "miss_rate": 1.0,
+     "power_w": 34.443428762822755,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 1088.7563731511732,
+     "miss_rate": 1.0,
+     "power_w": 34.76311805444308,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 1083.2516896011819,
+     "miss_rate": 1.0,
+     "power_w": 34.92452644653625,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 1080.4926063998123,
+     "miss_rate": 1.0,
+     "power_w": 35.0060470641773,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 250000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 1079.370562677182,
+     "miss_rate": 1.0,
+     "power_w": 35.03931847756984,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 587.4094809410858,
+     "miss_rate": 1.0,
+     "power_w": 61.87255540636469,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 560.9554009286818,
+     "miss_rate": 1.0,
+     "power_w": 64.6489245948533,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 549.9556503438897,
+     "miss_rate": 1.0,
+     "power_w": 65.88197455795488,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 544.4205851826086,
+     "miss_rate": 1.0,
+     "power_w": 66.52128878691916,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 541.6680564534283,
+     "miss_rate": 1.0,
+     "power_w": 66.84407719989174,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 500000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 540.5672979522061,
+     "miss_rate": 1.0,
+     "power_w": 66.97408304929604,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 318.0272062363686,
+     "miss_rate": 1.0,
+     "power_w": 111.7400591357749,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 291.5690212779112,
+     "miss_rate": 1.0,
+     "power_w": 121.60758410258417,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 280.5197998549942,
+     "miss_rate": 1.0,
+     "power_w": 126.27934509722387,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 275.02084050232634,
+     "miss_rate": 1.0,
+     "power_w": 128.74427868725633,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 272.25261282972747,
+     "miss_rate": 1.0,
+     "power_w": 130.02282947255495,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 1000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 271.1491176905079,
+     "miss_rate": 1.0,
+     "power_w": 130.5397740825421,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 183.3027501609695,
+     "miss_rate": 0.0103,
+     "power_w": 191.66218418741207,
+     "clears_deadline": false,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 156.87450716861645,
+     "miss_rate": 0.0,
+     "power_w": 223.44561501479166,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 145.82738431388933,
+     "miss_rate": 0.0,
+     "power_w": 240.14542625609042,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 140.30234065234825,
+     "miss_rate": 0.0,
+     "power_w": 249.48410747913766,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 137.55343558154462,
+     "miss_rate": 0.0,
+     "power_w": 254.40991256759176,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 2000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 136.4454503133495,
+     "miss_rate": 0.0,
+     "power_w": 256.4514498908473,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 129.91983575950866,
+     "miss_rate": 0.0,
+     "power_w": 269.18181135128907,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 89.51318996913777,
+     "miss_rate": 0.0,
+     "power_w": 389.33744618922907,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 78.47872150706073,
+     "miss_rate": 0.0,
+     "power_w": 443.65826441650984,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 72.95565497448841,
+     "miss_rate": 0.0,
+     "power_w": 477.0180487039826,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 70.19303060846053,
+     "miss_rate": 0.0,
+     "power_w": 495.67422866850427,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 4000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 69.09246797786412,
+     "miss_rate": 0.0,
+     "power_w": 503.5219559389237,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 126.00391911564603,
+     "miss_rate": 0.0,
+     "power_w": 277.4541396461523,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 67.04784547356374,
+     "miss_rate": 0.0,
+     "power_w": 518.7853614634558,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 56.023123943716065,
+     "miss_rate": 0.0,
+     "power_w": 620.2861272011767,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 50.50741362786535,
+     "miss_rate": 0.0,
+     "power_w": 687.6974479375968,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 47.74659862853292,
+     "miss_rate": 0.0,
+     "power_w": 727.2881840019058,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 6000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 46.63950559715153,
+     "miss_rate": 0.0,
+     "power_w": 744.4807848014598,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 273000000000.0,
+     "p50_ms": 123.38985295912423,
+     "miss_rate": 0.0,
+     "power_w": 283.26856652778565,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 600000000000.0,
+     "p50_ms": 59.04429396659161,
+     "miss_rate": 0.0,
+     "power_w": 588.700918576405,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 1200000000000.0,
+     "p50_ms": 41.0543882520395,
+     "miss_rate": 0.0,
+     "power_w": 845.3532461529254,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 2400000000000.0,
+     "p50_ms": 35.5402359742626,
+     "miss_rate": 0.0,
+     "power_w": 976.0463590048105,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 4800000000000.0,
+     "p50_ms": 32.77687019265924,
+     "miss_rate": 0.0,
+     "power_w": 1058.0823495244251,
+     "clears_deadline": true,
+     "within_power": false
+    },
+    {
+     "fp4": 9000000000000000.0,
+     "bw": 8000000000000.0,
+     "p50_ms": 31.673289613498152,
+     "miss_rate": 0.0,
+     "power_w": 1094.844189060492,
+     "clears_deadline": true,
+     "within_power": false
+    }
+   ]
+  }
+ },
+ "thor_wall": {
+  "wall_bw": 500000000000.0,
+  "thor_bw": 273000000000.0,
+  "thor_on_miss_side": true,
+  "swept_bw": [
+   100000000000.0,
+   150000000000.0,
+   200000000000.0,
+   273000000000.0,
+   350000000000.0,
+   500000000000.0,
+   750000000000.0,
+   1000000000000.0,
+   2000000000000.0
+  ],
+  "swept_miss": [
+   1.0,
+   1.0,
+   1.0,
+   1.0,
+   0.99775,
+   0.0,
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "a_vs_b": {
+  "a_ppw": 0.004630910062746482,
+  "b_ppw": 0.004587175386608583,
+  "gap_fraction": 0.00944407806355918,
+  "ci": [
+   -0.9973305534026222,
+   1.0162187095297406
+  ],
+  "update_engine_fraction": 0.02,
+  "a_row": {
+   "fp4": 500000000000000.0,
+   "tdp_w": 30.0
+  },
+  "b_row": {
+   "fp4": 750000000000000.0,
+   "tdp_w": 35.0
+  }
+ },
+ "sensitivity": [
+  {
+   "input": "step_compression",
+   "score": 2.5091859266865013
+  },
+  {
+   "input": "n_new",
+   "score": 2.298961276896495
+  },
+  {
+   "input": "bw_util",
+   "score": 0.020840952508290645
+  },
+  {
+   "input": "e_byte_hbm_pj",
+   "score": 0.0
+  }
+ ],
+ "thermal": {
+  "neck_ceiling_w": 40.0
+ }
+};
+
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const ROW_COLOR = { fm_rpu_14: "--fmrpu", b200: "--b200", jetson_thor: "--thor" };
+const ROW_LABEL = { fm_rpu_14: "FM-RPU-14", b200: "B200", jetson_thor: "Jetson Thor" };
+const NS = "http://www.w3.org/2000/svg";
+
+function el(name, attrs, parent) {
+  const e = document.createElementNS(NS, name);
+  for (const [k, v] of Object.entries(attrs || {})) e.setAttribute(k, v);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+function txt(parent, x, y, s, cls, anchor) {
+  const t = el("text", { x, y, class: cls || "tick-lbl" }, parent);
+  if (anchor) t.setAttribute("text-anchor", anchor);
+  t.textContent = s;
+  return t;
+}
+const fmt = {
+  ms: (v) => v >= 1000 ? (v / 1000).toFixed(2) + " s" : v.toFixed(v < 10 ? 1 : 0) + " ms",
+  pf: (v) => (v / 1e15).toFixed(v < 1e15 ? 2 : 1) + " PF",
+  bw: (v) => v >= 1e12 ? (v / 1e12).toFixed(1) + " TB/s" : (v / 1e9).toFixed(0) + " GB/s",
+  j: (v) => v < 1 ? v.toFixed(2) + " J" : v.toFixed(1) + " J",
+  w: (v) => v.toFixed(v < 100 ? 1 : 0) + " W",
+  pct: (v) => (v * 100).toFixed(1) + "%",
+  int: (v) => Math.round(v).toLocaleString("en-US"),
+};
+
+// ---- tooltip -------------------------------------------------------------
+const tip = document.getElementById("tooltip");
+function showTip(evt, html) {
+  tip.innerHTML = html;
+  tip.style.display = "block";
+  const pad = 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  let x = evt.clientX + pad, y = evt.clientY + pad;
+  if (x + w > innerWidth - 8) x = evt.clientX - w - pad;
+  if (y + h > innerHeight - 8) y = evt.clientY - h - pad;
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+}
+function hideTip() { tip.style.display = "none"; }
+function hover(node, htmlFn) {
+  node.addEventListener("pointermove", (e) => showTip(e, htmlFn()));
+  node.addEventListener("pointerleave", hideTip);
+  node.setAttribute("tabindex", "0");
+  node.classList.add("mark");
+  node.addEventListener("focus", (e) => {
+    const r = node.getBoundingClientRect();
+    showTip({ clientX: r.right, clientY: r.top }, htmlFn());
+  });
+  node.addEventListener("blur", hideTip);
+}
+const esc = (s) => { const d = document.createElement("i"); d.textContent = s; return d.innerHTML; };
+const trow = (label, val) => `<div class="t-row"><span>${esc(label)}</span><b>${esc(val)}</b></div>`;
+
+// ---- header chips ----------------------------------------------------------
+(function chips() {
+  const w = DATA.workload;
+  const items = [
+    ["model", (w.params_b / 1e9).toFixed(0) + "B @ 4-bit"],
+    ["N_ctx", fmt.int(w.n_ctx)],
+    ["N_new", fmt.int(w.n_new)],
+    ["schedule", w.diffusion_steps + "-step " + (w.cfg_pair ? "CFG pair" : "distilled")],
+    ["horizon", w.horizon_s.toFixed(1) + " s"],
+    ["deadline", w.control_period_ms.toFixed(0) + " ms"],
+    ["weights", w.weight_gb.toFixed(1) + " GB/step"],
+    ["KV", w.kv_gb.toFixed(1) + " GB/step"],
+  ];
+  document.getElementById("chips").innerHTML = items
+    .map(([k, v]) => `<span class="chip">${k} <b>${v}</b></span>`).join("");
+})();
+
+// ---- verdict board ---------------------------------------------------------
+(function verdict() {
+  const ceil = DATA.thermal.neck_ceiling_w;
+  const dl = DATA.workload.control_period_ms;
+  const head = `<thead><tr><th>Row</th><th class="num">chunk p50</th>
+    <th class="num">miss-rate</th><th>deadline ≤ 10⁻⁴</th>
+    <th class="num">avg power</th><th>power ≤ TDP</th>
+    <th>neck ≤ ${ceil.toFixed(0)} W</th><th class="num">p_feasible (MC)</th></tr></thead>`;
+  const rows = DATA.rows.map((r) => {
+    const pill = (ok, yes, no) =>
+      `<span class="pill ${ok ? "pass" : "fail"}">${ok ? "✓ " + yes : "✗ " + no}</span>`;
+    const dOK = r.miss_rate <= 1e-4;
+    const pOK = r.avg_power_w <= r.tdp_w;
+    const tOK = !r.thermal_limited;
+    return `<tr>
+      <td><span class="rowkey"><span class="swatch" style="background:var(${ROW_COLOR[r.name]})"></span>${ROW_LABEL[r.name]}${r.is_dut ? " ·&nbsp;DUT" : ""}</span></td>
+      <td class="num">${fmt.ms(r.p50_ms)}</td>
+      <td class="num">${r.miss_rate.toExponential(0)}</td>
+      <td>${pill(dOK, "clears " + dl + " ms", "misses")}</td>
+      <td class="num">${fmt.w(r.avg_power_w)} / ${fmt.w(r.tdp_w)}</td>
+      <td>${pill(pOK, "within TDP", "over TDP")}</td>
+      <td>${pill(tOK, "rejectable", "thermal-limited")}</td>
+      <td class="num">${fmt.pct(r.p_feasible)}</td>
+    </tr>`;
+  }).join("");
+  document.getElementById("verdict").innerHTML = head + "<tbody>" + rows + "</tbody>";
+})();
+
+// ---- KPI tiles ---------------------------------------------------------------
+(function kpis() {
+  const w = DATA.workload;
+  const fm = DATA.rows.find((r) => r.name === "fm_rpu_14");
+  const need = w.required_eff_pflops_160ms;
+  const have = fm.eff_compute / 1e15;
+  const tiles = [
+    { l: "FM-RPU p_feasible (256-draw MC)", v: fmt.pct(fm.p_feasible), c: "vs miss-rate ≤ 10⁻⁴ ∧ power ≤ TDP", crit: fm.p_feasible === 0 },
+    { l: "Effective compute required @160 ms", v: need.toFixed(2) + " PF", c: "provisioned: " + have.toFixed(2) + " PF eff → " + (need / have).toFixed(1) + "× short", crit: true },
+    { l: "FM-RPU average power", v: fmt.w(fm.avg_power_w), c: "budget " + fmt.w(fm.tdp_w) + " · neck ceiling " + fmt.w(DATA.thermal.neck_ceiling_w), crit: fm.avg_power_w > fm.tdp_w },
+    { l: "KV share of HBM traffic / step", v: (100 * w.kv_gb / (w.kv_gb + w.weight_gb)).toFixed(0) + "%", c: w.kv_gb.toFixed(1) + " GB KV ≈ " + w.weight_gb.toFixed(1) + " GB weights (P2)", crit: false },
+  ];
+  document.getElementById("kpis").innerHTML = tiles.map((t) => `
+    <div class="tile"><div class="lbl">${t.l}</div>
+    <div class="val${t.crit ? " crit" : ""}">${t.v}</div>
+    <div class="cmp">${t.c}</div></div>`).join("");
+})();
+
+// ---- roofline ---------------------------------------------------------------
+(function roofline() {
+  const svg = document.getElementById("roofline");
+  const W = 1040, H = 420, m = { t: 18, r: 30, b: 46, l: 74 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const xmin = Math.log10(1), xmax = Math.log10(2e5);
+  const ymin = Math.log10(3e12), ymax = Math.log10(1e16);
+  const X = (v) => m.l + (Math.log10(v) - xmin) / (xmax - xmin) * iw;
+  const Y = (v) => m.t + ih - (Math.log10(v) - ymin) / (ymax - ymin) * ih;
+
+  for (let e = 0; e <= 5; e++) {
+    const v = Math.pow(10, e);
+    el("line", { x1: X(v), x2: X(v), y1: m.t, y2: m.t + ih, class: "grid" }, svg);
+    txt(svg, X(v), m.t + ih + 18, "10" + "⁰¹²³⁴⁵"[e], "tick-lbl", "middle");
+  }
+  for (let e = 13; e <= 16; e++) {
+    const v = Math.pow(10, e);
+    el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), class: "grid" }, svg);
+    txt(svg, m.l - 8, Y(v) + 4, e === 15 ? "1 PF/s" : "10^" + e, "tick-lbl", "end");
+  }
+  txt(svg, m.l + iw / 2, H - 8, "arithmetic intensity (FLOP / byte, log)", "axis-lbl", "middle");
+  const ylab = txt(svg, 16, m.t + ih / 2, "attainable FLOP/s (log)", "axis-lbl", "middle");
+  ylab.setAttribute("transform", `rotate(-90 16 ${m.t + ih / 2})`);
+
+  const legend = document.getElementById("roofline-legend");
+  for (const r of DATA.rows) {
+    const c = css(ROW_COLOR[r.name]);
+    const x0 = Math.pow(10, xmin);
+    const pts = [];
+    for (let i = 0; i <= 80; i++) {
+      const I = Math.pow(10, xmin + (xmax - xmin) * i / 80);
+      const y = Math.min(r.eff_compute, I * r.eff_bw);
+      pts.push(`${X(I).toFixed(1)},${Y(y).toFixed(1)}`);
+    }
+    const line = el("polyline", {
+      points: pts.join(" "), fill: "none", stroke: c,
+      "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round",
+    }, svg);
+    hover(line, () => `<div class="t-title">${ROW_LABEL[r.name]}</div>` +
+      trow("effective compute", fmt.pf(r.eff_compute)) +
+      trow("effective HBM BW", fmt.bw(r.eff_bw)) +
+      trow("ridge point", fmt.int(r.ridge) + " FLOP/B"));
+    // ridge marker + direct label
+    el("circle", { cx: X(r.ridge), cy: Y(r.eff_compute), r: 4.5, fill: c, stroke: "var(--surface)", "stroke-width": 2 }, svg);
+    const ridgeAnchor = r.name === "fm_rpu_14" ? "end" : "start";
+    const ridgeDx = r.name === "fm_rpu_14" ? -9 : 7;
+    txt(svg, X(r.ridge) + ridgeDx, Y(r.eff_compute) - 8, ROW_LABEL[r.name] + " · ridge " + fmt.int(r.ridge), "d-lbl", ridgeAnchor);
+    legend.insertAdjacentHTML("beforeend",
+      `<span class="key"><span class="line" style="background:${c}"></span>${ROW_LABEL[r.name]}</span>`);
+    void x0;
+  }
+  legend.insertAdjacentHTML("beforeend",
+    `<span class="key"><span class="box" style="background:var(--ink-3);border-radius:50%"></span>DiT operator (on FM-RPU line)</span>`);
+
+  // operators on the FM-RPU (subject) roofline
+  const fm = DATA.rows.find((r) => r.name === "fm_rpu_14");
+  const LABELED = new Set(["ffn", "self_attn", "flow_update", "action_head"]);
+  for (const op of DATA.ops) {
+    if (op.intensity === null || op.intensity <= 0) continue;
+    const I = Math.max(op.intensity, Math.pow(10, xmin));
+    const y = Math.min(fm.eff_compute, I * fm.eff_bw);
+    const dot = el("circle", {
+      cx: X(I), cy: Y(y), r: 5, fill: css("--ink-3"),
+      stroke: "var(--surface)", "stroke-width": 2,
+    }, svg);
+    hover(dot, () => `<div class="t-title">${op.name}</div>` +
+      trow("intensity", fmt.int(op.intensity) + " FLOP/B") +
+      DATA.rows.map((r) => trow(ROW_LABEL[r.name],
+        op.regimes[r.name] === "compute_bound" ? "compute-bound" : "bandwidth-bound")).join(""));
+    if (LABELED.has(op.name)) {
+      const below = op.name === "self_attn" || op.name === "action_head";
+      txt(svg, X(I), Y(y) + (below ? 20 : -12), op.name, "d-lbl", "middle");
+    }
+  }
+})();
+
+// ---- latency waterfall --------------------------------------------------------
+(function latency() {
+  const svg = document.getElementById("latency");
+  const W = 1040, H = 240, m = { t: 8, r: 90, b: 34, l: 108 };
+  const iw = W - m.l - m.r;
+  const maxMs = Math.max(...DATA.rows.map((r) => r.stages_ms.reduce((a, b) => a + b, 0))) * 1.04;
+  const X = (v) => m.l + v / maxMs * iw;
+  const PHASE = (lbl) =>
+    lbl.startsWith("DiT") ? ["DiT forward", "--seq-500"] :
+    lbl.startsWith("flow") ? ["flow update", "--seq-250"] :
+    (lbl === "action head" || lbl === "emit") ? ["action/emit", "--seq-700"] :
+    ["front-end + prefill", "--seq-100"];
+
+  const seen = new Set();
+  const legend = document.getElementById("latency-legend");
+  const barH = 34, gapY = 22;
+  DATA.rows.forEach((r, i) => {
+    const y = m.t + i * (barH + gapY);
+    txt(svg, m.l - 10, y + barH / 2 + 4, ROW_LABEL[r.name], "d-lbl", "end");
+    let acc = 0;
+    r.stages_ms.forEach((ms, j) => {
+      const lbl = r.stage_labels[j];
+      const [phase, tok] = PHASE(lbl);
+      if (!seen.has(phase)) {
+        seen.add(phase);
+        legend.insertAdjacentHTML("beforeend",
+          `<span class="key"><span class="box" style="background:var(${tok})"></span>${phase}</span>`);
+      }
+      const x0 = X(acc), x1 = X(acc + ms);
+      const wpx = Math.max(x1 - x0 - 2, 0.75); // 2px surface gap between segments
+      const seg = el("rect", { x: x0, y, width: wpx, height: barH, fill: css(tok), rx: 0 }, svg);
+      hover(seg, () => `<div class="t-title">${ROW_LABEL[r.name]} · ${lbl}</div>` +
+        trow("stage", fmt.ms(ms)) + trow("cumulative", fmt.ms(acc + ms)) +
+        trow("share of chunk", fmt.pct(ms / r.p50_ms)));
+      acc += ms;
+    });
+    txt(svg, X(acc) + 8, y + barH / 2 + 4, fmt.ms(r.p50_ms) + " p50", "d-lbl");
+  });
+  // deadline rule
+  const dl = DATA.workload.control_period_ms;
+  el("line", { x1: X(dl), x2: X(dl), y1: 0, y2: m.t + 3 * (barH + gapY) - gapY + 8, stroke: "var(--ink)", "stroke-width": 1.5 }, svg);
+  txt(svg, X(dl) + 6, H - 12, dl.toFixed(0) + " ms deadline", "d-lbl", "start");
+  for (const v of [0, 1000, 2000, 3000]) {
+    if (v > maxMs) continue;
+    txt(svg, X(v), H - 12, v === 0 ? "0" : (v / 1000) + " s", "tick-lbl", v === 0 ? "start" : "middle");
+  }
+})();
+
+// ---- energy stacked bars ----------------------------------------------------
+(function energy() {
+  const svg = document.getElementById("energy");
+  const W = 1040, H = 200, m = { t: 8, r: 96, b: 30, l: 108 };
+  const iw = W - m.l - m.r;
+  const parts = [
+    ["FLOP energy", "flop_energy_j", "--seq-500"],
+    ["byte energy", "byte_energy_j", "--seq-250"],
+    ["static / leakage", "static_energy_j", "--seq-700"],
+  ];
+  const legend = document.getElementById("energy-legend");
+  for (const [lbl, , tok] of parts) legend.insertAdjacentHTML("beforeend",
+    `<span class="key"><span class="box" style="background:var(${tok})"></span>${lbl}</span>`);
+  const maxJ = Math.max(...DATA.rows.map((r) => r.flop_energy_j + r.byte_energy_j + r.static_energy_j)) * 1.05;
+  const X = (v) => m.l + v / maxJ * iw;
+  const barH = 30, gapY = 20;
+  DATA.rows.forEach((r, i) => {
+    const y = m.t + i * (barH + gapY);
+    txt(svg, m.l - 10, y + barH / 2 + 4, ROW_LABEL[r.name], "d-lbl", "end");
+    let acc = 0;
+    const total = r.flop_energy_j + r.byte_energy_j + r.static_energy_j;
+    for (const [lbl, key, tok] of parts) {
+      const v = r[key];
+      const x0 = X(acc), x1 = X(acc + v);
+      const wpx = Math.max(x1 - x0 - 2, 0.75);
+      const seg = el("rect", { x: x0, y, width: wpx, height: barH, fill: css(tok) }, svg);
+      hover(seg, () => `<div class="t-title">${ROW_LABEL[r.name]} · ${lbl}</div>` +
+        trow("energy / chunk", fmt.j(v)) + trow("share", fmt.pct(v / total)) +
+        trow("byte fraction (F4 output)", fmt.pct(r.byte_energy_j / total)));
+      acc += v;
+    }
+    txt(svg, X(acc) + 8, y + barH / 2 + 4, fmt.j(total) + " · " + fmt.w(r.avg_power_w), "d-lbl");
+  });
+  for (const v of [0, 50, 100, 150, 200]) {
+    if (v > maxJ) continue;
+    txt(svg, X(v), H - 8, v + " J", "tick-lbl", v === 0 ? "start" : "middle");
+  }
+})();
+
+// ---- heatmaps ----------------------------------------------------------------
+(function heatmaps() {
+  const hm = DATA.heatmap;
+  const labels = Object.keys(hm.grids);
+  const legend = document.getElementById("heatmap-legend");
+  legend.insertAdjacentHTML("beforeend",
+    `<span class="key"><span class="box" style="background:linear-gradient(90deg,var(--seq-100),var(--seq-700));width:44px"></span>p50 latency (light 40 ms → dark 10 s, log)</span>
+     <span class="key"><span class="box" style="border:2px solid var(--good);background:transparent"></span>✓ clears deadline-miss ≤ 10⁻⁴</span>`);
+  const ramp = ["--seq-100", "--seq-250", "--seq-400", "--seq-500", "--seq-600", "--seq-700"];
+  const lo = Math.log10(40), hi = Math.log10(10000);
+  const shade = (ms) => {
+    const t = Math.min(1, Math.max(0, (Math.log10(ms) - lo) / (hi - lo)));
+    return css(ramp[Math.min(ramp.length - 1, Math.floor(t * ramp.length))]);
+  };
+  labels.forEach((label, gi) => {
+    const svg = document.getElementById("hm" + gi);
+    const W = 500, H = 360, m = { t: 30, r: 10, b: 52, l: 64 };
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const nf = hm.fp4_axis.length, nb = hm.bw_axis.length;
+    const cw = iw / nf, ch = ih / nb;
+    txt(svg, m.l, 16, label, "d-lbl");
+    for (const cell of hm.grids[label]) {
+      const fi = hm.fp4_axis.indexOf(cell.fp4);
+      const bi = hm.bw_axis.indexOf(cell.bw);
+      const x = m.l + fi * cw, y = m.t + ih - (bi + 1) * ch;
+      const rect = el("rect", {
+        x: x + 1, y: y + 1, width: cw - 2, height: ch - 2,
+        fill: shade(cell.p50_ms), rx: 2,
+      }, svg);
+      if (cell.clears_deadline) {
+        el("rect", {
+          x: x + 2.5, y: y + 2.5, width: cw - 5, height: ch - 5,
+          fill: "none", stroke: "var(--good)", "stroke-width": 2, rx: 2,
+        }, svg);
+      }
+      hover(rect, () => `<div class="t-title">${fmt.pf(cell.fp4)} × ${fmt.bw(cell.bw)}</div>` +
+        trow("chunk p50", fmt.ms(cell.p50_ms)) +
+        trow("miss-rate", cell.miss_rate.toExponential(1)) +
+        trow("avg power", fmt.w(cell.power_w) + " / 30 W") +
+        trow("deadline", cell.clears_deadline ? "✓ clears" : "✗ misses") +
+        trow("power budget", cell.within_power ? "✓ within" : "✗ over"));
+    }
+    hm.fp4_axis.forEach((v, fi) =>
+      txt(svg, m.l + fi * cw + cw / 2, m.t + ih + 16, (v / 1e15).toString(), "tick-lbl", "middle"));
+    txt(svg, m.l + iw / 2, H - 16, "FP4 peak (PFLOP/s)", "axis-lbl", "middle");
+    hm.bw_axis.forEach((v, bi) =>
+      txt(svg, m.l - 8, m.t + ih - bi * ch - ch / 2 + 4, (v / 1e12).toFixed(v < 1e12 ? 3 : 1), "tick-lbl", "end"));
+    const yl = txt(svg, 14, m.t + ih / 2, "HBM BW (TB/s)", "axis-lbl", "middle");
+    yl.setAttribute("transform", `rotate(-90 14 ${m.t + ih / 2})`);
+  });
+})();
+
+// ---- sensitivity bars ----------------------------------------------------------
+(function sensitivity() {
+  const svg = document.getElementById("sens");
+  const W = 1040, H = 190, m = { t: 10, r: 90, b: 26, l: 170 };
+  const iw = W - m.l - m.r;
+  const maxS = Math.max(...DATA.sensitivity.map((d) => d.score)) * 1.05;
+  const X = (v) => m.l + v / maxS * iw;
+  const NAMES = {
+    step_compression: "step compression", n_new: "N_new (tokens/step)",
+    bw_util: "realized BW utilization", e_byte_hbm_pj: "e_byte (HBM)",
+  };
+  const barH = 24, gapY = 12;
+  DATA.sensitivity.forEach((d, i) => {
+    const y = m.t + i * (barH + gapY);
+    txt(svg, m.l - 10, y + barH / 2 + 4, NAMES[d.input] || d.input, "d-lbl", "end");
+    const w = Math.max(X(d.score) - m.l, 1.5);
+    const bar = el("rect", {
+      x: m.l, y, width: w, height: barH, fill: css("--seq-500"),
+      rx: 0,
+    }, svg);
+    el("rect", { x: m.l + Math.max(w - 4, 0), y, width: Math.min(4, w), height: barH, rx: 3, fill: css("--seq-500") }, svg);
+    hover(bar, () => `<div class="t-title">${NAMES[d.input] || d.input}</div>` +
+      trow("margin std injected", d.score.toFixed(4)) +
+      trow("rank", "#" + (i + 1) + " of " + DATA.sensitivity.length));
+    txt(svg, X(d.score) + 8, y + barH / 2 + 4, d.score.toFixed(d.score < 0.01 ? 4 : 2), "d-lbl");
+  });
+})();
+
+// ---- Thor wall line chart --------------------------------------------------------
+(function wall() {
+  const svg = document.getElementById("wall");
+  const W = 1040, H = 300, m = { t: 16, r: 40, b: 46, l: 74 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const d = DATA.thor_wall;
+  const xmin = Math.log10(9e10), xmax = Math.log10(2.2e12);
+  const X = (v) => m.l + (Math.log10(v) - xmin) / (xmax - xmin) * iw;
+  const Y = (v) => m.t + ih - v * ih;
+  document.getElementById("wall-num").textContent = fmt.bw(d.wall_bw);
+
+  for (const v of [0, 0.25, 0.5, 0.75, 1]) {
+    el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), class: "grid" }, svg);
+    txt(svg, m.l - 8, Y(v) + 4, fmt.pct(v), "tick-lbl", "end");
+  }
+  for (const g of [100e9, 273e9, 500e9, 1e12, 2e12]) {
+    txt(svg, X(g), m.t + ih + 18, fmt.bw(g), "tick-lbl", "middle");
+  }
+  txt(svg, m.l + iw / 2, H - 8, "HBM bandwidth (log) · compute unconstrained", "axis-lbl", "middle");
+  const yl = txt(svg, 16, m.t + ih / 2, "deadline-miss-rate", "axis-lbl", "middle");
+  yl.setAttribute("transform", `rotate(-90 16 ${m.t + ih / 2})`);
+
+  // reference rules: Thor 273 (thor hue) and the wall (ink)
+  el("line", { x1: X(d.thor_bw), x2: X(d.thor_bw), y1: m.t, y2: m.t + ih, stroke: css("--thor"), "stroke-width": 2 }, svg);
+  txt(svg, X(d.thor_bw) - 6, m.t + 14, "Thor 273 GB/s", "d-lbl", "end");
+  el("line", { x1: X(d.wall_bw), x2: X(d.wall_bw), y1: m.t, y2: m.t + ih, stroke: "var(--ink)", "stroke-width": 1.5 }, svg);
+  txt(svg, X(d.wall_bw) + 6, m.t + 14, "wall " + fmt.bw(d.wall_bw), "d-lbl");
+
+  const pts = d.swept_bw.map((bw, i) => [X(bw), Y(d.swept_miss[i])]);
+  el("polyline", {
+    points: pts.map((p) => p.map((v) => v.toFixed(1)).join(",")).join(" "),
+    fill: "none", stroke: css("--fmrpu"), "stroke-width": 2,
+    "stroke-linejoin": "round", "stroke-linecap": "round",
+  }, svg);
+  d.swept_bw.forEach((bw, i) => {
+    const dot = el("circle", {
+      cx: X(bw), cy: Y(d.swept_miss[i]), r: 4.5,
+      fill: css("--fmrpu"), stroke: "var(--surface)", "stroke-width": 2,
+    }, svg);
+    hover(dot, () => `<div class="t-title">${fmt.bw(bw)}</div>` +
+      trow("miss-rate", d.swept_miss[i].toExponential(1)) +
+      trow("verdict", d.swept_miss[i] <= 1e-4 ? "✓ clears" : "✗ misses"));
+  });
+})();
+
+// ---- A vs B gap ------------------------------------------------------------------
+(function avsb() {
+  const g = DATA.a_vs_b;
+  document.getElementById("avsb-h2").textContent =
+    "Generality costs " + (g.gap_fraction >= 0 ? "+" : "") + (g.gap_fraction * 100).toFixed(1) +
+    "% perf/watt on DreamZero — at 14B there is no memory tier to collapse";
+  const svg = document.getElementById("avsb");
+  const W = 1040, H = 150, m = { l: 74, r: 40 };
+  const iw = W - m.l - m.r, y = 66;
+  const lo = -1.1, hi = 1.1;
+  const X = (v) => m.l + (v - lo) / (hi - lo) * iw;
+
+  for (const v of [-1, -0.5, 0, 0.5, 1]) {
+    el("line", { x1: X(v), x2: X(v), y1: y - 26, y2: y + 26, class: "grid" }, svg);
+    txt(svg, X(v), y + 44, (v > 0 ? "+" : "") + (v * 100) + "%", "tick-lbl", "middle");
+  }
+  el("line", { x1: X(0), x2: X(0), y1: y - 30, y2: y + 30, stroke: "var(--ink)", "stroke-width": 1.5 }, svg);
+  // CI band
+  el("rect", {
+    x: X(g.ci[0]), y: y - 7, width: X(g.ci[1]) - X(g.ci[0]), height: 14,
+    fill: css("--fmrpu"), opacity: 0.14, rx: 7,
+  }, svg);
+  const dot = el("circle", {
+    cx: X(g.gap_fraction), cy: y, r: 7, fill: css("--fmrpu"),
+    stroke: "var(--surface)", "stroke-width": 2,
+  }, svg);
+  hover(dot, () => `<div class="t-title">A-vs-B gap (DreamZero perf/watt)</div>` +
+    trow("point", (g.gap_fraction * 100).toFixed(2) + "%") +
+    trow("90% CI", (g.ci[0] * 100).toFixed(0) + "% … +" + (g.ci[1] * 100).toFixed(0) + "%") +
+    trow("A (specialized)", fmt.pf(g.a_row.fp4) + " / " + g.a_row.tdp_w + " W") +
+    trow("B (union)", fmt.pf(g.b_row.fp4) + " / " + g.b_row.tdp_w + " W") +
+    trow("update engine", fmt.pct(g.update_engine_fraction) + " of datapath"));
+  txt(svg, X(g.gap_fraction), y - 18,
+    "gap " + (g.gap_fraction >= 0 ? "+" : "") + (g.gap_fraction * 100).toFixed(1) + "%", "d-lbl", "middle");
+  txt(svg, m.l, 22, "← union point better", "tick-lbl");
+  txt(svg, m.l + iw, 22, "specialized point better →", "tick-lbl", "end");
+  void dot;
+})();
+
+// ---- footer -----------------------------------------------------------------------
+(function foot() {
+  const c = DATA.calibration;
+  const within = c.anchors.filter((a) => a.within_tol).length;
+  document.getElementById("foot").innerHTML = [
+    `calibration gate: <b>${c.passed ? "PASSED" : "NOT PASSED"}</b> · tolerance ${(c.tol * 100).toFixed(0)}% on latency ∧ energy · anchors within tol: ${within}/${c.anchors.length} (placeholders, D1)`,
+    `utilization (shared, P1): compute ${DATA.util.compute_util} · BW ${DATA.util.bw_util} · e_flop ${DATA.util.e_flop_fp4_pj} pJ/FLOP · e_byte ${DATA.util.e_byte_hbm_pj} pJ/B · static ${DATA.util.static_fraction}×TDP`,
+    `source: fmrpu Tier-1 simulator · regenerate with <b>scripts/viz_data.py</b> · seed 20260710 · 2026-07-10`,
+  ].map((s) => `<div>${s}</div>`).join("");
+})();
+</script>
+
+
+</div>
+<footer class="site-foot">
+  <span>FM-RPU</span>
+  <span class="foot-tag">Inference silicon for embodied AI</span>
+</footer>
+</body>
+</html>

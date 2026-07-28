@@ -713,3 +713,70 @@ footer {
 .pmail:hover { color: var(--text-0); border-bottom-color: var(--warm-1); }
 
 .about { padding-bottom: var(--s8); }
+
+/* ======================================================================= */
+/* Larger nav tabs. 16px = 2x Silkscreen's 8px native — a pixel face is    */
+/* only sharp at whole multiples, so 16 is the next size up from 8.        */
+/* ======================================================================= */
+
+.nav nav, .wordmark { font-size: calc(var(--pixel-native) * 3); line-height: 32px; }
+.mark { width: var(--s6); height: var(--s6); }
+
+.nav nav a { padding: var(--s3) var(--s2) calc(var(--s3) - var(--px)); }
+
+@media (min-width: 700px) {
+  .nav nav a { padding: var(--s2) var(--s2) calc(var(--s2) - var(--px)); }
+}
+
+/* The provenance key in the whitepaper: a short aside, not a heading. */
+.prov-note {
+  margin: 0 0 var(--s6);
+  padding: var(--s3) var(--s4);
+  background: var(--ground-1);
+  border-left: var(--px) solid var(--ground-3);
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-2);
+}
+
+/* ---------------------------------------------- ported interactive pages */
+/* chip.html and feasibility.html keep their own component CSS; these rules
+   re-assert the site chrome, which their stylesheet would otherwise win. */
+
+body.ported { padding: 0; margin: 0; }
+
+body.ported .nav {
+  padding-inline: var(--gutter);
+  background: var(--ground-0);
+  border-bottom: var(--hairline) solid var(--ground-2);
+  margin-bottom: var(--s5);
+}
+
+body.ported > #main { padding-inline: var(--gutter); }
+
+footer.site-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s2) var(--s4);
+  justify-content: space-between;
+  max-width: var(--wrap);
+  margin: var(--s7) auto 0;
+  padding: var(--s5) var(--gutter);
+  border-top: var(--hairline) solid var(--ground-2);
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-0);
+}
+
+footer.site-foot .foot-tag {
+  font-family: var(--read);
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-3);
+}
