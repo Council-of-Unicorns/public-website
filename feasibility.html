@@ -33,7 +33,6 @@
   </nav>
 </header>
 
-<div id="main" tabindex="-1">
 
 
 <style>
@@ -253,19 +252,26 @@ h1 {
 h2 { font-family: var(--sans); font-weight: 400; }
 
 .eyebrow {
-  font-family: var(--pixel) !important;
-  font-size: 8px !important;
-  line-height: 16px !important;
-  letter-spacing: 1px !important;
+  font-family: var(--sans) !important;
+  font-size: 12px !important;
+  line-height: 20px !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase;
   color: var(--fmrpu) !important;
 }
 
-.chip, button, .pill, .tile .val, .readout, footer {
+.chip, button, .pill, .tile .val {
   font-family: var(--pixel) !important;
   font-size: 8px !important;
   line-height: 16px !important;
   letter-spacing: 1px;
 }
+
+/* Long strings stay in the reading face — Silkscreen at 8px is unreadable
+   past a few words (typography.md). */
+footer, .readout, .note, .sub { font-family: var(--sans) !important; }
+footer { font-size: 13px !important; line-height: 20px !important; color: var(--ink-3); }
+.readout { font-size: 13px !important; }
 
 .tile .val { font-size: 24px !important; line-height: 32px !important; }
 
@@ -304,12 +310,22 @@ input[type="range"] { accent-color: var(--fmrpu); }
 
 main { max-width: 1088px; }
 
+/* chip.html sets header{margin-top:34px}, which leaked onto the shared nav. */
+body.ported header.nav { margin-top: 0; }
+
+/* Slider was a 16px-tall target; 24px is the minimum. */
+input[type="range"] { height: 24px; }
+
+/* Charts keep their designed type size and scroll rather than shrink. */
+.panel, .chart-box { overflow-x: auto; }
+.panel svg, .chart-box svg { width: 100%; height: auto; }
+
 svg .blk-lbl { fill: #14121C !important; }
-svg .blk-sub { fill: #3A3348 !important; }
+svg .blk-sub { fill: #241F30 !important; }
 svg .die-lbl { fill: var(--ink) !important; }
 </style>
 
-<main>
+<main id="main" tabindex="-1">
   <div class="banner" role="alert">
     <span class="tag">NOT AUTHORITATIVE</span>
     <span class="why">Calibration gate is red — every anchor is a placeholder (D1). Figures exercise
@@ -347,7 +363,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     right of every row's ridge point: the binding resource is <b>compute</b>, not the HBM wall.
     Operator dots are placed on the FM-RPU roofline; hover for all three rows' regimes.</p>
     <div class="legend" id="roofline-legend"></div>
-    <div class="chart-box"><svg id="roofline" viewBox="0 0 1040 420" role="img"
+    <div class="chart-box"><svg id="roofline" viewBox="0 0 1040 420" style="min-width:1040px" role="img"
       aria-label="Log-log roofline chart: three hardware rows' rooflines with DiT operators plotted by arithmetic intensity"></svg></div>
   </section>
 
@@ -358,7 +374,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     The FM-RPU sweep point misses by ~15×; B200 alone fits the deadline — at datacenter power.
     Segment shade encodes pipeline phase; hover any segment.</p>
     <div class="legend" id="latency-legend"></div>
-    <div class="chart-box"><svg id="latency" viewBox="0 0 1040 240" role="img"
+    <div class="chart-box"><svg id="latency" viewBox="0 0 1040 240" style="min-width:1040px" role="img"
       aria-label="Stacked horizontal bars of per-stage latency per hardware row versus the 200 millisecond deadline"></svg></div>
   </section>
 
@@ -370,7 +386,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     self-contradiction that real anchor calibration must resolve. Byte energy (~0.9 J) is nearly
     invisible at this scale; hover for exact values. Static/leakage term: Part C.3.</p>
     <div class="legend" id="energy-legend"></div>
-    <div class="chart-box"><svg id="energy" viewBox="0 0 1040 200" role="img"
+    <div class="chart-box"><svg id="energy" viewBox="0 0 1040 200" style="min-width:1040px" role="img"
       aria-label="Stacked horizontal bars of FLOP, byte, and static energy per chunk per hardware row"></svg></div>
   </section>
 
@@ -383,8 +399,8 @@ svg .die-lbl { fill: var(--ink) !important; }
     <b>No cell clears the 30 W power budget</b> under placeholder constants.</p>
     <div class="legend" id="heatmap-legend"></div>
     <div class="duo">
-      <div class="chart-box"><svg id="hm0" viewBox="0 0 500 360" role="img" aria-label="Latency heatmap, 3-step CFG schedule"></svg></div>
-      <div class="chart-box"><svg id="hm1" viewBox="0 0 500 360" role="img" aria-label="Latency heatmap, 1-step distilled schedule"></svg></div>
+      <div class="chart-box"><svg id="hm0" viewBox="0 0 500 360" style="min-width:500px" role="img" aria-label="Latency heatmap, 3-step CFG schedule"></svg></div>
+      <div class="chart-box"><svg id="hm1" viewBox="0 0 500 360" style="min-width:500px" role="img" aria-label="Latency heatmap, 1-step distilled schedule"></svg></div>
     </div>
   </section>
 
@@ -394,7 +410,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     <p class="note">Spread each uncertain input injects into the binding feasibility margin while the
     others are held at point mass. The two workload-compression knobs dominate; realized bandwidth
     utilization barely registers — consistent with the compute-bound regime.</p>
-    <div class="chart-box"><svg id="sens" viewBox="0 0 1040 190" role="img"
+    <div class="chart-box"><svg id="sens" viewBox="0 0 1040 190" style="min-width:1040px" role="img"
       aria-label="Horizontal bar chart of sensitivity scores per uncertain input"></svg></div>
   </section>
 
@@ -404,7 +420,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     <p class="note">Deadline-miss-rate vs HBM bandwidth on a synthetic row with compute removed as a
     constraint. The wall sits at <b id="wall-num"></b> — Thor's 273 GB/s is on the miss side.
     Bandwidth is an independent kill for Thor; compute is simply the one that binds first.</p>
-    <div class="chart-box"><svg id="wall" viewBox="0 0 1040 300" role="img"
+    <div class="chart-box"><svg id="wall" viewBox="0 0 1040 300" style="min-width:1040px" role="img"
       aria-label="Line chart of deadline miss rate versus HBM bandwidth with Thor's bandwidth and the wall marked"></svg></div>
   </section>
 
@@ -415,13 +431,13 @@ svg .die-lbl { fill: var(--ink) !important; }
     point, both running the identical DreamZero hot path (P8b). The gap decomposes into leakage on the
     extra silicon (Part C.3) and the ~2% programmable update engine (Part C.2). The wide band is honest:
     placeholder priors are wide by design.</p>
-    <div class="chart-box"><svg id="avsb" viewBox="0 0 1040 150" role="img"
+    <div class="chart-box"><svg id="avsb" viewBox="0 0 1040 150" style="min-width:1040px" role="img"
       aria-label="Dot with confidence interval showing the A versus B perf-per-watt gap"></svg></div>
   </section>
 
   <footer id="foot"></footer>
 </main>
-<div id="tooltip" role="status"></div>
+<div id="tooltip"></div>
 
 <script>
 const DATA = {
@@ -1648,13 +1664,14 @@ function showTip(evt, html) {
   let x = evt.clientX + pad, y = evt.clientY + pad;
   if (x + w > innerWidth - 8) x = evt.clientX - w - pad;
   if (y + h > innerHeight - 8) y = evt.clientY - h - pad;
+  if (x < 8) x = 8;
+  if (y < 8) y = 8;
   tip.style.left = x + "px"; tip.style.top = y + "px";
 }
 function hideTip() { tip.style.display = "none"; }
 function hover(node, htmlFn) {
   node.addEventListener("pointermove", (e) => showTip(e, htmlFn()));
   node.addEventListener("pointerleave", hideTip);
-  node.setAttribute("tabindex", "0");
   node.classList.add("mark");
   node.addEventListener("focus", (e) => {
     const r = node.getBoundingClientRect();
@@ -1832,11 +1849,11 @@ const trow = (label, val) => `<div class="t-row"><span>${esc(label)}</span><b>${
         legend.insertAdjacentHTML("beforeend",
           `<span class="key"><span class="box" style="background:var(${tok})"></span>${phase}</span>`);
       }
-      const x0 = X(acc), x1 = X(acc + ms);
+      const x0 = X(acc), x1 = X(acc + ms); const cumAt = acc + ms;
       const wpx = Math.max(x1 - x0 - 2, 0.75); // 2px surface gap between segments
       const seg = el("rect", { x: x0, y, width: wpx, height: barH, fill: css(tok), rx: 0 }, svg);
       hover(seg, () => `<div class="t-title">${ROW_LABEL[r.name]} · ${lbl}</div>` +
-        trow("stage", fmt.ms(ms)) + trow("cumulative", fmt.ms(acc + ms)) +
+        trow("stage", fmt.ms(ms)) + trow("cumulative", fmt.ms(cumAt)) +
         trow("share of chunk", fmt.pct(ms / r.p50_ms)));
       acc += ms;
     });
@@ -1897,7 +1914,7 @@ const trow = (label, val) => `<div class="t-row"><span>${esc(label)}</span><b>${
   const labels = Object.keys(hm.grids);
   const legend = document.getElementById("heatmap-legend");
   legend.insertAdjacentHTML("beforeend",
-    `<span class="key"><span class="box" style="background:linear-gradient(90deg,var(--seq-100),var(--seq-700));width:44px"></span>p50 latency (light 40 ms → dark 10 s, log)</span>
+    `<span class="key"><span class="box" style="background:linear-gradient(90deg,var(--seq-100),var(--seq-700));width:44px"></span>p50 latency (dark 40 ms → light 10 s, log)</span>
      <span class="key"><span class="box" style="border:2px solid var(--good);background:transparent"></span>✓ clears deadline-miss ≤ 10⁻⁴</span>`);
   const ramp = ["--seq-100", "--seq-250", "--seq-400", "--seq-500", "--seq-600", "--seq-700"];
   const lo = Math.log10(40), hi = Math.log10(10000);
@@ -2068,7 +2085,6 @@ const trow = (label, val) => `<div class="t-row"><span>${esc(label)}</span><b>${
 </script>
 
 
-</div>
 <footer class="site-foot">
   <span>FM-RPU</span>
   <span class="foot-tag">Inference silicon for embodied AI</span>

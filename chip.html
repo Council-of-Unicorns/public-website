@@ -33,7 +33,6 @@
   </nav>
 </header>
 
-<div id="main" tabindex="-1">
 
 
 <style>
@@ -184,19 +183,26 @@ h1 {
 h2 { font-family: var(--sans); font-weight: 400; }
 
 .eyebrow {
-  font-family: var(--pixel) !important;
-  font-size: 8px !important;
-  line-height: 16px !important;
-  letter-spacing: 1px !important;
+  font-family: var(--sans) !important;
+  font-size: 12px !important;
+  line-height: 20px !important;
+  letter-spacing: .1em !important;
+  text-transform: uppercase;
   color: var(--fmrpu) !important;
 }
 
-.chip, button, .pill, .tile .val, .readout, footer {
+.chip, button, .pill, .tile .val {
   font-family: var(--pixel) !important;
   font-size: 8px !important;
   line-height: 16px !important;
   letter-spacing: 1px;
 }
+
+/* Long strings stay in the reading face — Silkscreen at 8px is unreadable
+   past a few words (typography.md). */
+footer, .readout, .note, .sub { font-family: var(--sans) !important; }
+footer { font-size: 13px !important; line-height: 20px !important; color: var(--ink-3); }
+.readout { font-size: 13px !important; }
 
 .tile .val { font-size: 24px !important; line-height: 32px !important; }
 
@@ -235,12 +241,22 @@ input[type="range"] { accent-color: var(--fmrpu); }
 
 main { max-width: 1088px; }
 
+/* chip.html sets header{margin-top:34px}, which leaked onto the shared nav. */
+body.ported header.nav { margin-top: 0; }
+
+/* Slider was a 16px-tall target; 24px is the minimum. */
+input[type="range"] { height: 24px; }
+
+/* Charts keep their designed type size and scroll rather than shrink. */
+.panel, .chart-box { overflow-x: auto; }
+.panel svg, .chart-box svg { width: 100%; height: auto; }
+
 svg .blk-lbl { fill: #14121C !important; }
-svg .blk-sub { fill: #3A3348 !important; }
+svg .blk-sub { fill: #241F30 !important; }
 svg .die-lbl { fill: var(--ink) !important; }
 </style>
 
-<main>
+<main id="main" tabindex="-1">
   <header>
     <p class="eyebrow">etched · FM-RPU concept explorer · calibrated Tier-1 instrument</p>
     <h1>Etching a world model into silicon</h1>
@@ -265,8 +281,8 @@ svg .die-lbl { fill: var(--ink) !important; }
       <span class="key"><span class="box" style="background:var(--blk-face);border:1px solid var(--hair)"></span>fixed-function / other</span>
     </div>
     <div class="duo">
-      <div class="panel"><svg id="die-gpu" viewBox="0 0 500 430" role="img" aria-label="Illustrative GPU floorplan with generality-tax blocks highlighted"></svg></div>
-      <div class="panel"><svg id="die-fmrpu" viewBox="0 0 500 430" role="img" aria-label="Illustrative FM-RPU floorplan: MAC array, attention engine, KV window, conveyor memory"></svg></div>
+      <div class="panel"><svg id="die-gpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative GPU floorplan with generality-tax blocks highlighted"></svg></div>
+      <div class="panel"><svg id="die-fmrpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative FM-RPU floorplan: MAC array, attention engine, KV window, conveyor memory"></svg></div>
     </div>
   </section>
 
@@ -280,13 +296,13 @@ svg .die-lbl { fill: var(--ink) !important; }
     deadline-miss-rate &lt; 10⁻⁴ guarantee comes from. Stage durations are the model's real
     timings for the 4 PF candidate, slowed ~40×.</p>
     <div class="controls">
-      <button id="play" aria-pressed="true">⏸ pause</button>
-      <button id="step-back">⇤ prev stage</button>
-      <button id="step-fwd">stage ⇥</button>
+      <button id="play" aria-pressed="true">PAUSE</button>
+      <button id="step-back">PREV</button>
+      <button id="step-fwd">NEXT</button>
       <span class="readout" id="anim-readout"></span>
     </div>
-    <div class="panel"><svg id="flow" viewBox="0 0 1040 440" role="img" aria-label="Animated dataflow of one control chunk through the etched pipeline"></svg></div>
-    <div class="panel" style="margin-top:16px"><svg id="gpu-contrast" viewBox="0 0 1040 120" role="img" aria-label="GPU contrast: kernel launches per chunk versus zero on the etched part"></svg></div>
+    <div class="panel"><svg id="flow" viewBox="0 0 1040 440" style="min-width:1040px" role="img" aria-label="Animated dataflow of one control chunk through the etched pipeline"></svg></div>
+    <div class="panel" style="margin-top:16px"><svg id="gpu-contrast" viewBox="0 0 1040 120" style="min-width:1040px" role="img" aria-label="GPU contrast: kernel launches per chunk versus zero on the etched part"></svg></div>
   </section>
 
   <section>
@@ -305,13 +321,13 @@ svg .die-lbl { fill: var(--ink) !important; }
       <button id="base-head" aria-pressed="true">Thor in-head (40 W)</button>
       <button id="base-max" aria-pressed="false">Thor bench (130 W)</button>
     </div>
-    <div class="panel"><svg id="speedup-chart" viewBox="0 0 1040 330" role="img" aria-label="Speedup versus eta with confidence band, success bar at 2x"></svg></div>
+    <div class="panel"><svg id="speedup-chart" viewBox="0 0 1040 330" style="min-width:1040px" role="img" aria-label="Speedup versus eta with confidence band, success bar at 2x"></svg></div>
     <div class="gauge-row" id="gauges"></div>
   </section>
 
   <footer id="foot"></footer>
 </main>
-<div id="tooltip" role="status"></div>
+<div id="tooltip"></div>
 
 <script>
 const DATA = {
@@ -735,13 +751,15 @@ function showTip(evt, html) {
   let x = evt.clientX + pad, y = evt.clientY + pad;
   if (x + w > innerWidth - 8) x = evt.clientX - w - pad;
   if (y + h > innerHeight - 8) y = evt.clientY - h - pad;
+  if (x < 8) x = 8;
+  if (y < 8) y = 8;
   tip.style.left = x + "px"; tip.style.top = y + "px";
 }
 function hideTip() { tip.style.display = "none"; }
 function hover(node, htmlFn) {
   node.addEventListener("pointermove", (e) => showTip(e, htmlFn()));
   node.addEventListener("pointerleave", hideTip);
-  node.setAttribute("tabindex", "0"); node.classList.add("mark");
+  node.classList.add("mark");
   node.addEventListener("focus", () => {
     const r = node.getBoundingClientRect();
     showTip({ clientX: r.right, clientY: r.top }, htmlFn());
@@ -826,7 +844,7 @@ function dieBlock(svg, x, y, w, h, fill, label, sub, tipRows) {
   dieBlock(s, 390, 62, 74, 112, dp, "attn", "engine 3120Q × " + (w.n_ctx / 1000).toFixed(1) + "k KV",
     [["geometry", "fixed: " + w.n_new + " Q × " + w.n_ctx.toLocaleString() + " KV × " + w.heads + " heads"],
      ["generality", "none — one shape, fused"]]);
-  dieBlock(s, 390, 182, 74, 60, other, "update", "µcoded flow/CEM",
+  dieBlock(s, 390, 182, 74, 60, other, "update", "flow/CEM",
     [["runs", "flow-ODE or CEM/MPC (Part B)"], ["cost", "~2% of datapath (priced)"]]);
   dieBlock(s, 34, 244, 200, 40, dp, "FP4 dequant → FP8 path", "hardwired mixed precision",
     [["does", "4-bit weight decode into the array"], ["GPU equivalent", "format kernels through RF"]]);
@@ -887,7 +905,7 @@ const FLOW = (() => {
   // CFG token pair
   const tokA = el("circle", { cx: 250, cy: 330, r: 7, fill: css("--fmrpu"), stroke: "var(--surface)", "stroke-width": 2 }, svg);
   const tokB = el("circle", { cx: 270, cy: 330, r: 7, fill: css("--seq-250"), stroke: "var(--surface)", "stroke-width": 2 }, svg);
-  txt(svg, 300, 334, "CFG pair — one weight stream, two branches", "blk-sub");
+  txt(svg, 300, 334, "CFG pair — one weight stream, two branches", "tick");
   // weight packets
   const pkts = [];
   for (let i = 0; i < 6; i++) pkts.push(el("circle", { cx: -20, cy: -20, r: 4.5, fill: css("--mem") }, svg));
@@ -915,7 +933,7 @@ const FLOW = (() => {
   const LOOP_S = 14; // wall seconds per chunk (~40x slow-motion)
   let t = 0, playing = !REDUCED, last = null;
   const playBtn = document.getElementById("play");
-  if (REDUCED) { playBtn.textContent = "▶ play"; playBtn.setAttribute("aria-pressed", "false"); }
+  if (REDUCED) { playBtn.textContent = "PLAY"; playBtn.setAttribute("aria-pressed", "false"); }
 
   function activeSpan(tt) { return F.spans.find((s) => tt >= s.t0 && tt < s.t1) || F.spans[F.spans.length - 1]; }
   function setBlock(id, on) {
@@ -968,23 +986,23 @@ const FLOW = (() => {
   function frame(ts) {
     if (playing) {
       if (last !== null) t = (t + (ts - last) / 1000 / LOOP_S) % 1;
-      last = ts; render(t);
+      last = ts; render(Math.floor(t * 48) / 48);
     } else last = ts;
     requestAnimationFrame(frame);
   }
   playBtn.addEventListener("click", () => {
     playing = !playing;
-    playBtn.textContent = playing ? "⏸ pause" : "▶ play";
+    playBtn.textContent = playing ? "PAUSE" : "PLAY";
     playBtn.setAttribute("aria-pressed", String(playing));
   });
   document.getElementById("step-fwd").addEventListener("click", () => {
     const sp = activeSpan(t); t = sp.t1 % 1; playing = false;
-    playBtn.textContent = "▶ play"; playBtn.setAttribute("aria-pressed", "false"); render(t);
+    playBtn.textContent = "PLAY"; playBtn.setAttribute("aria-pressed", "false"); render(t);
   });
   document.getElementById("step-back").addEventListener("click", () => {
     const idx = F.spans.indexOf(activeSpan(t));
     t = F.spans[Math.max(0, idx - 1)].t0; playing = false;
-    playBtn.textContent = "▶ play"; playBtn.setAttribute("aria-pressed", "false"); render(t);
+    playBtn.textContent = "PLAY"; playBtn.setAttribute("aria-pressed", "false"); render(t);
   });
   render(0);
   requestAnimationFrame(frame);
@@ -1108,7 +1126,6 @@ const FLOW = (() => {
 </script>
 
 
-</div>
 <footer class="site-foot">
   <span>FM-RPU</span>
   <span class="foot-tag">Inference silicon for embodied AI</span>

@@ -166,7 +166,7 @@ p { margin: 0; max-width: var(--measure); }
   text-decoration: none;
 }
 
-.mark { width: var(--s4); height: var(--s4); color: var(--warm-0); flex: none; }
+.wordmark .mark { width: var(--s4); height: var(--s4); color: var(--warm-0); flex: none; }
 
 .nav nav {
   display: flex;
@@ -719,8 +719,18 @@ footer {
 /* only sharp at whole multiples, so 16 is the next size up from 8.        */
 /* ======================================================================= */
 
-.nav nav, .wordmark { font-size: calc(var(--pixel-native) * 3); line-height: 32px; }
-.mark { width: var(--s6); height: var(--s6); }
+.nav nav, .wordmark { font-size: calc(var(--pixel-native) * 2); line-height: 24px; }
+
+@media (min-width: 1100px) {
+  .nav nav, .wordmark { font-size: calc(var(--pixel-native) * 3); line-height: 32px; }
+}
+
+/* A tall wrapped nav must not eat the viewport or cover anchor targets. */
+/* Only stick when the tabs fit on one row; a wrapped nav is too tall. */
+@media (max-width: 1099px) {
+  .nav { position: static; }
+}
+.wordmark .mark { width: var(--s6); height: var(--s6); }
 
 .nav nav a { padding: var(--s3) var(--s2) calc(var(--s3) - var(--px)); }
 
