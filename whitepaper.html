@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FM-RPU — Whitepaper</title>
+<meta name="description" content="A measured case for etching world-model inference into a robot's head." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<meta name="theme-color" content="#100E18" />
+<meta property="og:title" content="FM-RPU — Whitepaper" />
+<meta property="og:description" content="A measured case for etching world-model inference into a robot's head." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="wordmark" href="index.html">
+    <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+      <rect x="0" y="0" width="8" height="8" fill="currentColor" opacity=".18"/>
+      <rect x="1" y="1" width="2" height="2" fill="currentColor"/>
+      <rect x="5" y="1" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
+    </svg>
+    <span>FM-RPU</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html" aria-current="page">Whitepaper</a><a href="index.html#about">About</a>
+  </nav>
+</header>
+<main id="main" tabindex="-1" class="doc">
+  <article>
+    <p class="label">Whitepaper &mdash; July 2026</p>
+    <h1>A measured case for etching world-model inference into a robot&rsquo;s head</h1>
+    
+  <p class="doc-lede">Working paper, July 2026. Consolidates the calibrated-simulator results, the chip program (spec, layout, roadmap), the memory-wall analysis, and the strategy documents into one argument. Every number carries a provenance tag: <span class="prov prov-m">[M]</span> measured on hardware we ran, <span class="prov prov-s">[S]</span> computed by our calibrated instrument, <span class="prov prov-f">[F]</span> founder-measured in production, <span class="prov prov-x">[X]</span> external literature, <span class="prov prov-t">[T]</span> target or estimate.</p>
+
+  <p class="doc-lede">Audience: engineers deciding whether to build this with us. The document states what we know, how we know it, what we got wrong, and which problems are open.</p>
+
+  <h2>Abstract</h2>
+  <p>World Action Models place a 14&nbsp;B-parameter diffusion transformer inside a humanoid&rsquo;s 200&nbsp;ms balance loop. That model runs today on a kilowatt datacenter GPU or across a radio, and both options put facility power or Wi-Fi jitter inside a stability-critical control path <span class="prov prov-f">[F]</span>. We characterized the workload at operator granularity, calibrated an analytical performance model to measured Blackwell silicon within 0.7&ndash;4.6&nbsp;% on latency and energy <span class="prov prov-m">[M]</span>, and derived the design target for a head-resident accelerator. At head power the binding constraint is energy rate: chunk time equals chunk joules divided by watts, and peak FLOPS cancels out of the comparison <span class="prov prov-s">[S]</span>. Matching a 40&nbsp;W Jetson Thor at 2&times; median speedup requires an architecture energy advantage of &eta;* &asymp; 2.8, inside the published 1.6&ndash;3.2&times; TPUv4-versus-A100 band <span class="prov prov-x">[X]</span>. Attention consumes ~62&nbsp;% of dynamic energy, so matrix-multiply specialization alone caps the speedup at 1.17&times; and any credible datapath must improve the attention path <span class="prov prov-s">[S]</span>. We present the FM-RPU design point (4&nbsp;PF dense FP4, LPDDR5X conveyor, 30&nbsp;W), the workload co-design levers that attack the absolute 5&nbsp;Hz goal, and a roadmap in which a kill test gates every funding tier.</p>
+
+  <h2>1. Robot control converged on a workload that has no chip</h2>
+  <p>The leading humanoid programs now drive motion from latent world models: a video-action diffusion transformer imagines the next two seconds and emits an action chunk, re-planned five times per second <span class="prov prov-x">[X: DreamZero]</span>. A missed 200&nbsp;ms deadline is a stability event. The robot is mid-step when the answer arrives late.</p>
+  <p>We built both current alternatives and measured their failure <span class="prov prov-f">[F]</span>. Distilling the diffusion schedule from 16 steps to 3 reached control rate on two B200-class GPUs per robot, a kilowatt of datacenter silicon each. A production remote-inference stack (custom media-over-QUIC transport, CFG parallelism across GPUs, velocity caching, PyTorch graph capture, train-time chunking) then moved that compute off-robot. Iso-compute simulation puts the on-head deadline miss rate near zero and the busy-Wi-Fi miss rate at 7.8&nbsp;%, against a 10<sup>&minus;4</sup> stability target <span class="prov prov-s">[S]</span>. Remote inference fails on certification under jitter. The inference must live in the head, and the only deployable head silicon, a general-purpose SoC, runs this workload roughly 20&times; too slow at head power <span class="prov prov-s">[S]</span>.</p>
+
+  <h2>2. The workload is one shape-stable transformer loop</h2>
+  <p>Defaults follow Wan2.1-I2V-14B / DreamZero geometry: 14&nbsp;B parameters, d&nbsp;=&nbsp;5120, 40 layers, FFN 13&nbsp;824, 40 heads, 1&nbsp;560 tokens per latent frame, a 2&nbsp;s rolling window of N_ctx&nbsp;&asymp;&nbsp;18&nbsp;720 tokens, 1&nbsp;560&ndash;3&nbsp;120 new tokens per step, 1&ndash;3 denoising steps, a classifier-free-guidance (CFG) pair, 200&nbsp;ms control period. Four-bit weights occupy 7.0&nbsp;GB; the FP8 KV window occupies a comparable 7.7&nbsp;GB. Neither fits head-power SRAM, so both stream from DRAM every step <span class="prov prov-s">[S]</span>.</p>
+  <p>One denoising step splits as: self-attention 38.7&nbsp;% of FLOPs, FFN 28.6&nbsp;%, QKV projection 15.9&nbsp;%, cross-attention 10.9&nbsp;%, output projection 5.3&nbsp;% <span class="prov prov-s">[S]</span>. With CFG fan-out the step reads 14.8&nbsp;GB once and computes both guidance branches; naive double-fetch would double that. Arithmetic intensity is &asymp;&nbsp;1.7&nbsp;&times;&nbsp;10<sup>4</sup> FLOP/byte, far above every edge ridge point, so the loop is compute-bound in the classical roofline sense <span class="prov prov-s">[S]</span>. Section 8 explains why that margin still requires engineering.</p>
+
+  <h2>3. At head power, energy rate sets latency</h2>
+  <p>A robot head rejects ~40&nbsp;W through the neck <span class="prov prov-s">[S: thermal model]</span>. Chunk time obeys four bounds, and the fourth dominates:</p>
+  <p class="eq">t = max( t_compute, t_memory, t_comm, E_chunk / (TDP &middot; (1 &minus; f_static)) ).</p>
+  <p>At the three-step operating point the energy bound exceeds the roofline bound by an order of magnitude on Thor and on the FM-RPU alike <span class="prov prov-s">[S]</span>. Raising peak FLOPS without lowering joules per FLOP moves nothing. When both devices sit on the energy bound with shared coefficients, throughput cancels and the speedup reduces to an identity:</p>
+  <p class="eq">S = &eta; &middot; (TDP_dut / TDP_base),</p>
+  <p>where &eta; is the per-FLOP energy advantage of the design point over the calibrated GPU datapath <span class="prov prov-s">[S]</span>. A 30&nbsp;W part with &eta;&nbsp;=&nbsp;1 loses to a 40&nbsp;W Thor at S&nbsp;=&nbsp;0.75. The entire product question compresses into one number.</p>
+
+  <h2>4. The instrument earned its extrapolation rights on measured silicon</h2>
+  <p>Reproducing built silicon gates every extrapolation to unbuilt silicon. Four authoritative anchors ran on an RTX PRO 6000 Blackwell workstation: shape-faithful BF16 chunk proxies at one, two, and three steps, with board energy from mean <code>nvidia-smi</code> power times duration <span class="prov prov-m">[M]</span>. The fitted model reproduces all four within 0.7&ndash;4.6&nbsp;% latency and 0.2&ndash;2.4&nbsp;% energy; fitted compute utilization is 0.84 <span class="prov prov-m">[M]</span>. Placeholder anchors for Thor and B200 fail the gate at 40&ndash;65&nbsp;% error and carry no authority <span class="prov prov-s">[S]</span>.</p>
+  <p>Two further measurements killed our own easiest stories <span class="prov prov-m">[M]</span>:</p>
+  <ol>
+    <li><strong>DVFS is flat.</strong> Energy per FLOP is constant from 1.0 to 3.1&nbsp;GHz (&eta;_V/f&nbsp;=&nbsp;1.00, idle power subtracted and audited). The wide-and-slow voltage win requires sub-Vmin custom design; it is unavailable from operating points on this silicon.</li>
+    <li><strong>Precision scaling underdelivers.</strong> FP16&rarr;FP8 measures 1.77&ndash;1.82&times;, under the nominal 2&times; per halving. We hold the FP16&rarr;FP4 energy scale as a measured-anchored prior s&nbsp;~&nbsp;U(2.6,&nbsp;3.4), which tripled our absolute energy estimates when it replaced the assumed s&nbsp;&asymp;&nbsp;10.</li>
+  </ol>
+  <p>We publish adverse results and re-derive every downstream number when one lands. That discipline is the working method, and Section 12 states it as policy.</p>
+
+  <h2>5. The target: &eta;* &asymp; 2.8, and it cannot come from matmul alone</h2>
+  <p>Monte Carlo over token count, step compression, and the precision prior gives &eta;*&nbsp;=&nbsp;2.78&ndash;2.79 for median S&nbsp;=&nbsp;2 against Thor held to the 40&nbsp;W neck ceiling; the closed form 2&nbsp;&times;&nbsp;40/30&nbsp;=&nbsp;2.67 checks it <span class="prov prov-s">[S]</span>. Against Thor&rsquo;s 130&nbsp;W module rating the same design point reaches S&nbsp;&asymp;&nbsp;0.62 at &eta;&nbsp;=&nbsp;2.8; the FM-RPU is a head part, and we say so <span class="prov prov-s">[S]</span>.</p>
+  <p>The published evidence brackets the target. TPUv4 delivered 1.6&ndash;3.2&times; perf/W over the same-node A100 on measured power <span class="prov prov-x">[X: ISCA 2023]</span>. Hameed et al. showed that a general-purpose baseline spends 5.8&nbsp;% of energy in functional units (FU), that fused custom datapaths raise that fraction toward ~35&nbsp;%, and that custom storage wired to functional units, and neither instruction removal nor SIMD width, carries the processor-to-ASIC gap <span class="prov prov-x">[X: ISCA 2010]</span>. Tensor cores already implement the fused-matmul stage, so our advantage must come from the fabric around the MAC: pipeline and clocking (22&nbsp;% of the Hameed ledger), caches (19&nbsp;%), register files (10&nbsp;%), control (10&nbsp;%).</p>
+  <p>Attention sharpens the requirement. With the mid prior, dynamic energy splits ~62&nbsp;% attention, 36&nbsp;% matmul and projection, 2&nbsp;% bytes, because attention runs FP8 against FP4 linears <span class="prov prov-s">[S]</span>. Zeroing matmul energy while leaving attention unchanged caps the speedup at 1.17&times;. Reaching S&nbsp;=&nbsp;2 by matmul specialization is impossible under this split. The attention energy path (online-softmax streaming, FLASH-D-style division hiding, fused exponential-multiply operators, and a static per-layer max bound that our fixed geometry permits) is load-bearing for the thesis <span class="prov prov-x">[X: arXiv 2505.14201, 2505.14314]</span>.</p>
+
+  <h2>6. The FM-RPU design point</h2>
+  <p>A head-resident inference engine sized to the shapes above [T unless tagged]:</p>
+  <ul>
+    <li>~1.9&nbsp;M FP4 MACs at ~1.05&nbsp;GHz (4&nbsp;PF dense) in 128&times;128 weight-streaming systolic tiles; the widths divide the array exactly (5120&nbsp;=&nbsp;8&nbsp;&times;&nbsp;640, 13&nbsp;824&nbsp;=&nbsp;8&nbsp;&times;&nbsp;1728).</li>
+    <li>FP8 multiply into FP32 accumulators in dedicated SRAM below the array, TPUv1&rsquo;s narrow-multiply wide-accumulate pattern <span class="prov prov-x">[X]</span>.</li>
+    <li>A 256-bit LPDDR5X conveyor at 307&nbsp;GB/s and &ge;16&nbsp;GB. The prefetcher is a counter: the chip reads the identical ~44&nbsp;GB address sequence every chunk. ~90&nbsp;MB of on-die SRAM holds stream buffers and the activation spine, and never a resident weight set.</li>
+    <li>A DRAM-resident KV ring that advances by pointer at chunk end. The conveyor fetches weights and context KV once per step and fans them out to both CFG branches in silicon.</li>
+    <li><strong>Refresh inside the schedule.</strong> The sequencer issues per-bank refresh in statically-known conveyor-idle windows. Hot-head refresh derating otherwise taxes 14&ndash;28&nbsp;% of effective bandwidth and injects tail latency; scheduled refresh zeroes the interference by construction <span class="prov prov-s">[S]</span>.</li>
+    <li><strong>Zero-OS execution.</strong> The same chunk costs ~1&nbsp;200 kernel launches on a GPU and zero in-band instructions here. Determinism is throughput in this regime: under a 7&nbsp;ms p99 bound the TPU held 80&nbsp;% of peak while the same-node K80 fell to 37&nbsp;% <span class="prov prov-x">[X: ISCA 2017]</span>. Our 200&nbsp;ms loop is a tighter latency-bound regime than that benchmark.</li>
+    <li>A microcoded schedule ROM (1/2/3-step modes) produced by an offline tool, <code>fmrpu-schedule</code>, that reuses the calibrated simulator as its cost model and emits a per-mode worst-case deadline certificate. Weights, scales, token counts, and schedules load from an image; tile geometry and datapath formats are mask-fixed.</li>
+    <li>A programmable update block (~2&nbsp;% of datapath) runs flow-ODE or CEM-style planning. Supporting a JEPA-family workload costs 1.9&nbsp;% DreamZero-path perf/W at this design point; both families stream 7&nbsp;GB weights, so no memory tier separates them <span class="prov prov-s">[S]</span>.</li>
+  </ul>
+  <p>Modes at &eta;&nbsp;=&nbsp;2.8 against Thor-in-head <span class="prov prov-s">[S]</span>: Quality (3-step CFG) 6.4&nbsp;s vs 13.0&nbsp;s, S&nbsp;=&nbsp;2.03; Balanced (2-step) 4.3&nbsp;s vs 8.6&nbsp;s, S&nbsp;=&nbsp;2.03; Deadline (1-step distilled, N&nbsp;=&nbsp;1560) 0.61&nbsp;s vs 1.14&nbsp;s, S&nbsp;=&nbsp;1.86. The relative bar clears in Quality and Balanced. No mode meets an absolute 200&nbsp;ms at &eta;&nbsp;=&nbsp;2.8; the analytical model puts that at &eta;&nbsp;&asymp;&nbsp;16, outside every evidence band. Closing the absolute gap belongs to the workload levers below.</p>
+
+  <h2>7. Workload co-design multiplies what silicon delivers</h2>
+  <p>We scrutinized each candidate lever against its literature and kept survivors with per-mode multipliers on chunk energy <span class="prov prov-t">[T]</span>:</p>
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Lever</th><th scope="col">Verdict</th><th scope="col">Deadline</th><th scope="col">Quality</th></tr></thead>
+    <tbody>
+    <tr><td>Per-step feature caching</td><td>refuted at 1&ndash;3 steps (serving literature: ineffective on 4-step distilled models)</td><td>1.0</td><td>1.0&ndash;1.2</td></tr>
+    <tr><td>Sliding-tile sparse attention</td><td>survives, trimmed</td><td>1.15&ndash;1.45</td><td>1.15&ndash;1.45</td></tr>
+    <tr><td>Token merging</td><td>survives, cautious</td><td>1.1&ndash;1.3</td><td>1.1&ndash;1.3</td></tr>
+    <tr><td>Cross-chunk reuse (receding-horizon overlap)</td><td>upgraded: WorldCache reports 2.3&times; at 99.4&nbsp;% quality on a video world model; Chorus reports 1.45&times; on 4-step distilled models</td><td>1.0&ndash;1.45 (certified floor)</td><td>1.3&ndash;2.0</td></tr>
+    <tr><td>Softmax simplifications</td><td>survives, minor</td><td>1.01&ndash;1.03</td><td>1.01&ndash;1.03</td></tr>
+    </tbody>
+  </table></div>
+  <p>Composed with an overlap discount: &asymp;1.4&ndash;2.6&times; (Deadline) and &asymp;1.7&ndash;3.8&times; (Quality) <span class="prov prov-t">[T]</span>. Cross-chunk reuse is the flagship: consecutive chunks re-diffuse overlapping world state, the mechanism class that survives few-step schedules, and the one no LLM accelerator has a reason to build. In Deadline mode the schedule reserves the worst-case slot, so dynamic reuse saves energy while the miss-rate proof stands; a reuse floor counts against the deadline only when training guarantees it. Train-time chunking is the tool that can train that floor in <span class="prov prov-f">[F]</span>.</p>
+  <p>A recorded design constraint bounds this section: the control policy must not depend on aggressive quantization (INT2 weights, FP4 KV, 2:4 pruning) <span class="prov prov-f">[F]</span>. Those levers remain last resorts behind bit-exact and structural options.</p>
+
+  <h2>8. Engineering the memory wall, honestly</h2>
+  <p>WAN-class video models (the Wan2.1 family) measure memory-bandwidth-bound on B200 <span class="prov prov-f">[F]</span>, while our fused model calls the loop compute-bound. Three findings reconcile the two. First, unfused attention materializes 2.3&nbsp;GB of scores per layer, ~25&times; our entire stream; a GPU&rsquo;s memory-boundedness is partly manufactured by imperfect fusion, and an etched pipeline makes the fused byte count a guarantee <span class="prov prov-s">[S]</span>. Second, batch-1 execution collapses weight reuse on GPUs, moving the operating point across the roofline crossover our design document predicted. Third, our instrument holds no memory-bound anchor yet, so its memory-regime numbers are the least trusted in the model; ingesting real B200/WAN profiling is a gate-1 requirement <span class="prov prov-f">[F]</span>.</p>
+  <p>The candidate config sits 1.5&times; on the compute side of its ridge, and hot-head refresh nearly closes the margin <span class="prov prov-s">[S]</span>. The solution ladder holds bit-exact demand cuts (lossless entropy coding of the weight stream at &times;0.62&ndash;0.83, with demonstrated one-weight-per-clock decoders <span class="prov prov-x">[X]</span>) and linear-cost supply steps: 512-bit LPDDR5X at 614&nbsp;GB/s (Apple ships 546&nbsp;GB/s on-package today), LPDDR6 at ~2.25&times; per package in 2026, LPDDR6-PIM executing KV passes in-bank (Samsung and SK hynix are standardizing it), and hybrid-bonded 3D DRAM at 0.66&ndash;0.88&nbsp;pJ/bit for a second generation <span class="prov prov-x">[X]</span>. A conservative profile with FP8 weights and no aggressive quantization streams ~15.5&nbsp;GB per step and fits inside the compute shadow at 512-bit LPDDR5X <span class="prov prov-s">[S]</span>. MAC area trades ~linearly for PHY channels, so the compute-to-bandwidth ratio is a gate-1 decision against the ingested anchor, and never an afterthought.</p>
+
+  <h2>9. Open problems: what you would own</h2>
+  <p>Every problem below is open, carries load, and comes with instrumentation that measures progress.</p>
+  <ol>
+    <li><strong>The attention energy path.</strong> Design the streamer that makes 62&nbsp;% of dynamic energy cheap: division-free online softmax, fused exp-multiply, static max bounds, and the dataflow split between fabric passes. The thesis fails without it (Section 5).</li>
+    <li><strong>The dataflow A/B.</strong> Weight-stationary vs output-stationary vs broadcast-tree on our exact shapes, per pass, in Timeloop; a stall-free conveyor removes output-stationary&rsquo;s usual advantage and nobody has published this comparison for chunk diffusion.</li>
+    <li><strong>The Tier-2 energy ledger.</strong> Build the Accelergy-class tile model and produce our Hameed-Table-3: per-component mJ/chunk. Kill criterion: mapped &eta;&nbsp;&lt;&nbsp;2.2 or FU fraction&nbsp;&lt;&nbsp;35&nbsp;% ends the project before tapeout money.</li>
+    <li><strong>The memory-bound anchor.</strong> Ingest real B200/WAN profiling, identify bw_util (the realized bandwidth-utilization coefficient), place the crossover, and set the MACs-versus-channels ratio.</li>
+    <li><strong>Sub-Vmin operation.</strong> Etched claims half-voltage math blocks in A0 silicon; the near-threshold literature offers split domains, 8T SRAM, and Razor-class margin recovery (~47&nbsp;% measured). Prove it on a test tile or leave it out of &eta; forever.</li>
+    <li><strong>The certified reuse floor.</strong> Co-design train-time chunking with the scheduler so cross-chunk reuse carries a trained, certifiable minimum, converting a heuristic into deadline credit.</li>
+    <li><strong>The robot memory engine.</strong> Persistent latent state, episodic retrieval, fast-weight layers, and bounded context in hardware. A write-capable weight path breaks the read-only conveyor assumption, so scope it before RTL freezes that assumption.</li>
+    <li><strong>The compiler.</strong> <code>fmrpu-schedule</code> today; a PyTorch&rarr;StableHLO&rarr;MLIR backend as the platform grows. The moat is compiler plus scheduling plus memory hierarchy, and the cost model already exists as the calibrated simulator.</li>
+    <li><strong>Deadline-mode existence.</strong> Distill to 1-step at reduced tokens with task success intact. Without it, Deadline mode has silicon and no workload.</li>
+  </ol>
+
+  <h2>10. Roadmap: a kill test gates every dollar tier</h2>
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Gate</th><th scope="col">Resolves</th><th scope="col">Cost</th><th scope="col">Kill condition</th></tr></thead>
+    <tbody>
+    <tr><td>1. Tier-2 tile energy model + dataflow A/B + memory anchor</td><td>first computed &eta; for this datapath</td><td>~$0, weeks</td><td>&eta;&nbsp;&lt;&nbsp;2.2 or FU&nbsp;&lt;&nbsp;35&nbsp;%</td></tr>
+    <tr><td>2. Jetson Thor baseline measurement</td><td>the denominator of the success metric</td><td>~$3&nbsp;k, days</td><td>model misses measured Thor badly</td></tr>
+    <tr><td>3. MAC tile + conveyor RTL on FPGA (AMD Versal class)</td><td>measured &eta; for the core datapath, bit-exact vs the golden model</td><td>~$1&ndash;2&nbsp;M, 2&ndash;3 quarters</td><td>measured &eta; under the Tier-2 claim</td></tr>
+    <tr><td>4. Test-structure shuttle (includes the sub-Vmin tile)</td><td>&eta; on our silicon at our voltage</td><td>low $M, ~1 year</td><td>silicon under FPGA-projected &eta;</td></tr>
+    <tr><td>5. Production tapeout, N4-class</td><td>the product</td><td>$30&ndash;50&nbsp;M</td><td>only after gates 1&ndash;4 pass</td></tr>
+    </tbody>
+  </table></div>
+  <p>The funding shape follows the gates: a $3&ndash;4&nbsp;M pre-seed runs gates 1&ndash;3 to an FPGA-proven &eta; and a design-partner LOI; $8&ndash;15&nbsp;M funds the shuttle; $30&ndash;60&nbsp;M funds production <span class="prov prov-t">[T]</span>. Equipment for the first year: Thor devkits, AMD Versal FPGA boards (VEK280 class), cloud GPUs, and a power-measurement bench.</p>
+
+  <h2>11. Strategy in one page</h2>
+  <p>The socket is the humanoid head, won per robot generation, and defended by certification: deterministic timing, once inside a safety case, is a moat measured in years. Competitors each miss one constraint: Thor stays general because CUDA is the product; datacenter transformer ASICs sit 20&times; off in power regime; edge NPUs are ~100&times; too small for a 14&nbsp;B streaming model. The relative bar (2&times; Thor-in-head) rides on &eta; and clears in every mode; the absolute 5&nbsp;Hz loop is a joint model-and-silicon program (Sections 6&ndash;7), and we state that in public documents. Datacenter ASIC marketing numbers answer a different question.</p>
+
+  <h2>12. How we work</h2>
+  <ol>
+    <li><strong>Measurement first.</strong> No extrapolation without reproducing built hardware; our measurement-first gate blocked every feasibility claim until real anchors landed, and it still governs.</li>
+    <li><strong>Adverse results ship.</strong> The DVFS null, the 1.77&times; precision result, and the corrected 5&nbsp;Hz claim are in the record with the same prominence as favorable numbers.</li>
+    <li><strong>Provenance on every number.</strong> <span class="prov prov-m">[M]</span>/<span class="prov prov-s">[S]</span>/<span class="prov prov-f">[F]</span>/<span class="prov prov-x">[X]</span>/<span class="prov prov-t">[T]</span> tags appear in every document, including this one; an untagged number is a bug.</li>
+    <li><strong>Kill tests before dollars.</strong> A gate that cannot fail is theater. Ours name the number, the threshold, and what dies when it misses.</li>
+    <li><strong>One instrument, identical rules.</strong> One utilization model scores every hardware row; the design under test never receives a friendlier assumption than the incumbent.</li>
+  </ol>
+  <p>If that method and Section 9&rsquo;s problems read as the job you want, the instrument, the data, and the open questions are waiting. The silicon is waiting on you.</p>
+
+  <h2>References</h2>
+  <ol class="refs">
+    <li>DreamZero authors, &ldquo;World Action Models are Zero-shot Policies,&rdquo; arXiv:2602.15922, 2026.</li>
+    <li>Q. Shen et al., &ldquo;World Action Models: A Survey,&rdquo; arXiv:2606.20781, 2026.</li>
+    <li>N. Jouppi et al., &ldquo;In-Datacenter Performance Analysis of a Tensor Processing Unit,&rdquo; ISCA 2017.</li>
+    <li>N. Jouppi et al., &ldquo;TPU v4: An Optically Reconfigurable Supercomputer,&rdquo; ISCA 2023.</li>
+    <li>R. Hameed et al., &ldquo;Understanding Sources of Inefficiency in General-Purpose Chips,&rdquo; ISCA 2010.</li>
+    <li>FLASH-D, arXiv:2505.14201; ExpMul, arXiv:2505.14314.</li>
+    <li>WorldCache, arXiv:2603.22286; Chorus, arXiv:2604.04451; STA, arXiv:2502.04507.</li>
+  </ol>
+
+    <p class="readmore"><a href="index.html#about">Get in touch &rarr;</a></p>
+  </article>
+</main>
+
+<footer>
+  <span>FM-RPU</span>
+  <span class="foot-tag">Inference silicon for embodied AI</span>
+</footer>
+
+</body>
+</html>

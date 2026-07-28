@@ -3,24 +3,23 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Substrate &mdash; Inference silicon for embodied AI</title>
+<title>FM-RPU — Inference silicon for embodied AI</title>
 <meta name="description" content="We etch the robot's world model into silicon: real-time world-model inference inside a 30 W robot head, with deterministic timing." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
-<meta property="og:title" content="Substrate &mdash; Inference silicon for embodied AI" />
-<meta property="og:description" content="Real-time world-model inference inside a 30 W robot head, with deterministic timing." />
+<meta property="og:title" content="FM-RPU — Inference silicon for embodied AI" />
+<meta property="og:description" content="We etch the robot's world model into silicon: real-time world-model inference inside a 30 W robot head, with deterministic timing." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400&amp;display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
 <a class="skip" href="#main">Skip to content</a>
-
 <header class="nav">
-  <a class="wordmark" href="#top">
+  <a class="wordmark" href="index.html">
     <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
       <rect x="0" y="0" width="8" height="8" fill="currentColor" opacity=".18"/>
       <rect x="1" y="1" width="2" height="2" fill="currentColor"/>
@@ -28,21 +27,17 @@
       <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
       <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
     </svg>
-    <span>Substrate</span>
+    <span>FM-RPU</span>
   </a>
   <nav aria-label="Sections">
-    <a href="#realtime">Real&#8209;time</a>
-    <a href="#bet">Bet</a>
-    <a href="#evidence">Evidence</a>
-    <a href="#contact">Contact</a>
+    <a href="index.html" aria-current="page">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="index.html#about">About</a>
   </nav>
 </header>
-
 <main id="main" tabindex="-1">
 
   <section class="hero" id="top">
     <div class="hero-copy">
-      <p class="label">FM&#8209;RPU</p>
+      <p class="label">FM-RPU</p>
       <h1>We etch the robot&rsquo;s world model into silicon.</h1>
       <p class="lede">Real&#8209;time world&#8209;model inference, inside the head, on 30&nbsp;watts.</p>
       <details class="more">
@@ -188,13 +183,13 @@
 
   <section class="band alt" id="today">
     <p class="label">02 &mdash; What it costs today</p>
-    <h2>I built the wrong<br />solution first.</h2>
+    <h2>We built the wrong<br />solution first.</h2>
     <p class="claim">Control rate took two B200s in a datacenter and a custom QUIC relay. That puts the network inside the control loop.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>At 1X I was responsible for getting a fine&#8209;tuned action co&#8209;diffusion world model to control rate. It took the entire arsenal: sixteen&#8209;to&#8209;three&#8209;step distillation, classifier&#8209;free guidance split across two B200s, velocity caching between diffusion steps, graph capture to suppress kernel&#8209;launch overhead, and train&#8209;time chunking to fit the streaming regime. It worked &mdash; at two kilowatt&#8209;class GPUs per robot.</p>
-          <p class="muted">So I built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the shape of the mistake clear. No amount of transport engineering makes a wireless round trip predictable enough to design against. A humanoid whose competence depends on connectivity is a demo, not a product.</p>
+          <p>We have built inference stacks at frontier humanoid robotics companies. Reaching control rate took the entire arsenal: sixteen&#8209;to&#8209;three&#8209;step distillation, classifier&#8209;free guidance split across two B200s, velocity caching between diffusion steps, graph capture to suppress kernel&#8209;launch overhead, and train&#8209;time chunking to fit the streaming regime. It worked &mdash; at two kilowatt&#8209;class GPUs per robot.</p>
+          <p class="muted">So we built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the shape of the mistake clear. No amount of transport engineering makes a wireless round trip predictable enough to design against. Humanoids cannot scale if every robot depends on a remote GPU cluster and perfect connectivity.</p>
         </div>
       </details>
   </section>
@@ -359,26 +354,134 @@
           <p class="muted">It also tells us things we would rather not hear. Voltage and frequency scaling buys essentially nothing. Hitting 5&#8202;Hz on the nose will need model&#8209;side compression as well as silicon &mdash; that is a measurement, not an assumption. We would rather publish the ceiling than discover it in fab.</p>
         </div>
       </details>
+    <p class="readmore"><a href="whitepaper.html">Read the whitepaper &rarr;</a></p>
   </section>
 
   <section class="band horizon" id="horizon">
     <p class="label">05 &mdash; Horizon</p>
-    <h2>A brain holds a hundred trillion parameters.<br />It does not need a rack.</h2>
-    <p class="claim">Closing the distance between a GPU rack and biology is the only version of this future that arrives.</p>
+    <h2>A brain holds a hundred trillion synapses<br />on about twenty watts.</h2>
+    <p class="claim">We are not claiming to reproduce it in one chip. It sets the direction: far more embodied intelligence per joule than general&#8209;purpose computing provides.</p>
   </section>
 
-  <section class="band contact" id="contact">
-    <p class="label">Contact</p>
-    <h2>Get in touch.</h2>
-    <p class="claim">Roboticists, silicon architects, and inference engineers who have felt this constraint firsthand.</p>
-    <a class="mailto" href="mailto:hello@example.com">hello@example.com</a>
-    <p class="placeholder-note">Placeholder address &mdash; swap before launch.</p>
+  <section class="band about" id="about">
+    <p class="label">About us</p>
+    <h2>Who we are.</h2>
+    <p class="claim">We are solving the next bottleneck to real deployment: inference for millions of autonomous robots operating reliably, locally, and far from datacenters.</p>
+    <ul class="people">
+      <li class="person">
+        <svg class="avatar" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+        <rect x="1" y="1" width="14" height="14" class="av-pkg"/>
+        <rect x="2" y="2" width="12" height="12" class="av-die"/>
+        <g class="av-pads"><rect x="4" y="0" width="2" height="1"/>
+        <rect x="4" y="15" width="2" height="1"/>
+        <rect x="0" y="4" width="1" height="2"/>
+        <rect x="15" y="4" width="1" height="2"/>
+        <rect x="7" y="0" width="2" height="1"/>
+        <rect x="7" y="15" width="2" height="1"/>
+        <rect x="0" y="7" width="1" height="2"/>
+        <rect x="15" y="7" width="1" height="2"/>
+        <rect x="10" y="0" width="2" height="1"/>
+        <rect x="10" y="15" width="2" height="1"/>
+        <rect x="0" y="10" width="1" height="2"/>
+        <rect x="15" y="10" width="1" height="2"/></g>
+        <g class="av-cells"><rect x="3" y="3" width="2" height="2"/>
+        <rect x="11" y="3" width="2" height="2"/>
+        <rect x="7" y="3" width="2" height="2"/>
+        <rect x="3" y="5" width="2" height="2"/>
+        <rect x="11" y="5" width="2" height="2"/>
+        <rect x="5" y="5" width="2" height="2"/>
+        <rect x="9" y="5" width="2" height="2"/>
+        <rect x="5" y="7" width="2" height="2"/>
+        <rect x="9" y="7" width="2" height="2"/>
+        <rect x="3" y="9" width="2" height="2"/>
+        <rect x="11" y="9" width="2" height="2"/>
+        <rect x="5" y="9" width="2" height="2"/>
+        <rect x="9" y="9" width="2" height="2"/>
+        <rect x="7" y="9" width="2" height="2"/></g>
+      </svg>
+        <div class="person-copy">
+          <p class="pname">Richard Bao</p>
+          <p class="pbio">Co-founder. Built real-time world-action-model inference and the remote-inference stack at a frontier humanoid robotics company.</p>
+          <a class="pmail" href="mailto:richardbao419@gmail.com">richardbao419@gmail.com</a>
+        </div>
+      </li>
+      <li class="person">
+        <svg class="avatar" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+        <rect x="1" y="1" width="14" height="14" class="av-pkg"/>
+        <rect x="2" y="2" width="12" height="12" class="av-die"/>
+        <g class="av-pads"><rect x="4" y="0" width="2" height="1"/>
+        <rect x="4" y="15" width="2" height="1"/>
+        <rect x="0" y="4" width="1" height="2"/>
+        <rect x="15" y="4" width="1" height="2"/>
+        <rect x="7" y="0" width="2" height="1"/>
+        <rect x="7" y="15" width="2" height="1"/>
+        <rect x="0" y="7" width="1" height="2"/>
+        <rect x="15" y="7" width="1" height="2"/>
+        <rect x="10" y="0" width="2" height="1"/>
+        <rect x="10" y="15" width="2" height="1"/>
+        <rect x="0" y="10" width="1" height="2"/>
+        <rect x="15" y="10" width="1" height="2"/></g>
+        <g class="av-cells"><rect x="3" y="3" width="2" height="2"/>
+        <rect x="11" y="3" width="2" height="2"/>
+        <rect x="7" y="3" width="2" height="2"/>
+        <rect x="7" y="5" width="2" height="2"/>
+        <rect x="3" y="7" width="2" height="2"/>
+        <rect x="11" y="7" width="2" height="2"/>
+        <rect x="7" y="7" width="2" height="2"/>
+        <rect x="7" y="9" width="2" height="2"/></g>
+      </svg>
+        <div class="person-copy">
+          <p class="pname">Shiva Mudide</p>
+          <p class="pbio">Co-founder.</p>
+          <a class="pmail" href="mailto:shivamudide628@gmail.com">shivamudide628@gmail.com</a>
+        </div>
+      </li>
+      <li class="person">
+        <svg class="avatar" viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+        <rect x="1" y="1" width="14" height="14" class="av-pkg"/>
+        <rect x="2" y="2" width="12" height="12" class="av-die"/>
+        <g class="av-pads"><rect x="4" y="0" width="2" height="1"/>
+        <rect x="4" y="15" width="2" height="1"/>
+        <rect x="0" y="4" width="1" height="2"/>
+        <rect x="15" y="4" width="1" height="2"/>
+        <rect x="7" y="0" width="2" height="1"/>
+        <rect x="7" y="15" width="2" height="1"/>
+        <rect x="0" y="7" width="1" height="2"/>
+        <rect x="15" y="7" width="1" height="2"/>
+        <rect x="10" y="0" width="2" height="1"/>
+        <rect x="10" y="15" width="2" height="1"/>
+        <rect x="0" y="10" width="1" height="2"/>
+        <rect x="15" y="10" width="1" height="2"/></g>
+        <g class="av-cells"><rect x="3" y="3" width="2" height="2"/>
+        <rect x="11" y="3" width="2" height="2"/>
+        <rect x="5" y="3" width="2" height="2"/>
+        <rect x="9" y="3" width="2" height="2"/>
+        <rect x="3" y="5" width="2" height="2"/>
+        <rect x="11" y="5" width="2" height="2"/>
+        <rect x="3" y="7" width="2" height="2"/>
+        <rect x="11" y="7" width="2" height="2"/>
+        <rect x="7" y="7" width="2" height="2"/>
+        <rect x="5" y="9" width="2" height="2"/>
+        <rect x="9" y="9" width="2" height="2"/>
+        <rect x="7" y="9" width="2" height="2"/>
+        <rect x="3" y="11" width="2" height="2"/>
+        <rect x="11" y="11" width="2" height="2"/>
+        <rect x="7" y="11" width="2" height="2"/></g>
+      </svg>
+        <div class="person-copy">
+          <p class="pname">Yujin Kim</p>
+          <p class="pbio">Co-founder.</p>
+          <a class="pmail" href="mailto:yujin0105@gmail.com">yujin0105@gmail.com</a>
+        </div>
+      </li>
+    </ul>
+    <p class="placeholder-note">Avatars are placeholders.</p>
   </section>
 
 </main>
 
 <footer>
-  <span>Substrate</span>
+  <span>FM-RPU</span>
   <span class="foot-tag">Inference silicon for embodied AI</span>
 </footer>
 

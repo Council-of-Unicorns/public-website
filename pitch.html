@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FM-RPU — Pitch</title>
+<meta name="description" content="On-robot inference for world-action models." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<meta name="theme-color" content="#100E18" />
+<meta property="og:title" content="FM-RPU — Pitch" />
+<meta property="og:description" content="On-robot inference for world-action models." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="wordmark" href="index.html">
+    <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+      <rect x="0" y="0" width="8" height="8" fill="currentColor" opacity=".18"/>
+      <rect x="1" y="1" width="2" height="2" fill="currentColor"/>
+      <rect x="5" y="1" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
+    </svg>
+    <span>FM-RPU</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a><a href="pitch.html" aria-current="page">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="index.html#about">About</a>
+  </nav>
+</header>
+<main id="main" tabindex="-1" class="doc">
+  <article>
+    <p class="label">Pitch</p>
+    <h1>On-robot inference for<br />world-action models</h1>
+    
+  <p class="doc-lede">We have deep expertise in humanoid robotics, and there is a clear gap. The industry is converging on world-action models for real-time control. These models generalize zero-shot to new physical tasks, but cannot run in real time at the edge. The requirements are hard. They must generate multi-second trajectories at least five times per second inside a robot head with about 30 watts and severe thermal limits.</p>
+
+  <p>We have built inference stacks at frontier robotics companies. Despite state-of-the-art optimizations to the architecture and diffusion process, real-time control still required two remote B200 Blackwell GPUs in a data center thousands of miles away, as well as extraordinary software complexity, like a custom ultra-low-latency QUIC transport and distributed relay system for bidirectional streaming of camera frames and trajectories. It worked, but we were solving the wrong problem: humanoids cannot scale if every robot depends on a remote GPU cluster and perfect connectivity.</p>
+
+  <p>Jim Fan, who leads embodied AI research at NVIDIA, is publicly betting on world-action models such as DreamZero as a route to the physical Turing test. His &ldquo;Second Pre-training Paradigm&rdquo; argues that physical-state prediction could become as foundational as next-token prediction. But NVIDIA must preserve a general-purpose GPU architecture. We can trade that breadth for efficiency. Jetson Thor remains far from running frontier world-action models within humanoid latency and power budgets.</p>
+
+  <p>The ChatGPT moment for robotics requires world models to run on the robot. Today, they are too large to meet robots&rsquo; power and latency constraints. Our chip makes that possible. If world models stay large, specialization is the difference between running them on board and not running them at all. If model compression or future generations of Thor allow conventional edge chips to be sufficient, our chips will still run faster and with less power. Today, efficiency is the unlock. In the future, it remains our advantage.</p>
+
+  <p>Our development plan reduces risk at every stage. During the first six months, we will select real customer models and prove the design using software simulation and reprogrammable hardware. We will manufacture the chip only if complete models show a substantial speed and power advantage over Jetson Thor. We target our first tapeout in 14&ndash;18 months, working chips for customers in 22&ndash;26 months, and limited production after testing and correcting the design in 30&ndash;36 months. We can move faster than Etched because our scope is narrower: one accelerator inside a robot, not a multi-chip, liquid-cooled data-center rack.</p>
+
+  <p>This is the right moment. Robotics scaling laws are emerging. Physical Intelligence has shown that human-to-robot transfer emerges after sufficiently diverse robot pretraining, as representations align across embodiments. The industry is racing there through teleoperation and scalable human-data interfaces like Sunday Robotics&rsquo; universal manipulation interface.</p>
+
+  <p>The brain has roughly 100 trillion synapses, the closest biological analogue to learned parameters, and operates at about 20 watts. We are not claiming to reproduce it in one chip. But it establishes the long-term direction: far more embodied intelligence per joule than general-purpose computing provides.</p>
+
+  <p>We are solving the next bottleneck to real deployment: inference for millions of autonomous robots operating reliably, locally and far from data centers.</p>
+
+    <p class="readmore"><a href="whitepaper.html">Read the whitepaper &rarr;</a><a href="index.html#about">Meet the team &rarr;</a></p>
+  </article>
+</main>
+
+<footer>
+  <span>FM-RPU</span>
+  <span class="foot-tag">Inference silicon for embodied AI</span>
+</footer>
+
+</body>
+</html>
