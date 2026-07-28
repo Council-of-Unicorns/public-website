@@ -38,7 +38,7 @@
     <p class="label">Pitch</p>
     <h1>On-robot inference for<br />world-action models</h1>
     
-  <p class="doc-lede">We have deep expertise in humanoid robotics, and there is a clear gap. The industry is converging on world-action models for real-time control. These models generalize zero-shot to new physical tasks, but cannot run in real time at the edge. The requirements are hard. They must generate multi-second trajectories at least five times per second inside a robot head with about 30 watts and severe thermal limits.</p>
+  <p class="doc-lede">We have deep expertise in humanoid robotics, and there is a clear gap. The industry is converging on world-action models for real-time control. These models generalize zero-shot to new physical tasks, but cannot run in real time at the edge. The requirements are hard. To produce smooth actions with human-like reaction latency, they must generate multi-second trajectories at least five times per second, inside a robot head with about 30 watts and severe thermal limits.</p>
 
   <p>We have built inference stacks at frontier robotics companies. Despite state-of-the-art optimizations to the architecture and diffusion process, real-time control still required two remote B200 Blackwell GPUs in a data center thousands of miles away, as well as extraordinary software complexity, like a custom ultra-low-latency QUIC transport and distributed relay system for bidirectional streaming of camera frames and trajectories. It worked, but we were solving the wrong problem: humanoids cannot scale if every robot depends on a remote GPU cluster and perfect connectivity.</p>
 
