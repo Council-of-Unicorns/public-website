@@ -341,7 +341,7 @@ svg .die-lbl { fill: var(--ink) !important; }
   <header>
     <p class="eyebrow">The instrument</p>
     <h1>FM-RPU feasibility readout</h1>
-    <p class="sub">Can a chip in the robot&rsquo;s head run a 14-billion-parameter world model every 200&nbsp;ms on about 30 watts, when neither a Jetson Thor nor a head-power B200 can? This page is the raw readout. It is deliberately unflattering to us: <b>our own row is scored with no architecture advantage at all</b>, which is the whole point of the exercise below.</p>
+    <p class="sub">Can a chip in the robot&rsquo;s head run a 14-billion-parameter world model every 200&nbsp;ms on about 30 watts, when neither a Jetson Thor nor a head-power B200 can? This page is the raw readout. It is and it does not flatter us. <b>Our own row is scored with no architecture advantage at all</b>, which is on purpose. The note under Verdicts explains why.</p>
     <div class="chips" id="chips"></div>
   </header>
 
@@ -398,7 +398,7 @@ svg .die-lbl { fill: var(--ink) !important; }
   <section id="sens-sec">
     <p class="eyebrow">Sensitivity</p>
     <h2>Step compression and token count carry the conclusion</h2>
-    <p class="note">How far each uncertain input moves the answer on its own, with the others held fixed. The two knobs that shrink the workload &mdash; how many denoising steps, and how many tokens &mdash; dominate everything else. Realized bandwidth utilization barely registers, which is exactly what you would expect if the loop really is compute-bound, and a useful sign the model is not fooling itself.</p>
+    <p class="note">How far each uncertain input moves the answer on its own, with the others held fixed. The two knobs that shrink the workload &mdash; how many denoising steps, and how many tokens &mdash; dominate everything else. Realized bandwidth utilization barely registers, which is exactly what you would want to see if the loop really is compute-bound. It is a useful sign the model is not fooling itself.</p>
     <div class="chart-box"><svg id="sens" viewBox="0 0 1040 190" style="min-width:1040px" role="img"
       aria-label="Horizontal bar chart of sensitivity scores per uncertain input"></svg></div>
   </section>
@@ -406,7 +406,7 @@ svg .die-lbl { fill: var(--ink) !important; }
   <section id="wall-sec">
     <p class="eyebrow">The bandwidth wall</p>
     <h2>Even with unlimited compute, 273 GB/s misses the deadline</h2>
-    <p class="note">Deadline miss rate against memory bandwidth, on a synthetic row with compute removed as a constraint entirely. The wall sits at <b id="wall-num"></b>, and Thor&rsquo;s 273&nbsp;GB/s is on the wrong side of it. Bandwidth alone would sink Thor here even with infinite compute. Compute is simply the constraint that binds first.</p>
+    <p class="note">Deadline miss rate against memory bandwidth, on a synthetic row with compute removed as a constraint entirely. The wall sits at <b id="wall-num"></b>, and Thor&rsquo;s 273&nbsp;GB/s is on the wrong side of it. Bandwidth alone would sink Thor here even with infinite compute. Compute is just the constraint that binds first.</p>
     <div class="chart-box"><svg id="wall" viewBox="0 0 1040 300" style="min-width:1040px" role="img"
       aria-label="Line chart of deadline miss rate versus HBM bandwidth with Thor's bandwidth and the wall marked"></svg></div>
   </section>

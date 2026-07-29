@@ -169,8 +169,8 @@
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Low reaction latency matters; predictable reaction latency matters more. Ultra&#8209;high reliability means the answer arrives on the same schedule every time rather than on average &mdash; and that it behaves the same in a warehouse, a basement, or a field with no signal. A robot&rsquo;s competence should not depend on its connection.</p>
-          <p class="muted">That budget has to be met in a head whose neck path can reject roughly forty watts. This is not a throughput problem with a latency footnote. It is a deadline problem with a power ceiling, and the two constraints fight each other.</p>
+          <p>Being fast on average is not the requirement. The answer has to arrive on the same schedule every time, and it has to behave the same in a warehouse, a basement, or a field with no signal. A robot&rsquo;s competence should not depend on its connection.</p>
+          <p class="muted">That budget has to be met in a head whose neck path can reject roughly forty watts. Throughput is the easy half. The hard part is that the deadline and the power ceiling pull against each other.</p>
         </div>
       </details>
     <ul class="specs">
@@ -189,7 +189,7 @@
         <summary>Detail</summary>
         <div class="more-body">
           <p>We have built inference stacks at frontier humanoid robotics companies. Reaching control rate took the entire arsenal: sixteen&#8209;to&#8209;three&#8209;step distillation, classifier&#8209;free guidance split across two B200s, velocity caching between diffusion steps, graph capture to suppress kernel&#8209;launch overhead, and train&#8209;time chunking to fit the streaming regime. It worked &mdash; at two kilowatt&#8209;class GPUs per robot.</p>
-          <p class="muted">So we built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the shape of the mistake clear. No amount of transport engineering makes a wireless round trip predictable enough to design against. Humanoids cannot scale if every robot depends on a remote GPU cluster and perfect connectivity.</p>
+          <p class="muted">So we built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the mistake obvious. No amount of transport engineering makes a wireless round trip predictable enough to design against. Humanoids cannot scale if every robot depends on a remote GPU cluster and perfect connectivity.</p>
         </div>
       </details>
   </section>
@@ -203,8 +203,8 @@
         <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>The first chip is not exotic. It is a systolic array at the edge &mdash; the same bet Etched made for the datacenter and Groq made with the LPU, aimed at the one place none of them are looking. A fixed graph and fixed tensor shapes buy static scheduling, no kernel dispatch, and timing you can put in a safety case.</p>
-          <p class="muted">The generality is what costs you. A general&#8209;purpose SoC spends die area and power on rasterization, display, and a CPU complex a fixed policy will never call. Reallocate that to tensor arrays and on&#8209;chip SRAM and the same watts do considerably more useful work.</p>
+          <p>There is nothing exotic about the first chip. It is a systolic array at the edge, the same bet Etched made for the datacenter and Groq made with the LPU. Nobody has made it for the robot. A fixed graph and fixed tensor shapes buy static scheduling, no kernel dispatch, and timing you can put in a safety case.</p>
+          <p class="muted">The generality is what costs you. A general&#8209;purpose SoC spends die area and power on rasterization, display, and a CPU complex a fixed policy will never call. Reallocate that to tensor arrays and on&#8209;chip SRAM and the same watts do a lot more useful work.</p>
         </div>
       </details>
       </div>
@@ -351,7 +351,7 @@
         <summary>Detail</summary>
         <div class="more-body">
           <p>Before claiming anything, we built a simulator that has to reproduce real silicon first. Every hardware configuration shares one utilization model, so the comparisons stay honest rather than flattering the part we want to build.</p>
-          <p class="muted">It also tells us things we would rather not hear. Voltage and frequency scaling buys essentially nothing. Hitting 5&#8202;Hz on the nose will need model&#8209;side compression as well as silicon &mdash; that is a measurement, not an assumption. We would rather publish the ceiling than discover it in fab.</p>
+          <p class="muted">It also tells us things we would rather not hear. Voltage and frequency scaling buys nothing. Hitting 5&#8202;Hz on the nose will need model&#8209;side compression as well as silicon. We know that because we measured it. We would rather publish the ceiling than discover it in fab.</p>
         </div>
       </details>
     <p class="readmore"><a href="whitepaper.html">Read the whitepaper &rarr;</a></p>
@@ -360,7 +360,7 @@
   <section class="band horizon" id="horizon">
     <p class="label">05 &mdash; Horizon</p>
     <h2>A brain holds a hundred trillion synapses<br />on about twenty watts.</h2>
-    <p class="claim">We are not claiming to reproduce it in one chip. It sets the direction: far more embodied intelligence per joule than general&#8209;purpose computing provides.</p>
+    <p class="claim">We are not claiming to reproduce it in one chip. It tells us how much room is left. General&#8209;purpose computing will never get close to that much intelligence per joule.</p>
   </section>
 
   <section class="band about" id="about">

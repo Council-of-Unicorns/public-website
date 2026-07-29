@@ -264,22 +264,16 @@ svg .die-lbl { fill: var(--ink) !important; }
 
 <main id="main" tabindex="-1">
   <header>
-    <p class="eyebrow">etched · FM-RPU concept explorer · calibrated Tier-1 instrument</p>
+    <p class="eyebrow">The chip</p>
     <h1>Etching a world model into silicon</h1>
-    <p class="sub">A 14B diffusion-transformer world model must deliver an action every
-    <b>200 ms</b> inside a <b>30 W</b> robot head. This page shows the phase-1 chip concept,
-    how it runs the transformer with <b>zero instructions</b>, and the speedup it buys over
-    Jetson Thor — every number computed by the simulator calibrated against measured
-    Blackwell silicon. Die geometry is illustrative; the numbers are not.</p>
+    <p class="sub">A 14-billion-parameter world model has to produce an action every <b>200&nbsp;ms</b> inside a <b>30&nbsp;W</b> robot head. This page walks through the phase-1 concept: what is on the die, how it runs the transformer with <b>no instructions at all</b>, and how much faster that makes it than a Jetson Thor. Every number comes from the simulator calibrated against measured Blackwell silicon. The die drawings are illustrative; the numbers are not.</p>
     <div class="chips" id="chips"></div>
   </header>
 
   <section>
-    <p class="eyebrow">Act I · the die</p>
-    <h2>Spend the silicon on math, not on generality</h2>
-    <p class="note">A GPU devotes much of its die and energy to <b>being able to run anything</b>:
-    schedulers, instruction caches, register files, coherent caches. The FM-RPU hardwires one
-    dataflow and spends the freed area on FP4 multiply-accumulate. Hover any block.</p>
+    <p class="eyebrow">The die</p>
+    <h2>Where the die area goes</h2>
+    <p class="note">A GPU spends most of its area and energy on <b>being able to run anything</b> &mdash; schedulers, instruction caches, register files, coherent caches. None of that is free, and a fixed policy never uses any of it. We hardwire one dataflow and spend what that frees on FP4 multiply-accumulate. Hover any block to see what it costs.</p>
     <div class="legend">
       <span class="key"><span class="box" style="background:var(--fmrpu)"></span>datapath (does math)</span>
       <span class="key"><span class="box" style="background:var(--mem)"></span>memory / streaming</span>
@@ -293,14 +287,9 @@ svg .die-lbl { fill: var(--ink) !important; }
   </section>
 
   <section>
-    <p class="eyebrow">Act II · the etch</p>
-    <h2>The schedule is silicon: one chunk, end to end</h2>
-    <p class="note">Watch one 200 ms control chunk. Weights stream from DRAM <b>once per
-    diffusion step</b> and both CFG branches consume the same stream (F2). The 2 s KV window
-    is read each step and <b>shifts in place</b> at chunk end. There is no kernel launch, no
-    instruction fetch — the sequencing below is wired, which is also where the
-    deadline-miss-rate &lt; 10⁻⁴ guarantee comes from. Stage durations are the model's real
-    timings for the 4 PF candidate, slowed ~40×.</p>
+    <p class="eyebrow">The etch</p>
+    <h2>One chunk, start to finish</h2>
+    <p class="note">Here is one 200&nbsp;ms control chunk, start to finish. Weights stream out of DRAM <b>once per diffusion step</b>, and both guidance branches read the same stream, so the second branch is free. The two-second context window is read each step and <b>shifts in place</b> at the end of the chunk. Nothing here launches a kernel or fetches an instruction: the sequence below is wired into the silicon, which is also where the deadline guarantee comes from. Stage lengths are the model&rsquo;s real timings, slowed about 40&times; so you can watch them.</p>
     <div class="controls">
       <button id="play" aria-pressed="true">PAUSE</button>
       <button id="step-back">PREV</button>
@@ -312,13 +301,9 @@ svg .die-lbl { fill: var(--ink) !important; }
   </section>
 
   <section>
-    <p class="eyebrow">Act III · the payoff</p>
-    <h2>Speedup vs Thor — set the efficiency your etch delivers</h2>
-    <p class="note">Both chips are <b>power-limited</b> on this workload, so the speedup is set
-    by energy-per-FLOP, not peak FLOPS. The slider is <b>η</b> — the etched datapath's
-    efficiency advantage over measured Blackwell silicon. Everything else is the calibrated
-    model: same workload, same shared utilization (P1), Monte-Carlo over the uncertain inputs
-    (P7). Transformer ASICs have historically delivered η ≈ 2–5.</p>
+    <p class="eyebrow">The payoff</p>
+    <h2>How much faster, and what it depends on</h2>
+    <p class="note">Both chips run out of power before they run out of arithmetic, so what sets the speed is energy per FLOP, not peak FLOPS. The slider is <b>&eta;</b>, how much less energy our datapath spends per FLOP than the Blackwell silicon we measured. Everything else is held fixed: same workload, same utilization model for both chips, and the uncertain inputs swept rather than guessed. Transformer ASICs have historically landed somewhere around &eta; = 2&ndash;5.</p>
     <div class="controls">
       <label for="eta">η =</label>
       <input type="range" id="eta" min="0" max="8" step="1" value="4" aria-label="etch efficiency advantage eta">
