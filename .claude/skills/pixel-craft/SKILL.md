@@ -24,7 +24,7 @@ the medium are the same idea:
 - A pixel is the atomic unit of a grid, which is what a die floorplan is. Sprite work and chip
   layout are both "commit to a grid and place every cell deliberately."
 - Limited palettes and low frame counts are **constraint-driven design under a hard budget** —
-  the exact argument the pitch makes about 30W and 5Hz. The art should feel engineered to fit,
+  the exact argument the pitch makes about 40W and 5Hz. The art should feel engineered to fit,
   because that is the company's whole thesis.
 - Etching is permanence. Hard edges, no blur, no gradient — nothing soft or provisional.
 
@@ -40,7 +40,7 @@ Second, **do not let the retro styling imply the technology is retro.** The read
 toward the vocabulary of silicon and robotics.
 
 The audience is robotics engineers, silicon people, and deep-tech investors who detect
-overclaiming instantly. Concrete numbers (5Hz, 30W, 4B parameters, 2×B200) are the most
+overclaiming instantly. Concrete numbers (5Hz, 40W, 14B parameters, 2×B200) are the most
 persuasive material available — set them as the hero content and let the art frame them,
 rather than writing adjectives about ambition.
 
