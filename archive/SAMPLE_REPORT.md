@@ -26,10 +26,10 @@
 
 | Rank | Input | Influence (std of binding feasibility margin) |
 | --- | --- | --- |
-| 1 | bw_util | 6.9733 |
-| 2 | n_new | 5.5753 |
-| 3 | step_compression | 1.1911 |
-| 4 | e_byte_hbm_pj | 0.3697 |
+| 1 | bw_util | 5.2300 |
+| 2 | n_new | 4.1815 |
+| 3 | step_compression | 0.8933 |
+| 4 | e_byte_hbm_pj | 0.2772 |
 
 ## Thor bandwidth wall
 
@@ -38,8 +38,8 @@
 
 ## A-vs-B gap (cost of generality)
 
-- A perf/watt: 0.002835; B perf/watt: 0.002782
-- Gap fraction (B's cost of generality): +1.9% (90% CI [-91.0%, +94.7%])
+- A perf/watt: 0.002833; B perf/watt: 0.002782
+- Gap fraction (B's cost of generality): +1.8% (90% CI [-91.1%, +94.7%])
 - A region: p_feasible=0.0%; latency quantiles [p50=277.87 ms, p90=386.01 ms, p99=525.26 ms]; 90% CI on deadline margin [-223.94, +30.42] ms (n=96)
 - B region: p_feasible=0.0%; latency quantiles [p50=278.29 ms, p90=408.62 ms, p99=527.67 ms]; 90% CI on deadline margin [-223.83, +38.36] ms (n=96)
 

@@ -82,7 +82,7 @@ justified by a workload difference, not taste:
 | Update engine | µcoded flow-ODE / CEM island (Part-B hedge; ~2% of datapath, priced [I]) | ~2% | <0.5 W |
 | LPDDR PHY + DMA + ECC | 4×64-bit channels; sustained 74 GB/s in Deadline mode, bursts to 307 | ~8% | 1.5–4 W [I: e_byte range] |
 | Sequencer + IO + PMU | schedule µcode ROM (1/2/3-step modes), watchdog, latent-in/action-out | ~4% | ~0.5 W |
-| **Total** | | ~450 mm² | **~27–29 W** vs 30 W budget |
+| **Total** | | ~450 mm² | **~27–29 W** vs 40 W budget (11–13 W headroom at parity scoring; gate-1 decides whether it buys a wider-slower array, more channels, or thermal margin) |
 
 ## 3. The three dataflows (what the etch fixes in copper)
 

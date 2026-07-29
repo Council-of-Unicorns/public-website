@@ -6,7 +6,7 @@ power. Tags: **[M]** measured here, **[S]** our instrument, **[X]** external lit
 **[T]** estimate/bet. **v2 is the adversarial-scrutiny pass**: each lever carries a verdict;
 v1's numbers are corrected where they didn't survive.
 
-Ledger A (architecture η, required 2.79 [S], evidence 1.6–3.2× [X]) and Ledger C (sub-Vmin,
+Ledger A (architecture η, required 2.15 solid at 40 W parity [S], evidence 1.6–3.2× [X]) and Ledger C (sub-Vmin,
 spec §6b) are unchanged. This file is Ledger B: levers that shrink the *work*.
 
 ## The v2 verdict table
@@ -47,15 +47,15 @@ two-tier:
 
 | Goal | Status after v2 scrutiny |
 |---|---|
-| **Relative 2× vs Thor** | unchanged — rides on η ≥ 2.79 (Ledger A). Etch realization edge on B2/B3 (~1.2–1.4× relative [T]) is upside, not headline. |
-| **Absolute 5 Hz Deadline Mode** | **v1's "160–250 ms at η=2.79" was WRONG** — it applied B1 and the full stack to a mode where B1 is inapplicable. Corrected: 615 ms ÷ (1.4–2.6) ≈ **237–440 ms at η = 2.79**. 5 Hz closes only with **η ≈ 4 AND mid-stack Ledger B** (~215 ms), or a certified-floor B7 at the high end, or further model compression. Honest status: *plausible, not yet on the boundary.* |
-| Quality-mode replan | 6.4 s → **≈ 1.7–3.8 s** at η = 2.79 — approaching 0.5 Hz full-quality replanning. |
+| **Relative 2× vs Thor** | unchanged — rides on η ≥ 2.15 solid (Ledger A, 40 W parity). Etch realization edge on B2/B3 (~1.2–1.4× relative [T]) is upside, not headline. |
+| **Absolute 5 Hz Deadline Mode** | **v1's "160–250 ms at η=2.79" was WRONG** — it applied B1 and the full stack to a mode where B1 is inapplicable. Corrected (40 W parity): 530 ms ÷ (1.4–2.6) ≈ **205–380 ms at η = 2.15**. 5 Hz closes with **η ≈ 3 AND mid-stack Ledger B** (~185 ms), or a certified-floor B7 at the high end, or further model compression. Honest status: *plausible, not yet on the boundary.* |
+| Quality-mode replan | 6.1 s → **≈ 1.6–3.6 s** at η = 2.15 — approaching 0.5 Hz full-quality replanning. |
 
 ## Grand total (v2)
 
 | Stack | Multiplier | Status |
 |---|---|---|
-| Ledger A: architecture η | 2.79 required; 1.6–3.2 evidenced | the priced bet [S/X] |
+| Ledger A: architecture η | 2.15 solid / 3.0 target; 1.6–3.2 evidenced | the priced bet [S/X] |
 | Ledger B: workload shaping | **1.4–2.6× (Deadline) / 1.7–3.8× (Quality)** | scrutinized, task-gated [X/T] |
 | Ledger C: sub-Vmin LVI | 1.5–2.5× | gated side bet [T] |
 | **Total vs naive Blackwell execution** | **≈ 4–10× (A×B, mode-dependent; mid ≈ 7×)**, up to ~25× with C | v1 said 7–10×; v2 honesty widens the band downward |

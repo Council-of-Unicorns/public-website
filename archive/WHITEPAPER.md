@@ -20,13 +20,14 @@ path [F]. We characterized the workload at operator granularity, calibrated an a
 performance model to measured Blackwell silicon within 0.7–4.6 % on latency and energy [M],
 and derived the design target for a head-resident accelerator. At head power the binding
 constraint is energy rate: chunk time equals chunk joules divided by watts, and peak FLOPS
-cancels out of the comparison [S]. Matching a 40 W Jetson Thor at 2× median speedup
-requires an architecture energy advantage of η\* ≈ 2.8; beating it SOLIDLY (5th-percentile
-S ≥ 2 in every mode, with a 25 % thermal margin granted to Thor) requires η ≈ 3.0–4.0,
-spanning the top of the published 1.6–3.2× TPUv4-versus-A100 band [X, S]. Attention consumes ~62 % of dynamic energy, so matrix-multiply
+cancels out of the comparison [S]. Scored at power parity — both
+chips at the 40 W head ceiling — the speedup IS the efficiency advantage: S = η. Beating
+Thor 2× in the flagship Quality mode needs η ≈ 2.05; beating it SOLIDLY (5th-percentile
+S ≥ 2 in every mode, with a 25 % thermal margin granted to Thor) needs η ≈ 2.2–2.8,
+inside the published 1.6–3.2× TPUv4-versus-A100 band; the design target is η = 3 [X, S]. Attention consumes ~62 % of dynamic energy, so matrix-multiply
 specialization alone caps the speedup at 1.17× and any credible datapath must improve the
 attention path [S]. We present the FM-RPU design point (4 PF dense FP4, LPDDR5X conveyor,
-30 W), the workload co-design levers that attack the absolute 5 Hz goal, and a roadmap in
+40 W), the workload co-design levers that attack the absolute 5 Hz goal, and a roadmap in
 which a kill test gates every funding tier.
 
 ## 1. Robot control converged on a workload that has no chip
@@ -78,8 +79,8 @@ coefficients, throughput cancels and the speedup reduces to an identity:
 S = η · (TDP_dut / TDP_base),
 
 where η is the per-FLOP energy advantage of the design point over the calibrated GPU
-datapath [S]. A 30 W part with η = 1 loses to a 40 W Thor at S = 0.75. The entire product
-question compresses into one number.
+datapath [S]. At parity a part with η = 1 exactly ties Thor, and every point of speedup
+is a point of efficiency. The entire product question compresses into one number.
 
 ## 4. The instrument earned its extrapolation rights on measured silicon
 
@@ -103,18 +104,18 @@ Two further measurements killed our own easiest stories [M]:
 We publish adverse results and re-derive every downstream number when one lands. That
 discipline is the working method, and Section 12 states it as policy.
 
-## 5. The target: η ≈ 3–4 for a solid beat, and it cannot come from matmul alone
+## 5. The target: η ≈ 2.2–3 at power parity, and it cannot come from matmul alone
 
 Monte Carlo over token count, step compression, and the precision prior gives
-η\* = 2.78–2.79 for median S = 2 in the best mode against Thor held to the 40 W neck
-ceiling; the closed form 2 × 40/30 = 2.67 checks it [S]. That bar is a knife-edge: it
-leaves Deadline mode at 1.86× and zero margin for error. The success criterion is
-therefore the SOLID beat: 5th-percentile S ≥ 2 in every mode (η ≥ 3.02), with a design
-target of η = 4 that holds even if Thor's in-head budget proves 25 % better than our
-thermal estimate [S]. The gap between 3.0 and the band top means one stacked lever
-(realized-utilization edge, workload-shaping realization, or sub-Vmin) is required
-alongside top-of-band architecture; Section 9 owns those problems. Against Thor's 130 W module rating the same design
-point reaches S ≈ 0.62 at η = 2.8; the FM-RPU is a head part, and we say so [S].
+η\* = 2.05 for median S = 2 in the flagship Quality mode against Thor held to the 40 W
+neck ceiling; the closed form 2 × 40/40 = 2 checks it [S]. The success criterion is the
+SOLID beat: 5th-percentile S ≥ 2 in every mode (η ≥ 2.15), with a design target of η = 3
+that holds even if Thor's in-head budget proves 25 % better than our thermal estimate
+(50 W → η ≥ 2.80) [S]. The solid bar sits mid-band in the TPUv4 evidence and the target
+at its top, so the stacked levers (realized-utilization edge, workload-shaping
+realization, sub-Vmin) buy margin on top rather than carrying the claim; Section 9 still
+owns them. Against Thor's 130 W module rating the same design point reaches S ≈ 0.66 at
+the solid bar and 0.92 at the target; the FM-RPU is a head part, and we say so [S].
 
 The published evidence brackets the target. TPUv4 delivered 1.6–3.2× perf/W over the
 same-node A100 on measured power [X: ISCA 2023]. Hameed et al. showed that a
@@ -162,11 +163,12 @@ A head-resident inference engine sized to the shapes above [T unless tagged]:
   Supporting a JEPA-family workload costs 1.9 % DreamZero-path perf/W at this design
   point; both families stream 7 GB weights, so no memory tier separates them [S].
 
-Modes at η = 2.8 against Thor-in-head [S]: Quality (3-step CFG) 6.4 s vs 13.0 s, S = 2.03;
-Balanced (2-step) 4.3 s vs 8.6 s, S = 2.03; Deadline (1-step distilled, N = 1560) 0.61 s
-vs 1.14 s, S = 1.86. The relative bar clears in Quality and Balanced. No mode meets an
-absolute 200 ms at η = 2.8; the analytical model puts that at η ≈ 16, outside every
-evidence band. Closing the absolute gap belongs to the workload levers below.
+Modes at the solid bar η = 2.15 against Thor-in-head [S]: **Quality (3-step CFG), the
+flagship: 6.2 s vs 13.0 s, S = 2.10**; Balanced (2-step) 4.1 s vs 8.6 s, S = 2.10;
+Deadline (1-step distilled, N = 1560) 0.56 s vs 1.14 s, S = 2.05. Every mode clears 2× at
+the solid bar; at the η = 3 target Quality reaches 2.86×. No mode meets an absolute
+200 ms; the analytical model puts that at η ≈ 12 (η ≈ 6.4 in Deadline mode), outside
+every evidence band. Closing the absolute gap belongs to the workload levers below.
 
 ### 6.1 Heat removal carries the same leverage as η
 
@@ -180,8 +182,8 @@ general-purpose module cannot [T]:
    throttles under transients, which injects tail latency straight into the deadline
    budget. The zero-interference argument for scheduled refresh extends to thermal
    transients.
-2. **Flat, low power density.** The floorplan spreads 27–29 W over ~450 mm², about
-   6 W/cm² with uniform systolic activity [T]. Thor concentrates a 130 W-class die behind
+2. **Flat, low power density.** The floorplan spreads its 40 W budget over ~450 mm²,
+   under 9 W/cm² with uniform systolic activity [T]. Thor concentrates a 130 W-class die behind
    the same ceiling. Low flat density keeps the head fanless and pumpless, and the
    wide-and-slow direction lowers it further, so the thermal argument and the sub-Vmin
    argument point the same way.

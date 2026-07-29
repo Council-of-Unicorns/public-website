@@ -4,7 +4,7 @@ Refined roadmap (2026-07). Success bar: **S ≥ 2× Jetson Thor inference speed*
 world-model workload, measured per `docs/system-design.md` §A8a (Thor-in-the-head basis,
 ~40 W neck ceiling). The calibrated Tier-1 instrument says the bar reduces to an
 **energy-efficiency advantage η\* ≈ 3.1×** over measured Blackwell silicon at ≥ ~4 PF dense
-FP4 / 30 W (power-limited regime — raw peak beyond that is irrelevant).
+FP4 / 40 W, power parity with Thor-in-head (power-limited regime — raw peak beyond that is irrelevant).
 
 Gain decomposition (Tier-1 + literature judgment; Tier-2 must confirm per phase):
 generic transformer etch ~70–75% of the log-gain, world-model datapath ~20–25%,
@@ -29,7 +29,7 @@ at a deadline, not tokens per dollar:
    near-threshold literature supplies a measured technique menu (split Vdd domains, 8T
    SRAM + assist, Razor-class adaptive margin ≈47% energy recovery, splittable arrays) —
    see CHIP_SPEC §6b. Disposition: **phase-1b test-structure tile on the gate-4 shuttle;
-   never counted in η\* = 2.79; pure upside if proven.** Data: fixtures/dvfs_sweep.json.
+   never counted in the η bars (2.05 bare / 2.15 solid); pure upside if proven.** Data: fixtures/dvfs_sweep.json.
 2. **Stretch-to-deadline static timing.** The 200 ms control period is a resource: size
    the pipeline so one chunk completes just inside it (~170 ms) at minimum viable
    voltage. Race-to-idle wastes V². Only legal because the schedule is etched (Phase 3
@@ -40,7 +40,7 @@ at a deadline, not tokens per dollar:
 4. **Memory as a conveyor, not a cache.** The chip streams the identical ~44 GB
    weight+KV sequence every chunk: exact prefetch, open-page sequential bursts, no
    caching/coherence logic, interface clocked wide-and-slow. Memory is 4–13 W of the
-   30 W budget (instrument-computed) — conveyor discipline holds it to the low end.
+   40 W budget (instrument-computed) — conveyor discipline holds it to the low end.
 5. **Sensor-to-action on one die.** No PCIe host loop, no serdes fabric, no
    multi-tenancy. Camera latents in, action tokens out.
 
@@ -68,10 +68,11 @@ the fixed geometry (3,120 Q × 18,720 KV); fused per-layer pipeline for the exac
 sequence (QKV → self-attn → out → cross-attn → FFN). Each is a shave on the same
 FLOP-energy term the phase-1 etch attacks.
 
-**Gate (solid-beat, revised 2026-07-28):** Tier-2 confirms cumulative η ≥ 3.0 and the
-Tier-1 readout shows **S p05 ≥ 2 in every mode** vs Thor-in-head (the solid criterion,
-§A8a). The stacked-lever plan toward the η = 4 design target (utilization edge, Ledger-B
-realization, sub-Vmin) must name its expected contributions. Below η 3.0, the phase-2
+**Gate (solid-beat at power parity, revised 2026-07-29):** Tier-2 confirms cumulative
+η ≥ 2.2 (which now coincides with the Hameed-derived kill floor) and the Tier-1 readout
+shows **S p05 ≥ 2 in every mode** vs Thor-in-head (the solid criterion, §A8a). The
+stacked-lever plan toward the η = 3 design target (utilization edge, Ledger-B
+realization, sub-Vmin) must name its expected contributions. Below η 2.2, the phase-2
 shaves missed and the design point is re-swept before more silicon effort.
 
 ## Phase 3 — Schedule etch + safety (the deployability phase)

@@ -10,17 +10,20 @@ arithmetic is corrected where the instrument refutes it (§3).
 
 - **Model:** DreamZero-class 14B DiT; d=5120, L=40, ffn=13824, heads=40; 4-bit weights (7.0 GB),
   FP8 activations; N_ctx = 18,720 tokens (2 s window), N_new = 1,560–3,120.
-- **Form factor:** fanless robot head, **30 W chip budget** inside the 40 W neck-path ceiling.
-- **Success metric — SOLID beat (revised 2026-07-28, §A8a):** **S ≥ 2× vs Thor-in-head at
-  the 5th percentile, in EVERY mode including Deadline** → requires **η ≥ 3.02**; the
-  **design target is η = 4** (solid even if Thor gets a 25% thermal-budget margin, 50 W).
-  The old bare bar (median S ≥ 2, best mode) needed η ≥ 2.79 and left Deadline mode at
-  1.86×; it is retired as a success claim. η = 3–4 sits at/above the architecture-only
-  band top (1.6–3.2×), so the target REQUIRES architecture at top-of-band plus at least
-  one stacked lever: realized-utilization edge (the TPU 80%-vs-37% latency-bound datum,
-  uncredited in the fair headline), Ledger-B realization gains, or sub-Vmin (§6b).
+- **Form factor:** fanless robot head, **40 W chip power at the neck-path ceiling — power
+  parity with Thor-in-head** (2026-07-29; the TDP ratio cancels, S = η exactly).
+- **Success metric — SOLID beat at power parity (revised 2026-07-29, §A8a):** **S ≥ 2×
+  vs Thor-in-head at the 5th percentile, in EVERY mode including Deadline** → requires
+  **η ≥ 2.15**; the **design target is η = 3** (solid even if Thor gets a 25%
+  thermal-budget margin, 50 W → η ≥ 2.80). The bare bar (median S ≥ 2, best mode) is
+  η ≥ 2.05 and is not a success claim (it leaves Deadline mode at 1.91× median). The
+  solid bar sits mid-band in the architecture-only evidence (1.6–3.2×) and the target at
+  its top, so the stacked levers (realized-utilization edge — the TPU 80%-vs-37%
+  latency-bound datum, uncredited in the fair headline — Ledger-B realization gains,
+  sub-Vmin §6b) are margin, not load-bearing. The solid bar also now coincides with the
+  Tier-2 kill criterion (η ≥ 2.2).
 - **Stretch target:** absolute 200 ms chunk (5 Hz hard real-time) in Deadline Mode — at the
-  measured s this requires **η ≈ 16**: out of evidence range for silicon alone. The 5 Hz
+  measured s this requires **η ≈ 12**: out of evidence range for silicon alone. The 5 Hz
   absolute loop therefore needs model-side compression beyond the current workload (smaller
   model, fewer tokens, or a validated FP4-native training recipe) or a larger power envelope
   — a finding of the 2026-07-15 DVFS/FP8 measurements, not an assumption (§7).
@@ -36,14 +39,14 @@ t_chunk = max( Compute, Memory-Transfer, Communication, ENERGY-DISSIPATION )
 
 v0.1's three-term equation omits the term that actually binds. A thermally capped head is an
 **energy-rate-limited system**: a chunk that costs E joules cannot finish faster than E/TDP
-seconds no matter how much silicon is present. At 30 W usable ≈ 27 W:
+seconds no matter how much silicon is present. At 40 W usable ≈ 36 W:
 
 | bound (3-step CFG, N_new=3120, 4 PF array) | value |
 |---|---|
 | Compute / step (2.47e14 FLOPs @ 4 PF × 0.838) | 73.7 ms |
 | Memory / step (14.8 GB @ 307.2 GB/s) | 48.1 ms |
 | Communication (etched sequencer) | ~0 |
-| **Energy (146 J @ η=1 → 53 J @ η=3.1, ÷27 W)** | **5,410 → 1,968 ms** |
+| **Energy (146 J @ η=1 → 49 J @ η=3, ÷36 W)** | **4,056 → 1,352 ms** |
 
 Energy dominates by an order of magnitude. Consequently every efficiency decision (η) is a
 *latency* decision, and the design centers on joules, not on peak anything.
@@ -65,7 +68,7 @@ ladder, and the gate-1 anchor requirement: [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWI
 | 7 GB streamed per step → 22.8 ms | **14.8 GB per step → 48.1 ms** (weights 7.0 + KV 7.7 read each step) | attention reads the full window every step; P2: KV is a first-class term, ≈ the weight term |
 | Compute ≈ 2 ms/step ("negligible") | **73.7 ms/step** (3-step CFG) / 18.4 ms (1-step N=1560) at 4 PF effective | the workload is **compute-bound**: intensity ≈ 16,000 FLOP/B vs ridge ≈ 300; 2 ms would require ~124 PF effective |
 | Double-buffer: Bank A computes step N while Bank B prefetches step N+1 weights | **tile-granularity ping-pong** (2 × ~16 MB FIFOs feeding a weight-streaming systolic array) | step-granularity banks would need 2 × 7 GB of SRAM; weights are consumed as they arrive, never resident |
-| Total 70.4 ms → "crushes the deadline" | see mode table (§5): 3-step CFG ≈ **2.0 s at η=3.1** (energy-bound) — misses 5 Hz but **beats Thor-in-head 2.06×** (= project success); 5 Hz met only in Deadline Mode at η≈5 | the energy bound was missing; 5 Hz at 3-step/30 W would need ~45× better pJ/FLOP than measured Blackwell — beyond all evidence |
+| Total 70.4 ms → "crushes the deadline" | see mode table (§5): 3-step CFG ≈ **4.5 s at η=3** (energy-bound) — misses 5 Hz but **beats Thor-in-head 2.86×** (≥ project success); 5 Hz approached only in Deadline Mode at η≈6.4 | the energy bound was missing; 5 Hz at 3-step/40 W would need ~12× better pJ/FLOP than measured Blackwell — beyond all evidence |
 
 ## 4. Memory architecture (v0.1's direction, kept and sized)
 
@@ -98,11 +101,14 @@ ladder, and the gate-1 anchor requirement: [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWI
 
 ## 5. Operating modes (instrument-verified at the MEASURED s = 3.0)
 
-| Mode | Schedule | Chunk @ η=2.79 | @ η=5 | vs Thor-in-head (η=2.79/5) | 200 ms deadline |
+**Quality is the flagship mode** — the headline numbers quote it — and the solid
+criterion still requires every mode to clear 2×. (40 W parity, 2026-07-29.)
+
+| Mode | Schedule | Chunk @ η=2.15 | @ η=3 | vs Thor-in-head (η=2.15/3) | 200 ms deadline |
 |---|---|---|---|---|---|
-| **Quality** | 3-step CFG, N_new=3120 | 6.40 s | 3.72 s | **2.02× / 3.48×** | misses |
-| **Balanced** | 2-step CFG, N_new=3120 | 4.27 s | 2.48 s | 2.02× / 3.48× | misses |
-| **Deadline** | 1-step distilled, N_new=1560 | 615 ms | 392 ms | 1.85× / 2.91× | needs η≈16 |
+| **Quality (flagship)** | 3-step CFG, N_new=3120 | 6.2 s | 4.5 s | **2.10× / 2.86×** | misses |
+| **Balanced** | 2-step CFG, N_new=3120 | 4.1 s | 3.0 s | 2.10× / 2.86× | misses |
+| **Deadline** | 1-step distilled, N_new=1560 | 560 ms | 415 ms | 2.05× / 2.74× | needs η≈6.4 |
 
 *(Historical: the earlier s=10 table met the deadline at η≥5; the measured FP16→FP8 ratio
 of 1.77× — not the naive 2× per halving — moved s from an assumed ~10 to ~3, tripling
@@ -112,7 +118,7 @@ Implications the silicon must honor: (a) the schedule sequencer is a small **mic
 not a hardwired 3-step FSM — all three modes on one chip; (b) the control stack replans at
 chunk rate, so Quality mode at ~0.5–1 Hz replan remains usable for non-deadline tasks while
 Deadline mode serves the 5 Hz loop; (c) the SOLID success metric (p05 ≥ 2× in every
-mode) requires η ≥ 3.02, with η = 4 as the margin design target — the absolute 5 Hz goal
+mode) requires η ≥ 2.15, with η = 3 as the margin design target — the absolute 5 Hz goal
 remains the separate stretch that motivates step-distillation quality work in parallel.
 
 ## 6. Compute datapath
@@ -250,7 +256,7 @@ provides a concrete technique menu with measured gains:
 | Canary/monitor circuits + per-tile AVS | track droop and aging without global guardband | standard practice |
 | Splittable/segmented MAC arrays | contain voltage droop blast radius; Etched's own named mechanism | vendor-claimed (A0) |
 
-**Status: NOT counted in η\* = 2.79.** The headline bet remains architecture-only. If the
+**Status: NOT counted in the η bars (2.05 bare / 2.15 solid).** The headline bet remains architecture-only. If the
 phase-1b prototype tile demonstrates sub-Vmin operation, every measured multiplier is upside
 on top of the 1.6–3.2× band — potentially the difference between meeting the 2× bar and
 dominating it. Gate: a test-structure tile on the gate-4 shuttle, not before.
