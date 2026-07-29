@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Substrate — Feasibility Readout</title>
+<title>Substrate — Feasibility</title>
 <meta name="description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta name="robots" content="noindex, nofollow" />
-<meta property="og:title" content="Substrate — Feasibility Readout" />
+<meta property="og:title" content="Substrate — Feasibility" />
 <meta property="og:description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -34,433 +34,175 @@
   </nav>
 </header>
 
-
-
 <style>
-  :root {
-    --surface: #fbfbf9;
-    --surface-2: #f2f2ee;
-    --ink: #16181d;
-    --ink-2: #5a5e66;
-    --ink-3: #8b8f98;
-    --hair: #e4e4de;
-    --fmrpu: #2a78d6;
-    --b200: #1baf7a;
-    --thor: #eda100;
-    --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
-    --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
-    --good: #0ca30c;
-    --warning: #b97f00;
-    --critical: #d03b3b;
-    --critical-bg: #fbeaea;
-    --mono: ui-monospace, "SF Mono", "Cascadia Code", "JetBrains Mono", Menlo, Consolas, monospace;
-    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --surface: #16181c; --surface-2: #1e2126;
-      --ink: #f2f2ee; --ink-2: #a8adb8; --ink-3: #767b85;
-      --hair: #2a2d33;
-      --fmrpu: #3987e5; --b200: #199e70; --thor: #c98500;
-      --seq-100: #0d366b; --seq-250: #184f95; --seq-400: #256abf;
-      --seq-500: #3987e5; --seq-600: #6da7ec; --seq-700: #b7d3f6;
-      --good: #2fbf2f; --warning: #fab219;
-      --critical: #e05252; --critical-bg: #33191b;
-    }
-  }
-  :root[data-theme="light"] {
-    --surface: #fbfbf9; --surface-2: #f2f2ee;
-    --ink: #16181d; --ink-2: #5a5e66; --ink-3: #8b8f98;
-    --hair: #e4e4de;
-    --fmrpu: #2a78d6; --b200: #1baf7a; --thor: #eda100;
-    --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
-    --seq-500: #256abf; --seq-600: #184f95; --seq-700: #0d366b;
-    --good: #0ca30c; --warning: #b97f00;
-    --critical: #d03b3b; --critical-bg: #fbeaea;
-  }
-  :root[data-theme="dark"] {
-    --surface: #16181c; --surface-2: #1e2126;
-    --ink: #f2f2ee; --ink-2: #a8adb8; --ink-3: #767b85;
-    --hair: #2a2d33;
-    --fmrpu: #3987e5; --b200: #199e70; --thor: #c98500;
-    --seq-100: #0d366b; --seq-250: #184f95; --seq-400: #256abf;
-    --seq-500: #3987e5; --seq-600: #6da7ec; --seq-700: #b7d3f6;
-    --good: #2fbf2f; --warning: #fab219;
-    --critical: #e05252; --critical-bg: #33191b;
-  }
-
+  :root { --surface:#fbfbf9; --surface-2:#f2f2ee; --ink:#16181d; --ink-2:#52565e; --ink-3:#8b8f98;
+    --hair:#e4e4de; --accent:#2a78d6; --good:#0ca30c; --crit:#d03b3b;
+    --mono: ui-monospace,"SF Mono","Cascadia Code","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  @media (prefers-color-scheme: dark) { :root { --surface:#16181c; --surface-2:#1e2126; --ink:#f2f2ee;
+    --ink-2:#aeb3bd; --ink-3:#767b85; --hair:#2a2d33; --accent:#3987e5; --good:#2fbf2f; --crit:#e05252; } }
+  :root[data-theme="light"] { --surface:#fbfbf9; --surface-2:#f2f2ee; --ink:#16181d; --ink-2:#52565e;
+    --ink-3:#8b8f98; --hair:#e4e4de; --accent:#2a78d6; --good:#0ca30c; --crit:#d03b3b; }
+  :root[data-theme="dark"] { --surface:#16181c; --surface-2:#1e2126; --ink:#f2f2ee; --ink-2:#aeb3bd;
+    --ink-3:#767b85; --hair:#2a2d33; --accent:#3987e5; --good:#2fbf2f; --crit:#e05252; }
   * { box-sizing: border-box; }
-  body {
-    background: var(--surface); color: var(--ink);
-    font: 15px/1.55 var(--sans);
-    margin: 0; padding: 0 20px 72px;
-  }
-  main { max-width: 1080px; margin: 0 auto; }
-
-  .banner {
-    display: flex; gap: 12px; align-items: baseline;
-    background: var(--critical-bg);
-    border-left: 3px solid var(--critical);
-    padding: 12px 16px; margin: 20px 0 28px;
-    font-family: var(--mono); font-size: 13px;
-  }
-  .banner .tag { color: var(--critical); font-weight: 700; letter-spacing: .04em; white-space: nowrap; }
-  .banner .why { color: var(--ink-2); }
-
-  header h1 {
-    font-family: var(--mono); font-size: 26px; font-weight: 600;
-    letter-spacing: -0.01em; margin: 0 0 4px; text-wrap: balance;
-  }
-  header .sub { color: var(--ink-2); margin: 0 0 16px; max-width: 68ch; }
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
-  .chip {
-    font-family: var(--mono); font-size: 12px;
-    background: var(--surface-2); border: 1px solid var(--hair);
-    padding: 3px 10px; border-radius: 3px; color: var(--ink-2);
-    white-space: nowrap;
-  }
-  .chip b { color: var(--ink); font-weight: 600; }
-
-  section { margin: 44px 0 0; }
-  .eyebrow {
-    font-family: var(--mono); font-size: 11px; font-weight: 600;
-    letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
-    margin: 0 0 4px;
-  }
-  h2 { font-size: 19px; margin: 0 0 6px; text-wrap: balance; }
-  .note { color: var(--ink-2); font-size: 14px; max-width: 72ch; margin: 0 0 16px; }
-  .note b { color: var(--ink); }
-
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-  .tile {
-    border: 1px solid var(--hair); border-radius: 4px;
-    padding: 14px 16px; background: var(--surface);
-  }
-  .tile .lbl { font-size: 12.5px; color: var(--ink-2); }
-  .tile .val { font-family: var(--mono); font-size: 30px; font-weight: 650; line-height: 1.15; margin-top: 2px; }
-  .tile .cmp { font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); margin-top: 4px; }
-  .tile .val.crit { color: var(--critical); }
-
-  table { border-collapse: collapse; width: 100%; font-size: 14px; }
-  th {
-    text-align: left; font-family: var(--mono); font-size: 11px;
-    text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3);
-    font-weight: 600; padding: 8px 12px 6px; border-bottom: 1px solid var(--hair);
-  }
-  td { padding: 9px 12px; border-bottom: 1px solid var(--hair); font-variant-numeric: tabular-nums; }
-  td.num, th.num { text-align: right; }
-  .rowkey { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; }
-  .swatch { width: 10px; height: 10px; border-radius: 2px; flex: none; }
-  .pill {
-    display: inline-flex; align-items: center; gap: 5px;
-    font-family: var(--mono); font-size: 12px; font-weight: 600;
-    padding: 2px 8px; border-radius: 3px; white-space: nowrap;
-  }
-  .pill.fail { color: var(--critical); background: color-mix(in srgb, var(--critical) 10%, transparent); }
-  .pill.pass { color: var(--good); background: color-mix(in srgb, var(--good) 10%, transparent); }
-
-  .chart-box { border: 1px solid var(--hair); border-radius: 4px; padding: 16px; overflow-x: auto; }
-  .chart-box svg { display: block; width: 100%; height: auto; }
-  .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 0 0 12px; font-size: 13px; color: var(--ink-2); }
-  .legend .key { display: inline-flex; align-items: center; gap: 7px; }
-  .legend .line { width: 16px; height: 2px; border-radius: 1px; }
-  .legend .box { width: 11px; height: 11px; border-radius: 2px; }
-
-  .duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  @media (max-width: 860px) { .duo { grid-template-columns: 1fr; } }
-
-  #tooltip {
-    position: fixed; pointer-events: none; z-index: 10; display: none;
-    background: var(--ink); color: var(--surface);
-    font: 12.5px/1.5 var(--mono);
-    padding: 8px 11px; border-radius: 4px; max-width: 320px;
-    box-shadow: 0 4px 16px rgba(0,0,0,.25);
-  }
-  #tooltip .t-title { font-weight: 700; margin-bottom: 3px; }
-  #tooltip .t-row { display: flex; gap: 10px; justify-content: space-between; }
-  #tooltip .t-row b { font-weight: 650; }
-
-  svg text { font-family: var(--mono); fill: var(--ink-2); }
-  svg .axis-lbl { font-size: 11px; }
-  svg .tick-lbl { font-size: 10.5px; fill: var(--ink-3); }
-  svg .d-lbl { font-size: 11px; fill: var(--ink); font-weight: 600; }
-  svg .grid { stroke: var(--hair); stroke-width: 1; }
-  svg .mark:focus { outline: none; }
-  svg .mark:focus-visible { stroke: var(--ink); stroke-width: 2; }
-
-  footer {
-    margin-top: 56px; padding-top: 16px; border-top: 1px solid var(--hair);
-    font-family: var(--mono); font-size: 12px; color: var(--ink-3);
-  }
-  footer div { margin: 2px 0; }
-  @media (prefers-reduced-motion: no-preference) {
-    .tile, .chart-box { transition: border-color .15s ease; }
-    .tile:hover, .chart-box:hover { border-color: var(--ink-3); }
-  }
-
-/* ---- house palette override (site design system) ---------------------- */
-:root, :root[data-theme="light"], :root[data-theme="dark"] {
-  --surface:   #100E18;
-  --surface-2: #221E30;
-  --inset:     #171522;
-  --ink:       #F4EFE4;
-  --ink-2:     #A79FB5;
-  --ink-3:     #948CAB;
-  --hair:      #2E2941;
-
-  --fmrpu:     #E8A552;
-  --thor:      #5C97A0;
-  --mem:       #6FB3AE;
-  --b200:      #9A8CC4;
-  --tax:       #C0998C;
-  --blk-face:  #BDB6C6;
-  --blk-face-on: #E4DECF;
-
-  --seq-100:   #4A2338;
-  --seq-250:   #7A3B22;
-  --seq-400:   #B5652F;
-  --seq-500:   #D98E4A;
-  --seq-600:   #E8A552;
-  --seq-700:   #F0C176;
-
-  --good:      #5FA36B;
-  --warning:   #C4762F;
-  --critical:  #D2685A;
-  --critical-bg: #2A1A22;
-
-  --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-  --sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-
-  --px: 4px;
-  --pixel: "Silkscreen", ui-monospace, monospace;
-}
-
-/* ---- house treatment: hard edges, no blur, pixel accents -------------- */
-body { background: var(--surface); color: var(--ink); }
-
-*, *::before, *::after { border-radius: 0 !important; }
-svg rect, svg circle { rx: 0; }
-
-h1 {
-  font-family: var(--sans) !important;
-  font-weight: 300 !important;
-  font-size: clamp(28px, 4.4vw, 44px) !important;
-  letter-spacing: -0.02em !important;
-  line-height: 1.14 !important;
-  color: var(--ink);
-}
-
-h2 { font-family: var(--sans); font-weight: 400; }
-
-.eyebrow {
-  font-family: var(--sans) !important;
-  font-size: 12px !important;
-  line-height: 20px !important;
-  letter-spacing: .1em !important;
-  text-transform: uppercase;
-  color: var(--fmrpu) !important;
-}
-
-.chip, button, .pill, .tile .val {
-  font-family: var(--pixel) !important;
-  font-size: 8px !important;
-  line-height: 16px !important;
-  letter-spacing: 1px;
-}
-
-/* Long strings stay in the reading face — Silkscreen at 8px is unreadable
-   past a few words (typography.md). */
-footer, .readout, .note, .sub { font-family: var(--sans) !important; }
-footer { font-size: 13px !important; line-height: 20px !important; color: var(--ink-3); }
-.readout { font-size: 13px !important; }
-
-.tile .val { font-size: 24px !important; line-height: 32px !important; }
-
-button {
-  padding: var(--px) calc(var(--px) * 3) !important;
-  min-height: calc(var(--px) * 8);
-  background: var(--surface-2);
-  border: var(--px) solid var(--hair);
-  color: var(--ink);
-  cursor: pointer;
-}
-button:hover { border-color: var(--fmrpu); color: var(--fmrpu); }
-button[aria-pressed="true"] { border-color: var(--fmrpu); color: var(--fmrpu); }
-
-.chip { padding: var(--px) calc(var(--px) * 2) !important; }
-
-.panel, .chart-box, .tile { border: 1px solid var(--hair); background: var(--surface); }
-
-#tooltip {
-  background: var(--surface-2) !important;
-  color: var(--ink) !important;
-  border-left: var(--px) solid var(--fmrpu);
-  box-shadow: var(--px) var(--px) 0 rgba(0,0,0,.55) !important;
-  font-family: var(--mono) !important;
-}
-
-.banner {
-  border-left: var(--px) solid var(--warning) !important;
-  flex-wrap: wrap;            /* long banner text must wrap on a phone */
-  min-width: 0;
-}
-.banner .why { min-width: 0; }
-.banner .tag { color: var(--warning) !important; }
-
-table { font-variant-numeric: tabular-nums; }
-th { font-family: var(--pixel) !important; font-size: 8px !important; letter-spacing: 1px; color: var(--fmrpu) !important; }
-
-input[type="range"] { accent-color: var(--fmrpu); }
-
-::selection { background: var(--fmrpu); color: var(--surface); }
-:focus-visible { outline: var(--px) solid var(--fmrpu); outline-offset: var(--px); }
-
-main { max-width: 1088px; }
-
-/* chip.html sets header{margin-top:34px}, which leaked onto the shared nav. */
-body.ported header.nav { margin-top: 0; }
-
-/* Slider was a 16px-tall target; 24px is the minimum. */
-input[type="range"] { height: 24px; }
-
-/* Charts keep their designed type size and scroll rather than shrink. */
-.panel, .chart-box { overflow-x: auto; }
-.panel svg, .chart-box svg { width: 100%; height: auto; }
-
-svg .blk-lbl { fill: #14121C !important; }
-svg .blk-sub { fill: #241F30 !important; }
-svg .die-lbl { fill: var(--ink) !important; }
+  body { background:var(--surface); color:var(--ink); font:17px/1.7 var(--sans); margin:0; padding:0 24px 90px; }
+  main { max-width: 720px; margin: 0 auto; }
+  .site-nav { max-width:720px; margin:0 auto; display:flex; gap:20px; align-items:baseline;
+    padding:18px 0 14px; border-bottom:1px solid var(--hair); font:600 13px var(--mono); }
+  .site-nav .brand { color:var(--accent); font-weight:700; letter-spacing:.06em; margin-right:6px; }
+  .site-nav a { color:var(--ink-3); text-decoration:none; }
+  .site-nav a:hover { color:var(--ink); }
+  .site-nav a.active { color:var(--ink); border-bottom:2px solid var(--accent); padding-bottom:2px; }
+  h1 { font-family:var(--mono); font-size:26px; line-height:1.3; margin:36px 0 18px; letter-spacing:-.01em; text-wrap:balance; }
+  h2 { font-size:20px; margin:40px 0 12px; }
+  p { color:var(--ink-2); margin:0 0 18px; }
+  p b { color:var(--ink); }
+  .chart-box { border:1px solid var(--hair); border-radius:6px; padding:18px; margin:22px 0; overflow-x:auto; }
+  .chart-box svg { display:block; width:100%; height:auto; }
+  svg text { font-family:var(--mono); fill:var(--ink-2); }
+  svg .tick { font-size:11px; fill:var(--ink-3); }
+  svg .lbl { font-size:12px; fill:var(--ink); font-weight:600; }
+  svg .grid { stroke:var(--hair); stroke-width:1; }
+  .tbl { overflow-x:auto; margin:16px 0 22px; }
+  table { border-collapse:collapse; width:100%; font-size:14.5px; }
+  th { text-align:left; font:600 11px var(--mono); text-transform:uppercase; letter-spacing:.07em;
+    color:var(--ink-3); padding:8px 10px 6px; border-bottom:1px solid var(--hair); }
+  td { padding:9px 10px; border-bottom:1px solid var(--hair); color:var(--ink-2); font-variant-numeric:tabular-nums; }
+  td:first-child { color:var(--ink); }
+  .foot { margin-top:48px; padding-top:16px; border-top:1px solid var(--hair); font:12.5px var(--mono); color:var(--ink-3); }
 </style>
 
-<main id="main" tabindex="-1">
-  <div class="banner" role="alert">
-    <span class="tag">CALIBRATED — WITH LIMITS</span>
-    <span class="why">Gate passes on four measured RTX PRO 6000 anchors (0.7–4.6 % latency, 0.2–2.4 % energy). The <b>Jetson Thor and B200 rows are still grounded on placeholder anchors</b> that miss by 40–65 %, so read those two comparisons as indicative, not settled.</span>
-  </div>
+<main>
+<h1>Same power as the best edge GPU. How much faster is a chip built for one job?</h1>
 
-  <header>
-    <p class="eyebrow">The instrument</p>
-    <h1>Staying a multiple ahead of Jetson Thor</h1>
-    <p class="sub">The question that matters is not whether today&rsquo;s largest world model runs in a head today. Models are shrinking, silicon keeps improving, and that bar moves on its own. What we care about is staying <b>a fixed multiple ahead of Jetson Thor</b> while it moves. This page is the raw readout of the constraint everything else sits on, and it does not flatter us: <b>our own row is scored with no architecture advantage at all</b>. That is on purpose. It is the floor, not the forecast.</p>
-    <div class="chips" id="chips"></div>
-  </header>
+<p>We compare our chip and NVIDIA's Jetson Thor at identical power, 40 watts, the most a
+robot's head can cool. At matched power the physics is clean: the speed ratio equals the
+efficiency ratio, exactly. Beating Thor twice over means using half the energy per
+operation. Purpose-built chips have delivered gains in that range before, and this page
+shows the test, the result, and what would prove us wrong.</p>
 
-  <section id="durability">
-  <p class="eyebrow">Why it lasts</p>
-  <h2>The bar moves. The multiple should not.</h2>
-  <p class="note">Everything above is measured against a 14&nbsp;B model, which is the largest thing anyone
-  is currently trying to put in a head. That is deliberately the hardest case, and it is also a moving
-  target &mdash; the published models have been getting smaller quickly.</p>
-  <div class="chart-box" style="padding:0"><table>
-    <thead><tr><th scope="col">Model</th><th scope="col">Params</th><th scope="col">What it demonstrates</th></tr></thead>
-    <tbody>
-    <tr><td>DreamZero-class</td><td>14&nbsp;B</td><td>the workload we size the chip against</td></tr>
-    <tr><td>LaWAM</td><td>2.3&nbsp;B</td><td>competitive in simulation and on physical robot tasks</td></tr>
-    <tr><td>Efficient-WAM</td><td>1&nbsp;B</td><td>a world-action model with low-cost future imagination</td></tr>
-    <tr><td>SmolVLA</td><td>500&nbsp;M</td><td>distilled from large VLAs, keeping much of the generalization</td></tr>
-    </tbody>
-  </table></div>
-  <p class="note">So absolute feasibility arrives on its own eventually, for us and for NVIDIA alike. Which
-  is why we do not price the company on it. What we price is the ratio, and there are three reasons it
-  survives the bar moving.</p>
-  <p class="note"><b>Power efficiency improves far slower than headline performance.</b> Huang&rsquo;s law is
-  quoted as 25&times; every five years, but that is throughput. Measured FLOP/s per watt doubles roughly
-  every three to four years, and between 2014 and 2020 a ~6&times; gain in FLOPs came with ~2&times; the power
-  draw. Inside a 30&nbsp;W head you do not get to spend more power, so Thor&rsquo;s successors inherit the slow
-  curve rather than the fast one.</p>
-  <p class="note"><b>&eta; is architecture, not process.</b> Our advantage comes from deleting generality:
-  no scheduler, no instruction fetch, no coherent cache, no kernel launches. A node shrink is available to
-  both of us, so it moves both numbers and leaves the ratio where it was. That is what makes &eta; an asset
-  rather than a lead we have to keep re-winning.</p>
-  <p class="note"><b>NVIDIA cannot take it without giving up the product.</b> CUDA generality is what they
-  sell. Hameed and colleagues measured only 5.8&nbsp;% of a general-purpose chip&rsquo;s energy reaching the
-  transistors that do arithmetic; a fixed datapath pushes that toward 35&nbsp;%. Closing that gap means
-  abandoning the generality their entire robotics stack depends on.</p>
-  <p class="note">The honest version of the downside: if models shrink far enough that a general SoC clears
-  the deadline in-head on its own, our wedge narrows from <i>only we can do this</i> to <i>we do it faster
-  and cooler</i>. We would still run the same model on a fraction of the energy, or a considerably larger
-  model in the same envelope &mdash; and on current trends the models are getting more capable, not just
-  smaller.</p>
-  <p class="note" style="font-size:13px">Sources: LaWAM (arXiv:2606.15768), Efficient-WAM (arXiv:2606.10040),
-  NanoVLA (arXiv:2510.25122), Drop-Then-Recovery (arXiv:2606.27755), AC&sup2;-VLA (arXiv:2601.19634),
-  SmolVLA; Hameed et al., ISCA 2010; GPU price-performance and perf/watt trends, Epoch AI.</p>
-</section>
+<h2>How we tested it</h2>
 
-  <section id="verdict-sec">
-    <p class="eyebrow">Verdicts</p>
-    <h2>Nobody clears the bar today, Thor included</h2>
-    <p class="note">On a 14&nbsp;B model at head power, <b>no row clears all three bars &mdash; Jetson Thor included</b>. That is the useful finding. Absolute real-time on today&rsquo;s largest model is not a bar anyone is standing over, so it cannot be the thing that separates us. The comparison that can is relative, and our row here is deliberately its own worst case: same utilization model as the incumbent, no etched-dataflow advantage credited, &eta;&nbsp;=&nbsp;1. It is the number we multiply, not the number we ship.</p>
-    <div class="chart-box" style="padding:0"><table id="verdict"></table></div>
-  </section>
+<p>Before designing any silicon, we built a performance simulator and required it to
+reproduce real hardware before trusting anything it says about hardware that does not
+exist yet. We ran the world-model workload on an NVIDIA Blackwell workstation GPU in our
+lab, measured latency and power at the wall, and tuned the simulator until it matched.
+It now reproduces our measurements within 0.7 to 4.6 percent on latency and within 0.2
+to 2.4 percent on energy, across four different configurations.</p>
 
-  <section>
-    <p class="eyebrow">Headline readings</p>
-    <div class="kpis" id="kpis"></div>
-  </section>
+<p>Every comparison below uses the same rules for both chips: identical power, identical
+utilization assumptions. Our design never gets a friendlier assumption than NVIDIA's.</p>
 
-  <section id="roofline-sec">
-    <p class="eyebrow">Roofline</p>
-    <h2>The workload is compute-bound on every real row</h2>
-    <p class="note">Each chunk re-diffuses about <b>6,240 tokens for every weight fetch</b> &mdash; nothing like the low-batch decode people picture when they call a model bandwidth-bound. Every operator lands far to the right of every device&rsquo;s ridge point, so <b>compute is what binds</b>, not memory. Dots sit on the RPU roofline; hover to see how each operator lands on the other two rows.</p>
-    <div class="legend" id="roofline-legend"></div>
-    <div class="chart-box"><svg id="roofline" viewBox="0 0 1040 420" style="min-width:1040px" role="img"
-      aria-label="Log-log roofline chart: three hardware rows' rooflines with DiT operators plotted by arithmetic intensity"></svg></div>
-  </section>
+<h2>The physics of the problem</h2>
 
-  <section id="latency-sec">
-    <p class="eyebrow">Latency</p>
-    <h2>Where the 200 ms budget goes</h2>
-    <p class="note">Per-stage chunk time against the 200&nbsp;ms deadline, marked by the vertical rule. <b>Thor misses it by about 2.5&times;</b>; our &eta;&nbsp;=&nbsp;1 floor misses by about 9&times;. Only the B200 fits, at datacenter power a thousand miles away, which is the problem this project exists to remove. Nobody reaches 5&nbsp;Hz on a 14&nbsp;B model in a head, which is why the target is a multiple rather than a finish line. Shade encodes pipeline phase; hover any segment.</p>
-    <div class="legend" id="latency-legend"></div>
-    <div class="chart-box"><svg id="latency" viewBox="0 0 1040 240" style="min-width:1040px" role="img"
-      aria-label="Stacked horizontal bars of per-stage latency per hardware row versus the 200 millisecond deadline"></svg></div>
-  </section>
+<p>A robot's head can shed roughly 40 watts of heat through the neck. Under that limit,
+the deciding factor is not how many operations per second a chip can advertise. A job
+that costs 100 joules takes at least 100 joules divided by 40 watts, two and a half
+seconds, no matter how fast the chip claims to be. Both chips hit this wall in our
+simulations, and it makes the comparison exact: with the same watts and the same job,
+speed is energy efficiency. We call the ratio the efficiency advantage.</p>
 
-  <section id="energy-sec">
-    <p class="eyebrow">Energy</p>
-    <h2>Almost all of it is compute</h2>
-    <p class="note">At the measured calibration of about 0.33&nbsp;pJ per FP4 FLOP, compute is <b>~96&nbsp;% of every chunk&rsquo;s energy</b> and every row draws more than its own rated power &mdash; the B200 by more than three times. That is not a modelling artifact left over from placeholder constants; it survived calibration. It is what the energy-rate bound looks like when you hold real silicon to this workload. Moving bytes costs almost nothing next to it; hover for exact joules.</p>
-    <div class="legend" id="energy-legend"></div>
-    <div class="chart-box"><svg id="energy" viewBox="0 0 1040 200" style="min-width:1040px" role="img"
-      aria-label="Stacked horizontal bars of FLOP, byte, and static energy per chunk per hardware row"></svg></div>
-  </section>
+<h2>The result</h2>
 
-  <section id="heatmap-sec">
-    <p class="eyebrow">Design space</p>
-    <h2>Compute moves the answer. Bandwidth does not.</h2>
-    <p class="note">Chunk latency across a grid of FP4 compute against memory bandwidth (<b>darker is faster</b>). The green cells form <b>vertical stripes</b>, which tells you where to spend: compute moves the answer and bandwidth barely does. At one distilled step, anything past 2&nbsp;PF clears at <i>every</i> bandwidth on the chart, Thor&rsquo;s 273&nbsp;GB/s included &mdash; so LPDDR is enough and HBM is not worth its power. <b>No cell clears 30&nbsp;W by brute force</b>, which is precisely why the advantage has to come from energy per FLOP rather than from more silicon.</p>
-    <div class="legend" id="heatmap-legend"></div>
-    <div class="duo">
-      <div class="chart-box"><svg id="hm0" viewBox="0 0 500 360" style="min-width:500px" role="img" aria-label="Latency heatmap, 3-step CFG schedule"></svg></div>
-      <div class="chart-box"><svg id="hm1" viewBox="0 0 500 360" style="min-width:500px" role="img" aria-label="Latency heatmap, 1-step distilled schedule"></svg></div>
-    </div>
-  </section>
+<p>With no efficiency advantage the two chips tie: same watts, same energy per operation,
+same speed. From there, every gain in efficiency is a gain in speed, one for one. In its
+highest-quality planning mode, at our design target, the chip finishes a two-second imagined
+trajectory in 4.5 seconds where Thor needs 13.</p>
 
-  <section id="sens-sec">
-    <p class="eyebrow">Sensitivity</p>
-    <h2>Step compression and token count carry the conclusion</h2>
-    <p class="note">How far each uncertain input moves the answer on its own, with the others held fixed. The two knobs that shrink the workload &mdash; how many denoising steps, and how many tokens &mdash; dominate everything else. Realized bandwidth utilization barely registers, which is exactly what you would want to see if the loop really is compute-bound. It is a useful sign the model is not fooling itself.</p>
-    <div class="chart-box"><svg id="sens" viewBox="0 0 1040 190" style="min-width:1040px" role="img"
-      aria-label="Horizontal bar chart of sensitivity scores per uncertain input"></svg></div>
-  </section>
+<div class="chart-box"><svg id="bet" viewBox="0 0 880 380" role="img"
+  aria-label="Speedup versus efficiency advantage at matched power"></svg></div>
 
-  <section id="wall-sec">
-    <p class="eyebrow">The bandwidth wall</p>
-    <h2>Thor&rsquo;s memory bus misses the deadline on its own</h2>
-    <p class="note">Deadline miss rate against memory bandwidth, on a synthetic row with compute removed as a constraint entirely. The wall sits at <b id="wall-num"></b>, and Thor&rsquo;s 273&nbsp;GB/s is on the wrong side of it. Bandwidth alone would sink Thor here even with infinite compute. Compute is just the constraint that binds first.</p>
-    <div class="chart-box"><svg id="wall" viewBox="0 0 1040 300" style="min-width:1040px" role="img"
-      aria-label="Line chart of deadline miss rate versus HBM bandwidth with Thor's bandwidth and the wall marked"></svg></div>
-  </section>
+<div class="tbl"><table>
+<tr><th>Efficiency advantage</th><th>Speed vs Thor at the same 40 W</th><th>What it means</th></tr>
+<tr><td>1× (no advantage)</td><td>1.0×</td><td>a tie, by physics</td></tr>
+<tr><td>2×</td><td>1.95×</td><td>at the doorstep of the goal</td></tr>
+<tr><td>2.15×</td><td>2.05×</td><td>clears 2× in every operating mode, judged pessimistically</td></tr>
+<tr><td>3× (our design target)</td><td>2.9×</td><td>clears 2× even if Thor turns out 25% better than we assume</td></tr>
+</table></div>
 
-  <section id="avsb-sec">
-    <p class="eyebrow">The cost of generality</p>
-    <h2 id="avsb-h2"></h2>
-    <p class="note">What it costs to keep the chip general enough to run a second family of models. The union point &mdash; half again as much FP4 array and a 35&nbsp;W budget, sized to cover a JEPA-MPC workload &mdash; against the DreamZero-specialized point, both running the identical DreamZero path. The gap is leakage on the extra silicon plus the roughly 2&nbsp;% programmable update block. The confidence band is wide because the priors behind it are wide, and we would rather show that than tidy it away.</p>
-    <div class="chart-box"><svg id="avsb" viewBox="0 0 1040 150" style="min-width:1040px" role="img"
-      aria-label="Dot with confidence interval showing the A versus B perf-per-watt gap"></svg></div>
-  </section>
+<p>We hold ourselves to the strict version of the goal: at least twice Thor's speed in
+every operating mode, from the highest-quality three-step planner down to the fastest
+one-step controller, judged at the pessimistic end of our simulation's uncertainty, not
+the average. That requires a 2.15× efficiency advantage. Our design target is 3×, which
+keeps the win intact even if our assumptions about Thor prove generous to us.</p>
 
-  <footer id="foot"></footer>
+<h2>Why 2 to 3× is credible</h2>
+
+<p>Purpose-built AI chips have done this before. Google's TPUv4 delivered 1.6 to 3.2
+times the performance per watt of NVIDIA's A100, measured on real deployments and
+published in a peer-reviewed paper. Our required 2.15 sits in the middle of that range
+and our 3× target at its top. On top of the architecture sit gains we deliberately do
+not count in the headline: the utilization advantage fixed-schedule chips hold under
+strict deadlines (Google measured its TPU sustaining 80 percent of peak under a latency
+limit where the GPU fell to 37 percent), workload tricks our chip runs better than GPUs
+do, and low-voltage circuit techniques one well-funded competitor reports working in
+silicon. Those are margin, not promises.</p>
+
+<h2>What we have already ruled out</h2>
+
+<p>We tested the two shortcuts everyone suggests, on our own hardware, and both failed.
+Slowing the clock to save energy does nothing on modern GPUs; we measured energy per
+operation flat across the entire frequency range. And halving numeric precision, which
+marketing materials say doubles efficiency, measured only 1.77 times. We publish these
+negative results because a plan built on numbers that survive testing is worth more than
+one built on numbers that sound good.</p>
+
+<h2>One important distinction</h2>
+
+<p>Beating Thor in every mode is a separate question from hitting the model's full
+five-updates-per-second target in its highest-quality mode. The first is a chip question
+and the answer is above. The second also depends on shrinking the model itself, work our
+team has done before at a frontier robotics company, and it is part of the plan rather
+than a promise we make on silicon alone.</p>
+
+<h2>What would prove us wrong</h2>
+
+<p>We spend money in stages, and each stage can kill the project cheaply. First, a
+detailed energy model of the core circuit block, built with open tools in weeks, for
+almost nothing. If it shows less than a 2.2× advantage, we stop; that kill line sits
+exactly at our success bar. Second, a few thousand dollars of Jetson Thor hardware to
+replace our Thor estimates with measurements. Third, the design running on
+reprogrammable hardware, which converts the simulated advantage into a measured one
+before any chip is manufactured. We only pay for silicon after all three pass.</p>
+
+<p class="foot">Method notes: simulator calibrated against measured NVIDIA RTX PRO 6000
+runs (four configurations); both chips scored at 40 W with identical utilization
+assumptions; uncertainty from Monte-Carlo simulation over workload size and measured
+precision scaling; TPU figures from Jouppi et al., ISCA 2017 and 2023. Full technical detail in the <a href="whitepaper.html">whitepaper</a>.</p>
+</main>
+<script>
+const DATA = {"curve":[{"e":1.0,"s":1.00,"lo":1.00,"hi":1.00},{"e":1.5,"s":1.47,"lo":1.46,"hi":1.48},{"e":2.0,"s":1.95,"lo":1.93,"hi":1.96},{"e":2.5,"s":2.42,"lo":2.39,"hi":2.44},{"e":3.0,"s":2.86,"lo":2.81,"hi":2.90},{"e":3.5,"s":3.31,"lo":3.24,"hi":3.36},{"e":4.0,"s":3.75,"lo":3.66,"hi":3.82}]};
+const NS="http://www.w3.org/2000/svg";
+const css=(n)=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+function el(t,a,p){const e=document.createElementNS(NS,t);for(const[k,v]of Object.entries(a))e.setAttribute(k,v);p.appendChild(e);return e;}
+function txt(p,x,y,s,c,an){const t=el("text",{x,y,class:c||"tick"},p);if(an)t.setAttribute("text-anchor",an);t.textContent=s;return t;}
+(function(){
+  const svg=document.getElementById("bet");
+  const W=880,H=380,m={t:26,r:30,b:56,l:56};
+  const iw=W-m.l-m.r,ih=H-m.t-m.b;
+  const X=(e)=>m.l+(e-1)/3*iw, Y=(v)=>m.t+ih-Math.min(v,4.0)/4.0*ih;
+  el("rect",{x:X(1.6),y:m.t,width:X(3.2)-X(1.6),height:ih,fill:css("--good"),opacity:.08},svg);
+  txt(svg,X(2.4),m.t+16,"what Google's TPU has delivered vs same-generation GPUs (1.6–3.2×)","lbl","middle");
+  for(const v of[0,1,2,3,4]){el("line",{x1:m.l,x2:m.l+iw,y1:Y(v),y2:Y(v),class:"grid"},svg);txt(svg,m.l-9,Y(v)+4,v+"×","tick","end");}
+  for(const e of[1,1.5,2,2.5,3,3.5,4])txt(svg,X(e),m.t+ih+20,e+"×","tick","middle");
+  txt(svg,m.l+iw/2,H-10,"our chip's energy-efficiency advantage, at the same 40 watts","tick","middle");
+  el("line",{x1:m.l,x2:m.l+iw,y1:Y(2),y2:Y(2),stroke:css("--good"),"stroke-width":1.6},svg);
+  txt(svg,m.l+iw,Y(2)-7,"goal: 2× Thor","lbl","end");
+  const up=DATA.curve.map(d=>`${X(d.e).toFixed(1)},${Y(d.hi).toFixed(1)}`);
+  const dn=[...DATA.curve].reverse().map(d=>`${X(d.e).toFixed(1)},${Y(d.lo).toFixed(1)}`);
+  el("polygon",{points:[...up,...dn].join(" "),fill:css("--accent"),opacity:.15},svg);
+  el("polyline",{points:DATA.curve.map(d=>`${X(d.e).toFixed(1)},${Y(d.s).toFixed(1)}`).join(" "),
+    fill:"none",stroke:css("--accent"),"stroke-width":2.5,"stroke-linejoin":"round","stroke-linecap":"round"},svg);
+  for(const d of DATA.curve)el("circle",{cx:X(d.e),cy:Y(d.s),r:4,fill:css("--accent"),stroke:"var(--surface)","stroke-width":2},svg);
+  el("line",{x1:X(2.15),x2:X(2.15),y1:m.t,y2:m.t+ih,stroke:"var(--ink)","stroke-width":1.2,opacity:.55},svg);
+  txt(svg,X(2.15)+6,m.t+ih-12,"needed: 2.15×","lbl");
+  el("line",{x1:X(3.0),x2:X(3.0),y1:m.t,y2:m.t+ih,stroke:"var(--ink)","stroke-width":1.2,opacity:.35},svg);
+  txt(svg,X(3.0)+6,m.t+ih-12,"our target: 3×","lbl");
+})();
+</script>
+
+<footer id="foot"></footer>
 </main>
 <div id="tooltip"></div>
 
