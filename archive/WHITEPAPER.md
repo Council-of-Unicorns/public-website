@@ -250,6 +250,12 @@ no aggressive quantization streams ~15.5 GB per step and fits inside the compute
 512-bit LPDDR5X [S]. MAC area trades ~linearly for PHY channels, so the compute-to-bandwidth
 ratio is a gate-1 decision against the ingested anchor, and never an afterthought.
 
+**Verdict: a solution exists at every priced severity; gate 1 selects the rung.** The
+worst case forces the 512-bit interface plus entropy coding, both ordinary engineering,
+and every rung honors the no-aggressive-quantization constraint [F]. The single open item
+is a measurement: ingest the founder's B200 profiling at gate 1 and read off which rung
+the real workload needs.
+
 ## 9. Open problems: what you would own
 
 Every problem below is open, carries load, and comes with instrumentation that measures progress.
