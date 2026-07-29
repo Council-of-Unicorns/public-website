@@ -345,13 +345,13 @@
 
   <section class="band alt" id="evidence">
     <p class="label">04 &mdash; Evidence</p>
-    <h2>We built the instrument<br />before the chip.</h2>
-    <p class="claim">Calibrated against measured Blackwell silicon to within 0.7&ndash;4.6&#8202;percent. It tells us FP8 buys 1.77&times;, not 2&times;.</p>
+    <h2>At thirty watts,<br />only joules matter.</h2>
+    <p class="claim">Peak FLOPS cancels out of the comparison. What is left is one number: how much less energy our datapath spends per FLOP than a GPU does.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Before claiming anything, we built a simulator that has to reproduce real silicon first. Every hardware configuration shares one utilization model, so the comparisons stay honest rather than flattering the part we want to build.</p>
-          <p class="muted">It also tells us things we would rather not hear. Voltage and frequency scaling buys nothing. Hitting 5&#8202;Hz on the nose will need model&#8209;side compression as well as silicon. We know that because we measured it. We would rather publish the ceiling than discover it in fab.</p>
+          <p>Call that number &eta;. Beating a Jetson Thor held to head power by 2&times; needs &eta; &asymp; 2.8 &mdash; and TPUv4 already delivered 1.6&ndash;3.2&times; over an A100 on the same process node, so we are asking for something that has been done before rather than something new. Before claiming any of it we built a simulator that has to reproduce real silicon first. It matches measured Blackwell to within 0.7&ndash;4.6&#8202;% on latency and 0.2&ndash;2.4&#8202;% on energy, and every hardware row shares one utilization model, so a comparison cannot quietly flatter the part we want to build.</p>
+          <p class="muted">It also tells us things we would rather not hear. Roughly 62&#8202;% of the energy goes to attention rather than matrix multiply, so the world&rsquo;s best MAC array on its own caps out at 1.17&times; &mdash; attention is where this chip is won or lost. Running wide and slow buys nothing at all. And hitting 5&#8202;Hz on the nose will need the model to compress as well as the silicon, which is a measurement rather than an opinion. We would rather publish the ceiling than discover it in fab.</p>
         </div>
       </details>
     <p class="readmore"><a href="whitepaper.html">Read the whitepaper &rarr;</a></p>
