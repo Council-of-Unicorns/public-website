@@ -3,6 +3,9 @@
 # Remove a line (or use `git add -f`) if you want something tracked.
 docs/
 CLAUDE.md
+archive/papers/
+archive/archive/
+archive/PITCH.md
 
 node_modules/
 .DS_Store
