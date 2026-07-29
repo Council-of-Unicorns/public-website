@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FM-RPU — Chip Explorer</title>
-<meta name="description" content="How the FM-RPU runs a 14B world model with zero instructions, and the speedup it buys over Jetson Thor." />
+<title>RPU — Chip Explorer</title>
+<meta name="description" content="How the RPU runs a 14B world model with zero instructions, and the speedup it buys over Jetson Thor." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
-<meta property="og:title" content="FM-RPU — Chip Explorer" />
-<meta property="og:description" content="How the FM-RPU runs a 14B world model with zero instructions, and the speedup it buys over Jetson Thor." />
+<meta property="og:title" content="RPU — Chip Explorer" />
+<meta property="og:description" content="How the RPU runs a 14B world model with zero instructions, and the speedup it buys over Jetson Thor." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -26,7 +26,7 @@
       <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
       <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
     </svg>
-    <span>FM-RPU</span>
+    <span>RPU</span>
   </a>
   <nav aria-label="Sections">
     <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html" aria-current="page">Chip</a><a href="index.html#about">About</a>
@@ -282,7 +282,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     </div>
     <div class="duo">
       <div class="panel"><svg id="die-gpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative GPU floorplan with generality-tax blocks highlighted"></svg></div>
-      <div class="panel"><svg id="die-fmrpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative FM-RPU floorplan: MAC array, attention engine, KV window, conveyor memory"></svg></div>
+      <div class="panel"><svg id="die-fmrpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative RPU floorplan: MAC array, attention engine, KV window, conveyor memory"></svg></div>
     </div>
   </section>
 
@@ -345,7 +345,7 @@ const DATA = {
   "chunk_flops": 741519320678400.0
  },
  "chip": {
-  "name": "FM-RPU (phase-1 candidate)",
+  "name": "RPU (phase-1 candidate)",
   "fp4_peak_pf": 4.0,
   "tdp_w": 30.0,
   "clock_ghz": 1.05,
@@ -810,19 +810,19 @@ function dieBlock(svg, x, y, w, h, fill, label, sub, tipRows) {
       trow("energy share of a FLOP", "mostly NOT the MAC"));
   }
   dieBlock(s, 34, 316, 200, 34, tax, "L2 + coherent cache", "generality: any access pattern",
-    [["exists because", "access patterns are unknown"], ["FM-RPU equivalent", "none — stream is known"]]);
+    [["exists because", "access patterns are unknown"], ["RPU equivalent", "none — stream is known"]]);
   dieBlock(s, 244, 316, 120, 34, other, "CPU + ISP + etc.", "SoC generality",
     [["role", "runs everything else"], ["cost", "area + leakage"]]);
   dieBlock(s, 374, 316, 90, 34, mm, "LPDDR5X PHY", T.bw_gbs.toFixed(0) + " GB/s",
     [["bandwidth", T.bw_gbs.toFixed(0) + " GB/s"], ["serves", "cache hierarchy"]]);
   dieBlock(s, 34, 360, 430, 34, tax, "GigaThread / launch / dispatch / virtualization", "every kernel, every 55 µs",
-    [["kernel launches per chunk", "~1,200 (40 layers × 5 ops × 3 steps × 2 CFG)"], ["FM-RPU equivalent", "zero — schedule is wired"]]);
+    [["kernel launches per chunk", "~1,200 (40 layers × 5 ops × 3 steps × 2 CFG)"], ["RPU equivalent", "zero — schedule is wired"]]);
 })();
 
 (function fmrpuDie() {
   const s = document.getElementById("die-fmrpu");
   const c = DATA.chip, w = DATA.workload;
-  txt(s, 250, 20, "FM-RPU (phase-1 candidate)", "die-lbl", "middle");
+  txt(s, 250, 20, "RPU (phase-1 candidate)", "die-lbl", "middle");
   txt(s, 250, 36, c.fp4_peak_pf.toFixed(0) + " PF FP4 · " + c.mac_units_m.toFixed(1) + "M MACs @ " + c.clock_ghz + " GHz wide-and-slow · " + c.tdp_w + " W", "tick", "middle");
   el("rect", { x: 20, y: 48, width: 460, height: 360, rx: 6, fill: "var(--inset)", stroke: "var(--hair)" }, s);
   const dp = css("--fmrpu"), mm = css("--mem"), other = css("--blk-face");
@@ -1011,9 +1011,9 @@ const FLOW = (() => {
   for (let i = 0; i < 60; i++) {
     const r = el("rect", { x: 20 + i * 16.5, y: 78, width: 13, height: 22, rx: 2, fill: tax, opacity: .8 }, s);
     hover(r, () => `<div class="t-title">kernel launch ${Math.round((i + 1) * launches / 60)} of ${launches}</div>` +
-      trow("on FM-RPU", "does not exist — wired sequence"));
+      trow("on RPU", "does not exist — wired sequence"));
   }
-  txt(s, 20, 116, "FM-RPU: 0 launches, 0 instructions — the sequencer above IS the program", "d-lbl");
+  txt(s, 20, 116, "RPU: 0 launches, 0 instructions — the sequencer above IS the program", "d-lbl");
 })();
 
 // ---------- Act III: speedup explorer ----------
@@ -1058,7 +1058,7 @@ const FLOW = (() => {
         trow("speedup p50", d.p50.toFixed(2) + "×") +
         trow("90% CI", d.ci_low.toFixed(2) + "–" + d.ci_high.toFixed(2) + "×") +
         trow("P(S ≥ 2)", (d.p_success * 100).toFixed(0) + "%") +
-        trow("FM-RPU power-limited", (d.dut_power_limited * 100).toFixed(0) + "% of draws"));
+        trow("RPU power-limited", (d.dut_power_limited * 100).toFixed(0) + "% of draws"));
     }
     // eta* marker
     const es = DATA.eta_star[base];
@@ -1118,7 +1118,7 @@ const FLOW = (() => {
 
 
 <footer class="site-foot">
-  <span>FM-RPU</span>
+  <span>RPU</span>
   <span class="foot-tag">Inference silicon for embodied AI</span>
 </footer>
 </body>

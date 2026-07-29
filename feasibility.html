@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>FM-RPU — Feasibility Readout</title>
+<title>RPU — Feasibility Readout</title>
 <meta name="description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta name="robots" content="noindex, nofollow" />
-<meta property="og:title" content="FM-RPU — Feasibility Readout" />
+<meta property="og:title" content="RPU — Feasibility Readout" />
 <meta property="og:description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -27,7 +27,7 @@
       <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
       <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
     </svg>
-    <span>FM-RPU</span>
+    <span>RPU</span>
   </a>
   <nav aria-label="Sections">
     <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html">Chip</a><a href="index.html#about">About</a>
@@ -401,7 +401,7 @@ svg .die-lbl { fill: var(--ink) !important; }
   <section id="roofline-sec">
     <p class="eyebrow">Roofline</p>
     <h2>The workload is compute-bound on every real row</h2>
-    <p class="note">Each chunk re-diffuses about <b>6,240 tokens for every weight fetch</b> &mdash; nothing like the low-batch decode people picture when they call a model bandwidth-bound. Every operator lands far to the right of every device&rsquo;s ridge point, so <b>compute is what binds</b>, not memory. Dots sit on the FM-RPU roofline; hover to see how each operator lands on the other two rows.</p>
+    <p class="note">Each chunk re-diffuses about <b>6,240 tokens for every weight fetch</b> &mdash; nothing like the low-batch decode people picture when they call a model bandwidth-bound. Every operator lands far to the right of every device&rsquo;s ridge point, so <b>compute is what binds</b>, not memory. Dots sit on the RPU roofline; hover to see how each operator lands on the other two rows.</p>
     <div class="legend" id="roofline-legend"></div>
     <div class="chart-box"><svg id="roofline" viewBox="0 0 1040 420" style="min-width:1040px" role="img"
       aria-label="Log-log roofline chart: three hardware rows' rooflines with DiT operators plotted by arithmetic intensity"></svg></div>
@@ -1783,9 +1783,9 @@ const trow = (label, val) => `<div class="t-row"><span>${esc(label)}</span><b>${
   const need = w.required_eff_pflops_160ms;
   const have = fm.eff_compute / 1e15;
   const tiles = [
-    { l: "FM-RPU p_feasible (256-draw MC)", v: fmt.pct(fm.p_feasible), c: "vs miss-rate ≤ 10⁻⁴ ∧ power ≤ TDP", crit: fm.p_feasible === 0 },
+    { l: "RPU p_feasible (256-draw MC)", v: fmt.pct(fm.p_feasible), c: "vs miss-rate ≤ 10⁻⁴ ∧ power ≤ TDP", crit: fm.p_feasible === 0 },
     { l: "Effective compute required @160 ms", v: need.toFixed(2) + " PF", c: "provisioned: " + have.toFixed(2) + " PF eff → " + (need / have).toFixed(1) + "× short", crit: true },
-    { l: "FM-RPU average power", v: fmt.w(fm.avg_power_w), c: "budget " + fmt.w(fm.tdp_w) + " · neck ceiling " + fmt.w(DATA.thermal.neck_ceiling_w), crit: fm.avg_power_w > fm.tdp_w },
+    { l: "RPU average power", v: fmt.w(fm.avg_power_w), c: "budget " + fmt.w(fm.tdp_w) + " · neck ceiling " + fmt.w(DATA.thermal.neck_ceiling_w), crit: fm.avg_power_w > fm.tdp_w },
     { l: "KV share of HBM traffic / step", v: (100 * w.kv_gb / (w.kv_gb + w.weight_gb)).toFixed(0) + "%", c: w.kv_gb.toFixed(1) + " GB KV ≈ " + w.weight_gb.toFixed(1) + " GB weights (P2)", crit: false },
   ];
   document.getElementById("kpis").innerHTML = tiles.map((t) => `
@@ -1846,9 +1846,9 @@ const trow = (label, val) => `<div class="t-row"><span>${esc(label)}</span><b>${
     void x0;
   }
   legend.insertAdjacentHTML("beforeend",
-    `<span class="key"><span class="box" style="background:var(--ink-3);border-radius:50%"></span>DiT operator (on FM-RPU line)</span>`);
+    `<span class="key"><span class="box" style="background:var(--ink-3);border-radius:50%"></span>DiT operator (on RPU line)</span>`);
 
-  // operators on the FM-RPU (subject) roofline
+  // operators on the RPU (subject) roofline
   const fm = DATA.rows.find((r) => r.name === "fm_rpu_14");
   const LABELED = new Set(["ffn", "self_attn", "flow_update", "action_head"]);
   for (const op of DATA.ops) {
@@ -2135,7 +2135,7 @@ const trow = (label, val) => `<div class="t-row"><span>${esc(label)}</span><b>${
 
 
 <footer class="site-foot">
-  <span>FM-RPU</span>
+  <span>RPU</span>
   <span class="foot-tag">Inference silicon for embodied AI</span>
 </footer>
 </body>
