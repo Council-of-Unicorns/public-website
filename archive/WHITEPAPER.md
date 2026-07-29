@@ -207,15 +207,15 @@ extraction through the stacked die.
 We scrutinized each candidate lever against its literature and kept survivors with
 per-mode multipliers on chunk energy [X/T, task-success gated]:
 
-| Lever | Verdict | Deadline mode | Quality mode |
+| Lever | Verdict | Quality mode | Deadline mode |
 |---|---|---|---|
-| Per-step feature caching | refuted at 1–3 steps (serving literature: ineffective on 4-step distilled models) | 1.0 | 1.0–1.2 |
+| Cross-chunk reuse (receding-horizon overlap) | upgraded: WorldCache reports 2.3× at 99.4 % quality on a video world model; Chorus reports 1.45× on 4-step distilled models | 1.3–2.0 | 1.0–1.45 (certified floor) |
 | Sliding-tile sparse attention | survives, trimmed | 1.15–1.45 | 1.15–1.45 |
 | Token merging | survives, cautious | 1.1–1.3 | 1.1–1.3 |
-| Cross-chunk reuse (receding-horizon overlap) | upgraded: WorldCache reports 2.3× at 99.4 % quality on a video world model; Chorus reports 1.45× on 4-step distilled models | 1.0–1.45 (certified floor) | 1.3–2.0 |
 | Softmax simplifications | survives, minor | 1.01–1.03 | 1.01–1.03 |
+| Per-step feature caching | refuted at 1–3 steps (serving literature: ineffective on 4-step distilled models) | 1.0–1.2 | 1.0 |
 
-Composed with an overlap discount: ≈1.4–2.6× (Deadline) and ≈1.7–3.8× (Quality) [T].
+Composed with an overlap discount: ≈1.7–3.8× (Quality) and ≈1.4–2.6× (Deadline) [T].
 Cross-chunk reuse is the flagship: consecutive chunks re-diffuse overlapping world state,
 the mechanism class that survives few-step schedules, and the one no LLM accelerator has
 a reason to build. In Deadline mode the schedule reserves the worst-case slot, so dynamic

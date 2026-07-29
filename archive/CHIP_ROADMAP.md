@@ -92,9 +92,9 @@ ceiling with margin.
 
 ## Ledger B — workload co-design levers (parallel; see PERF_LEVERS.md)
 
-Quantified, scrutinized stack of workload-shaping levers (v2: ≈1.4–2.6× Deadline /
-1.7–3.8× Quality [X/T]): the path toward the absolute-5 Hz goal that silicon alone cannot
-reach (η≈16). Honest status: 5 Hz needs η≈4 + mid-stack, or a certified cross-chunk reuse
+Quantified, scrutinized stack of workload-shaping levers (v2: ≈1.7–3.8× Quality /
+1.4–2.6× Deadline [X/T]): the path toward the absolute-5 Hz goal that silicon alone cannot
+reach (η≈12 at 40 W parity). Honest status: 5 Hz needs η≈3 + mid-stack, or a certified cross-chunk reuse
 floor (the train-time co-design experiment). Verification pre-silicon: Tier-1 sweeps +
 quality checks on the local RTX proxy. µcode/sequencer budget lands in gate 1.
 
