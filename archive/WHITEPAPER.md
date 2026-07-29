@@ -202,7 +202,15 @@ density, and shipping the reference thermal design with the chip. Microfluidic c
 also pairs with the gen-2 3D-DRAM supply step (Section 8), whose weakest point is heat
 extraction through the stacked die.
 
-## 7. Workload co-design multiplies what silicon delivers
+## 7. The model has to meet us halfway
+
+Silicon alone stops short of the absolute 200 ms goal, which needs η ≈ 12 (Section 6), so
+the model closes the rest. Two families of lever do that work: runtime levers the chip
+exploits inside a chunk, and train-time levers the model team applies before weights ever
+ship. Everything below sits in public literature, and our baseline already banks several of them.
+The open ground sits in one corner, named at the end.
+
+### 7.1 Runtime levers the chip exploits
 
 We scrutinized each candidate lever against its literature and kept survivors with
 per-mode multipliers on chunk energy [X/T, task-success gated]:
@@ -223,9 +231,50 @@ reuse saves energy while the miss-rate proof stands; a reuse floor counts agains
 deadline only when training guarantees it. The founder's train-time chunking is the tool
 that can train that floor in [F].
 
-A recorded design constraint bounds this section: the control policy must not depend on
-aggressive quantization (INT2 weights, FP4 KV, 2:4 pruning) [F]. Those levers remain
+### 7.2 Train-time levers the model team applies
+
+The published toolbox splits by model family, and "distillation" names different things in
+each [X, founder survey]. Latent-planning world models (Dreamer, DINO-WM, TD-MPC) distill
+into smaller student networks or policies. Generative-simulator world models (video
+diffusion: Genie, Cosmos-class, our DreamZero fork) distill sampling steps, which dominate
+their cost. Our workload sits in the second family, so step count leads.
+
+| Lever | Representative methods [X] | Effect on our chunk | Status for us |
+|---|---|---|---|
+| Step-reduction distillation | consistency and trajectory (LCM, FRMD), distribution matching (DMD, DMD2), adversarial (LADD), self-distillation flow maps (One-Step Flow Policy), modality-aware (Flash-WAM) | divides every per-step term by the step count | **partly banked**: 16→3 is already in the baseline [F]; 3→1 is the Deadline-mode existence question (§9) |
+| Capacity distillation | teacher→smaller student on predictions or latents; on-policy and closed-loop variants that fight compounding error (ActDistill) | cuts parameters, so weight traffic and matmul energy fall together | available, untested at our scale; action-only students already match or beat teachers (OneDP reports 95–98 % against an 83 % teacher) |
+| Quantization | PTQ (FP8 and INT8 near-lossless), QAT for 4-bit and below (QVGen, NVFP4 QAT-distillation), mixed precision by module sensitivity, KV and activation quantization | sets bytes per weight and per KV entry, the two terms that size the conveyor | **bounded by the recorded constraint** below; our FP4 linear weights already presume QAT, and the conservative memory profile keeps FP8 weights (Section 8) |
+| Pruning and sparsity | structured pruning of heads, channels, layers; unstructured and lottery-ticket sparsification | structured pruning shrinks the mapped shapes; unstructured shrinks storage only | structured only, because our tiles are mask-fixed; 2:4 sits behind the constraint |
+| Latent and token compression | discrete and categorical latents (DreamerV2/V3), VQ token latents (IRIS, TWM), tokenizer and VAE compression, temporal token merging | cuts N_new and N_ctx directly | available, and it lands on the two inputs our sensitivity ranking puts on top |
+| Backbone architecture | state-space and Mamba-style sequence models, linear or masked attention, smaller DiTs, low-rank factorization, LoRA-style adapters, parameter sharing | attacks the attention term that carries ~62 % of dynamic energy | **changes chip assumptions** (see below) |
+| Frozen foundation encoders | build on DINO, SAM, or VAE latents; decoder-free designs (MuDreamer, DINO-WM) | most perception parameters become borrowed and shared | **already banked**: our fork drops the pixel decoder, so this cannot be counted twice |
+
+Three consequences follow, and they matter more than the catalogue.
+
+**We may not double-count the baseline.** Latent-space modeling, the dropped pixel decoder,
+the 3-step schedule, and mixed FP8/FP4 precision are inside the numbers Section 6 already
+reports. The multipliers in §7.1 sit on top of that baseline, never beside it.
+
+**Some model choices reach back into the chip.** A state-space or linear-attention backbone
+would retire much of the attention energy the chip is built to make cheap, and token
+compression moves the very parameters that size the array and the conveyor. Our
+thesis rests on shape stability (Section 2), so the model roadmap is a chip input rather
+than an independent track. Gate 1 fixes the model contract before RTL commits to a shape.
+
+**The recorded constraint bounds the quantization column.** The control policy must not
+depend on aggressive quantization (INT2 weights, FP4 KV, 2:4 pruning) [F]. Those remain
 last resorts behind bit-exact and structural options.
+
+### 7.3 Where the headroom actually is
+
+Every method above is public, so none of it is a moat and all of it is available to Thor
+as well. Two asymmetries survive that. The chip realizes the runtime levers at a cost a
+GPU cannot match, which is §7.1. And on the training side, the action-only setting is
+close to saturated, while joint video-action distillation stays open: the two streams
+carry different signal-to-noise schedules, so a single consistency objective serves
+neither well, and per-modality treatment (Flash-WAM's idea) is the current frontier
+[X, founder survey]. That is our model-side bet, it pairs with the certified reuse floor
+in §9, and it is the one place where being early buys more than being fast.
 
 ## 8. Engineering the memory wall, honestly
 
