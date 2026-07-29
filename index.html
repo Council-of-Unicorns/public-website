@@ -4,11 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>RPU — Inference silicon for embodied AI</title>
-<meta name="description" content="We etch the robot's world model into silicon: real-time world-model inference inside a 30 W robot head, with deterministic timing." />
+<meta name="description" content="We etch the robot's world model into silicon: real-time world-model inference inside a 40 W robot head, with deterministic timing." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta property="og:title" content="RPU — Inference silicon for embodied AI" />
-<meta property="og:description" content="We etch the robot's world model into silicon: real-time world-model inference inside a 30 W robot head, with deterministic timing." />
+<meta property="og:description" content="We etch the robot's world model into silicon: real-time world-model inference inside a 40 W robot head, with deterministic timing." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -27,7 +27,7 @@
       <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
       <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
     </svg>
-    <span>RPU</span>
+    <span>Substrate</span>
   </a>
   <nav aria-label="Sections">
     <a href="index.html" aria-current="page">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html">Chip</a><a href="index.html#about">About</a>
@@ -39,7 +39,7 @@
     <div class="hero-copy">
       <p class="label">RPU</p>
       <h1>We etch the robot&rsquo;s world model into silicon.</h1>
-      <p class="lede">Real&#8209;time world&#8209;model inference, inside the head, on 30&nbsp;watts.</p>
+      <p class="lede">Real&#8209;time world&#8209;model inference, inside the head, on 40&nbsp;watts.</p>
       <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
@@ -350,7 +350,7 @@
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Call that number &eta;. Beating a Jetson Thor held to head power by 2&times; needs &eta; &asymp; 2.8 &mdash; and TPUv4 already delivered 1.6&ndash;3.2&times; over an A100 on the same process node, so we are asking for something that has been done before rather than something new. Before claiming any of it we built a simulator that has to reproduce real silicon first. It matches measured Blackwell to within 0.7&ndash;4.6&#8202;% on latency and 0.2&ndash;2.4&#8202;% on energy, and every hardware row shares one utilization model, so a comparison cannot quietly flatter the part we want to build.</p>
+          <p>Call that number &eta;. Beating a Jetson Thor at the same 40 W by 2&times; needs &eta; &asymp; 2.05, holding it in every mode needs 2.15 &mdash; and TPUv4 already delivered 1.6&ndash;3.2&times; over an A100 on the same process node, so we are asking for something that has been done before rather than something new. Before claiming any of it we built a simulator that has to reproduce real silicon first. It matches measured Blackwell to within 0.7&ndash;4.6&#8202;% on latency and 0.2&ndash;2.4&#8202;% on energy, and every hardware row shares one utilization model, so a comparison cannot quietly flatter the part we want to build.</p>
           <p class="muted">It also tells us things we would rather not hear. Roughly 62&#8202;% of the energy goes to attention rather than matrix multiply, so the world&rsquo;s best MAC array on its own caps out at 1.17&times; &mdash; attention is where this chip is won or lost. Running wide and slow buys nothing at all. And hitting 5&#8202;Hz on the nose will need the model to compress as well as the silicon, which is a measurement rather than an opinion. We would rather publish the ceiling than discover it in fab.</p>
         </div>
       </details>
