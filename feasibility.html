@@ -341,14 +341,14 @@ svg .die-lbl { fill: var(--ink) !important; }
   <header>
     <p class="eyebrow">The instrument</p>
     <h1>FM-RPU feasibility readout</h1>
-    <p class="sub">Can a chip in the robot&rsquo;s head run a 14-billion-parameter world model every 200&nbsp;ms on about 30 watts, when neither a Jetson Thor nor a head-power B200 can? This page is the raw readout. It is and it does not flatter us. <b>Our own row is scored with no architecture advantage at all</b>, which is on purpose. The note under Verdicts explains why.</p>
+    <p class="sub">The question that matters is not whether today&rsquo;s largest world model runs in a head today. Models are shrinking, silicon keeps improving, and that bar moves on its own. What we care about is staying <b>a fixed multiple ahead of Jetson Thor</b> while it moves. This page is the raw readout of the constraint everything else sits on, and it does not flatter us: <b>our own row is scored with no architecture advantage at all</b>. That is on purpose. It is the floor, not the forecast.</p>
     <div class="chips" id="chips"></div>
   </header>
 
   <section id="verdict-sec">
     <p class="eyebrow">Verdicts</p>
     <h2>No row clears all three constraints</h2>
-    <p class="note">Every row is scored with the same utilization model. We never hand our own design a friendlier assumption than the incumbent gets &mdash; which is why the FM-RPU row looks bad here. It is being run as though it were a small GPU, with none of the etched-dataflow efficiency the chip exists to deliver. To count as feasible a row has to clear all three bars at once: deadline misses at or under one in ten thousand, average power inside its own rating, and heat the neck can actually carry away.</p>
+    <p class="note">Nothing here clears all three bars at once: deadline misses at or under one in ten thousand, average power inside its own rating, and heat the neck can carry away. Read that as the starting line rather than the verdict. Every row is scored with the same utilization model, so we never hand our own design a friendlier assumption than the incumbent gets &mdash; which means the FM-RPU row here is a small GPU with none of the etched-dataflow efficiency the chip exists to deliver. Everything we are building starts from this number and multiplies it.</p>
     <div class="chart-box" style="padding:0"><table id="verdict"></table></div>
   </section>
 
@@ -419,7 +419,48 @@ svg .die-lbl { fill: var(--ink) !important; }
       aria-label="Dot with confidence interval showing the A versus B perf-per-watt gap"></svg></div>
   </section>
 
-  <footer id="foot"></footer>
+  <section id="durability">
+  <p class="eyebrow">Why it lasts</p>
+  <h2>The bar moves. The multiple should not.</h2>
+  <p class="note">Everything above is measured against a 14&nbsp;B model, which is the largest thing anyone
+  is currently trying to put in a head. That is deliberately the hardest case, and it is also a moving
+  target &mdash; the published models have been getting smaller quickly.</p>
+  <div class="chart-box" style="padding:0"><table>
+    <thead><tr><th scope="col">Model</th><th scope="col">Params</th><th scope="col">What it demonstrates</th></tr></thead>
+    <tbody>
+    <tr><td>DreamZero-class</td><td>14&nbsp;B</td><td>the workload we size the chip against</td></tr>
+    <tr><td>LaWAM</td><td>2.3&nbsp;B</td><td>competitive in simulation and on physical robot tasks</td></tr>
+    <tr><td>Efficient-WAM</td><td>1&nbsp;B</td><td>a world-action model with low-cost future imagination</td></tr>
+    <tr><td>SmolVLA</td><td>500&nbsp;M</td><td>distilled from large VLAs, keeping much of the generalization</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">So absolute feasibility arrives on its own eventually, for us and for NVIDIA alike. Which
+  is why we do not price the company on it. What we price is the ratio, and there are three reasons it
+  survives the bar moving.</p>
+  <p class="note"><b>Power efficiency improves far slower than headline performance.</b> Huang&rsquo;s law is
+  quoted as 25&times; every five years, but that is throughput. Measured FLOP/s per watt doubles roughly
+  every three to four years, and between 2014 and 2020 a ~6&times; gain in FLOPs came with ~2&times; the power
+  draw. Inside a 30&nbsp;W head you do not get to spend more power, so Thor&rsquo;s successors inherit the slow
+  curve rather than the fast one.</p>
+  <p class="note"><b>&eta; is architecture, not process.</b> Our advantage comes from deleting generality:
+  no scheduler, no instruction fetch, no coherent cache, no kernel launches. A node shrink is available to
+  both of us, so it moves both numbers and leaves the ratio where it was. That is what makes &eta; an asset
+  rather than a lead we have to keep re-winning.</p>
+  <p class="note"><b>NVIDIA cannot take it without giving up the product.</b> CUDA generality is what they
+  sell. Hameed and colleagues measured only 5.8&nbsp;% of a general-purpose chip&rsquo;s energy reaching the
+  transistors that do arithmetic; a fixed datapath pushes that toward 35&nbsp;%. Closing that gap means
+  abandoning the generality their entire robotics stack depends on.</p>
+  <p class="note">The honest version of the downside: if models shrink far enough that a general SoC clears
+  the deadline in-head on its own, our wedge narrows from <i>only we can do this</i> to <i>we do it faster
+  and cooler</i>. We would still run the same model on a fraction of the energy, or a considerably larger
+  model in the same envelope &mdash; and on current trends the models are getting more capable, not just
+  smaller.</p>
+  <p class="note" style="font-size:13px">Sources: LaWAM (arXiv:2606.15768), Efficient-WAM (arXiv:2606.10040),
+  NanoVLA (arXiv:2510.25122), Drop-Then-Recovery (arXiv:2606.27755), AC&sup2;-VLA (arXiv:2601.19634),
+  SmolVLA; Hameed et al., ISCA 2010; GPU price-performance and perf/watt trends, Epoch AI.</p>
+</section>
+
+<footer id="foot"></footer>
 </main>
 <div id="tooltip"></div>
 
