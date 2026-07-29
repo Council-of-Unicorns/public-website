@@ -214,16 +214,15 @@ they combine without degrading closed-loop behavior.
 
 ### 7.1 Runtime levers the chip exploits
 
-We scrutinized each candidate lever against its literature and kept survivors with
-per-mode multipliers on chunk energy [X/T, task-success gated]:
-
-| Lever | Verdict | Quality mode | Deadline mode |
-|---|---|---|---|
-| Cross-chunk reuse (receding-horizon overlap) | upgraded: WorldCache reports 2.3× at 99.4 % quality on a video world model; Chorus reports 1.45× on 4-step distilled models | 1.3–2.0 | 1.0–1.45 (certified floor) |
-| Sliding-tile sparse attention | survives, trimmed | 1.15–1.45 | 1.15–1.45 |
-| Token merging | survives, cautious | 1.1–1.3 | 1.1–1.3 |
-| Softmax simplifications | survives, minor | 1.01–1.03 | 1.01–1.03 |
-| Per-step feature caching | refuted at 1–3 steps (serving literature: ineffective on 4-step distilled models) | 1.0–1.2 | 1.0 |
+We scrutinized each candidate lever against its literature and kept the survivors, each
+carrying a per-mode multiplier on chunk energy [X/T, task-success gated]. Cross-chunk
+reuse leads at 1.3–2.0× in Quality mode and 1.0–1.45× in Deadline mode against a certified
+floor, on the strength of WorldCache reporting 2.3× at 99.4 % quality on a video world
+model and Chorus reporting 1.45× on 4-step distilled models [X]. Sliding-tile sparse
+attention survives in trimmed form at 1.15–1.45× in either mode, token merging at 1.1–1.3×,
+and softmax simplifications at a percent or two. Per-step feature caching fails at our step
+count: the serving literature finds it ineffective on 4-step distilled models, which leaves
+it worth 1.0–1.2× in Quality mode and nothing in Deadline mode [X].
 
 Composed with an overlap discount: ≈1.7–3.8× (Quality) and ≈1.4–2.6× (Deadline) [T].
 Cross-chunk reuse is the flagship: consecutive chunks re-diffuse overlapping world state,
@@ -259,7 +258,9 @@ train the student on states reached under its own behavior rather than only copy
 teacher trajectories (ActDistill, on-policy distillation) [X], because small errors that
 look harmless in an offline dataset compound once the student runs in the loop.
 Quantization-aware distillation combines both reductions: the student learns to stay
-accurate while operating at low precision from the start.
+accurate while operating at low precision from the start. This route stays available to
+us and untested at our scale; the action-only setting already reports students matching or
+beating their teachers (OneDP quotes 95–98 % against an 83 % teacher) [X].
 
 **Changing what the model represents.** Pixel reconstruction is expensive and often
 unnecessary for control. Latent-space models predict in a compressed representation and
@@ -267,16 +268,19 @@ decode images only when needed. Reconstruction-free approaches remove the decode
 and operate over features from a frozen perception model (MuDreamer, DINO-WM) [X].
 Discrete or tokenized latents (DreamerV2/V3 categorical latents, IRIS, TWM), stronger
 spatial and temporal compression, and fewer tokens per frame attack the sequence-length
-cost directly. These change the geometry of the workload the chip executes, which makes
-them chip decisions as much as model decisions.
+cost directly. Two of these we already bank, since our fork drops the pixel decoder and
+predicts in latent space; the token-count reductions remain available, and they land on
+the two inputs our sensitivity ranking puts on top. These change the geometry of the
+workload the chip executes, which makes them chip decisions as much as model decisions.
 
 **Architecture and reuse.** State-space and Mamba-style models, linear or masked
 attention, hybrid backbones, low-rank factorization, parameter sharing, and smaller
 purpose-built DiTs each reduce the cost of long-horizon prediction [X]. Frozen foundation
 encoders (DINO, SAM, VAE latents) supply perception without every world model carrying its
 own visual stack. Structured pruning removes whole heads, channels, or layers in a form
-hardware can exploit, while caching reuses features, keys and values, or activations
-across nearby frames and denoising steps.
+hardware can exploit, and only the structured kind helps us, because our tiles are
+mask-fixed. Caching reuses features, keys and values, or activations across nearby frames
+and denoising steps.
 
 **The two families differ, and the word "distilled" hides it.** In latent-planning systems
 (Dreamer, DINO-WM, TD-MPC) the opportunities are compact latent dynamics, smaller
@@ -290,17 +294,7 @@ None of this is speculative. Quantization, step reduction, latent compression, c
 structured sparsity, and student-teacher distillation are all established techniques [X].
 The engineering opportunity is to combine them around the requirements of closed-loop
 robotics instead of optimizing each one independently for image quality or offline
-benchmarks. Where each lever stands for us:
-
-| Lever | Effect on our chunk | Status for us |
-|---|---|---|
-| Step-reduction distillation | divides every per-step term by the step count | **partly banked**: 16→3 sits in the baseline [F]; 3→1 is the Deadline-mode existence question (§9) |
-| Capacity distillation | fewer parameters, so weight traffic and matmul energy fall together | available, untested at our scale; action-only students already match or beat teachers (OneDP reports 95–98 % against an 83 % teacher) [X] |
-| Quantization | sets bytes per weight and per KV entry, the two terms that size the conveyor | **bounded by the recorded constraint** below; FP4 linear weights presume QAT, and the conservative memory profile keeps FP8 weights (Section 8) |
-| Pruning and sparsity | structured pruning shrinks the mapped shapes; unstructured shrinks storage only | structured only, because our tiles are mask-fixed; 2:4 sits behind the constraint |
-| Latent and token compression | cuts N_new and N_ctx directly | available, and it lands on the two inputs our sensitivity ranking puts on top |
-| Backbone architecture | attacks the attention term that carries ~62 % of dynamic energy | **changes chip assumptions** (see below) |
-| Frozen encoders, decoder-free designs | most perception parameters become borrowed and shared | **already banked**: our fork drops the pixel decoder, so this cannot be counted twice |
+benchmarks.
 
 Three consequences follow, and they matter more than the catalogue.
 
