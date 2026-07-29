@@ -37,7 +37,7 @@
   <article>
     <p class="label">Whitepaper &mdash; July 2026</p>
     <h1>A measured case for etching world-model inference into a robot&rsquo;s head</h1>
-          <p class="doc-lede">A humanoid's world model has to produce an action every 200 milliseconds, and it has to do it from inside the robot's head. Nothing can do that today. A datacenter GPU can hit the deadline at a kilowatt and a thousand miles away; a radio link can carry the answer back until the moment the channel gets busy. This is our case that a chip can do it in the head instead — and, just as importantly, the places where that case is still thin.</p>
+              <p class="doc-lede">A humanoid's world model has to produce an action every 200 milliseconds, and it has to do it from inside the robot's head. Nothing can do that today. A datacenter GPU can hit the deadline at a kilowatt and a thousand miles away; a radio link can carry the answer back until the moment the channel gets busy. This is our case that a chip can do it in the head instead — and, just as importantly, the places where that case is still thin.</p>
 
   <p class="prov-note">Every number below says where it came from. <span class="prov prov-m">[M]</span> we measured it ourselves. <span class="prov prov-s">[S]</span> our simulator computed it. <span class="prov prov-f">[F]</span> we measured it in production at a robotics company. <span class="prov prov-x">[X]</span> someone else published it. <span class="prov prov-t">[T]</span> it is a target we have not hit yet. An untagged number is a bug.</p>
 
@@ -161,16 +161,6 @@
   <p>It is worth being explicit about why we price the bet on the ratio rather than on absolute real-time. World models are getting smaller quickly &mdash; 2.3&nbsp;B in LaWAM, 1&nbsp;B in Efficient-WAM, 500&nbsp;M in SmolVLA <span class="prov prov-x">[X]</span>. Absolute feasibility arrives eventually on its own, for us and for NVIDIA alike. What does not arrive on its own is energy per FLOP. Measured GPU performance per watt doubles roughly every three to four years, far slower than the headline throughput figure, and inside a fixed 40&nbsp;W head you cannot spend your way past it <span class="prov prov-x">[X]</span>. &eta; comes from deleting generality, and a process node is available to both parties, so the ratio survives what the absolute number does not.</p>
   <p>Each competitor misses one constraint, and it is a different one each time. Thor stays general because CUDA is the product. Datacenter transformer ASICs are 20&times; off in power regime. Edge NPUs are roughly 100&times; too small for a 14&nbsp;B streaming model. The relative bar, 2&times; Thor in-head, rides entirely on &eta;. The absolute 5&nbsp;Hz loop is a joint model-and-silicon program, and we say so in public rather than only in private.</p>
 
-  <h2>12. How we work</h2>
-  <ol>
-    <li><strong>Measure before extrapolating.</strong> No prediction about silicon that does not exist until the model reproduces silicon that does. That gate blocked every feasibility claim we wanted to make until real anchors landed, and it still governs.</li>
-    <li><strong>Adverse results ship.</strong> The flat-DVFS result, the 1.77&times; precision number, and the corrected 5&nbsp;Hz claim are all in the record with the same prominence as the numbers we like.</li>
-    <li><strong>Say where every number came from.</strong> Untagged numbers are bugs.</li>
-    <li><strong>A gate that cannot fail is theatre.</strong> Ours name the number, the threshold, and what dies when it misses.</li>
-    <li><strong>One instrument, one set of rules.</strong> The same utilization model scores every hardware row. Our design never gets a friendlier assumption than the incumbent.</li>
-  </ol>
-  <p>If that method and the problems in Section 9 read like the job you want, the instrument, the data and the open questions are here. The silicon is waiting on you.</p>
-
   <h2>References</h2>
   <ol class="refs">
     <li>DreamZero authors, &ldquo;World Action Models are Zero-shot Policies,&rdquo; arXiv:2602.15922, 2026.</li>
@@ -183,6 +173,8 @@
     <li>Efficient-WAM (1&nbsp;B world-action model), arXiv:2606.10040; LaWAM (latent world action models), arXiv:2606.15768; NanoVLA, arXiv:2510.25122.</li>
     <li>Epoch AI, &ldquo;Trends in GPU price-performance&rdquo; &mdash; measured FLOP/s per watt doubling time.</li>
   </ol>
+
+    
 
     
 

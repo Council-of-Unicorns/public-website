@@ -268,7 +268,8 @@ Every problem below is open, carries load, and comes with instrumentation that m
    usual advantage and nobody has published this comparison for chunk diffusion.
 3. **The Tier-2 energy ledger.** Build the Accelergy-class tile model and produce our
    Hameed-Table-3: per-component mJ/chunk. Kill criterion: mapped η < 2.2 or FU fraction
-   < 35 % ends the project before tapeout money.
+   < 35 % ends the project before tapeout money; the 2.2 line sits just above the 2.15
+   success bar, so the kill test and the success test have nearly merged.
 4. **The memory-bound anchor.** Ingest real B200/WAN profiling, identify bw_util (the realized
    bandwidth-utilization coefficient), place
    the crossover, and set the MACs-versus-channels ratio.
@@ -290,6 +291,11 @@ Every problem below is open, carries load, and comes with instrumentation that m
     rejection around the schedule's power trace; quantify the guardband a compile-time
     trace recovers; and test whether embedded microfluidics makes the gen-2 3D-DRAM
     supply step thermally viable (Section 6.1) [T].
+11. **HBM, reconsidered.** The early rejection of HBM rests on power, cost, and the
+    conveyor's modest bandwidth need, and it predates the calibrated model [T].
+    Single-stack HBM3E stays an explicit fallback in the memory ladder; re-price it
+    against the gate-1 anchor alongside the LPDDR rungs so the ruling rests on measured
+    numbers.
 
 ## 10. Roadmap: a kill test gates every dollar tier
 
