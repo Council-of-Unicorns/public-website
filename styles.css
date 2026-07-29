@@ -796,3 +796,16 @@ footer.site-foot .foot-tag {
 .tbl table.levers td:nth-child(4),
 .tbl table.levers th:nth-child(3),
 .tbl table.levers th:nth-child(4) { white-space: nowrap; }
+
+/* Levers we have priced but deliberately do not depend on. */
+.held {
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 16px;
+  letter-spacing: 0;
+  white-space: nowrap;
+  padding: 0 var(--s1);
+  margin-left: var(--s1);
+  color: var(--ground-0);
+  background: var(--text-3);
+}
