@@ -1,7 +1,7 @@
 # Archive — FM-RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-07-29 at etched commit cd172fb (40 W power-parity scoring; S = eta).
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-07-29 at etched commit 918c15a (40 W power parity, S = eta; Quality mode leads).
 
 ## Canonical documents
 
