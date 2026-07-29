@@ -114,18 +114,19 @@ trajectory in 4.5 seconds where Thor needs 13.</p>
   aria-label="Speedup versus efficiency advantage at matched power"></svg></div>
 
 <div class="tbl"><table>
-<tr><th>Efficiency advantage</th><th>Speed vs Thor at the same 40 W</th><th>What it means</th></tr>
-<tr><td>1× (no advantage)</td><td>1.0×</td><td>a tie, by physics</td></tr>
-<tr><td>2×</td><td>1.95×</td><td>at the doorstep of the goal</td></tr>
-<tr><td>2.15×</td><td>2.05×</td><td>clears 2× in every operating mode, judged pessimistically</td></tr>
-<tr><td>3× (our design target)</td><td>2.9×</td><td>clears 2× even if Thor turns out 25% better than we assume</td></tr>
+<tr><th>Efficiency advantage we build</th><th>What it gets us</th></tr>
+<tr><td>1× (no advantage)</td><td>a tie with Thor, by physics</td></tr>
+<tr><td>2×</td><td>1.95× Thor — just short of the goal</td></tr>
+<tr><td>2.15×</td><td>2.05× Thor — clears the goal, judged pessimistically</td></tr>
+<tr><td>3× (our design target)</td><td>2.9× Thor — clears the goal even if Thor turns out 25% better than we assume</td></tr>
 </table></div>
 
-<p>We hold ourselves to the strict version of the goal: at least twice Thor's speed in
-every operating mode, from the highest-quality three-step planner down to the fastest
-one-step controller, judged at the pessimistic end of our simulation's uncertainty, not
-the average. That requires a 2.15× efficiency advantage. Our design target is 3×, which
-keeps the win intact even if our assumptions about Thor prove generous to us.</p>
+<p><b>The goal is 2× Thor.</b> Everything else in that table is what it takes to get
+there. Because both chips are held to the same 40 W, speed and energy efficiency are the
+same quantity — so an efficiency advantage of 2.15× is what delivers a 2× speed-up when
+you judge it at the pessimistic end of our simulation's uncertainty rather than the
+average. Our design target is 3×, which keeps the win intact even if our assumptions
+about Thor prove generous to us.</p>
 
 <h2>Why 2 to 3× is credible</h2>
 
