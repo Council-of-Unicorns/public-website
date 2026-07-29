@@ -1,8 +1,8 @@
 # Archive — FM-RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Copied 2026-07-28 at etched
-commit c5c65db.
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-07-29 at etched
+commit b4fc988.
 
 ## Canonical documents
 

@@ -20,16 +20,16 @@
 
 ## FM-RPU feasibility (region with confidence bands)
 
-- Feasibility region: p_feasible=0.0%; latency quantiles [p50=1385.77 ms, p90=2074.08 ms, p99=2407.87 ms]; 90% CI on deadline margin [-2040.95, -574.31] ms (n=256)
+- Feasibility region: p_feasible=0.0%; latency quantiles [p50=284.38 ms, p90=423.99 ms, p99=528.18 ms]; 90% CI on deadline margin [-248.87, +25.00] ms (n=256)
 
 ## Sensitivity ranking
 
 | Rank | Input | Influence (std of binding feasibility margin) |
 | --- | --- | --- |
-| 1 | step_compression | 1.0479 |
-| 2 | n_new | 0.9497 |
-| 3 | bw_util | 0.0214 |
-| 4 | e_byte_hbm_pj | 0.0000 |
+| 1 | bw_util | 6.9733 |
+| 2 | n_new | 5.5753 |
+| 3 | step_compression | 1.1911 |
+| 4 | e_byte_hbm_pj | 0.3697 |
 
 ## Thor bandwidth wall
 
@@ -38,8 +38,8 @@
 
 ## A-vs-B gap (cost of generality)
 
-- A perf/watt: 0.002797; B perf/watt: 0.002754
-- Gap fraction (B's cost of generality): +1.6% (90% CI [-98.7%, +101.8%])
-- A region: p_feasible=0.0%; latency quantiles [p50=1363.82 ms, p90=1816.24 ms, p99=2448.35 ms]; 90% CI on deadline margin [-1936.84, -625.37] ms (n=96)
-- B region: p_feasible=0.0%; latency quantiles [p50=909.03 ms, p90=1314.68 ms, p99=1619.37 ms]; 90% CI on deadline margin [-1260.09, -312.25] ms (n=96)
+- A perf/watt: 0.002835; B perf/watt: 0.002782
+- Gap fraction (B's cost of generality): +1.9% (90% CI [-91.0%, +94.7%])
+- A region: p_feasible=0.0%; latency quantiles [p50=277.87 ms, p90=386.01 ms, p99=525.26 ms]; 90% CI on deadline margin [-223.94, +30.42] ms (n=96)
+- B region: p_feasible=0.0%; latency quantiles [p50=278.29 ms, p90=408.62 ms, p99=527.67 ms]; 90% CI on deadline margin [-223.83, +38.36] ms (n=96)
 
