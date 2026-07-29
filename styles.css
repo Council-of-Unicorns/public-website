@@ -790,3 +790,9 @@ footer.site-foot .foot-tag {
   text-transform: none;
   color: var(--text-3);
 }
+
+/* Multiplier columns must not break mid-number (e.g. "1.0–" / "1.45x"). */
+.tbl table.levers td:nth-child(3),
+.tbl table.levers td:nth-child(4),
+.tbl table.levers th:nth-child(3),
+.tbl table.levers th:nth-child(4) { white-space: nowrap; }
