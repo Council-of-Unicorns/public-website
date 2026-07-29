@@ -266,7 +266,7 @@ svg .die-lbl { fill: var(--ink) !important; }
   <header>
     <p class="eyebrow">The chip</p>
     <h1>Etching a world model into silicon</h1>
-    <p class="sub">A 14-billion-parameter world model has to produce an action every <b>200&nbsp;ms</b> inside a <b>30&nbsp;W</b> robot head. This page walks through the phase-1 concept: what is on the die, how it runs the transformer with <b>no instructions at all</b>, and how much faster that makes it than a Jetson Thor. Every number comes from the simulator calibrated against measured Blackwell silicon. The die drawings are illustrative; the numbers are not.</p>
+    <p class="sub">A 14-billion-parameter world model has to produce an action every <b>200&nbsp;ms</b> inside a <b>40&nbsp;W</b> robot head. This page walks through the phase-1 concept: what is on the die, how it runs the transformer with <b>no instructions at all</b>, and how much faster that makes it than a Jetson Thor. Every number comes from the simulator calibrated against measured Blackwell silicon. The die drawings are illustrative; the numbers are not.</p>
     <div class="chips" id="chips"></div>
   </header>
 
@@ -345,13 +345,13 @@ const DATA = {
   "chunk_flops": 741519320678400.0
  },
  "chip": {
-  "name": "RPU (phase-1 candidate)",
+  "name": "FM-RPU (phase-1 candidate)",
   "fp4_peak_pf": 4.0,
-  "tdp_w": 30.0,
+  "tdp_w": 40.0,
   "clock_ghz": 1.05,
   "mac_units_m": 1.9047619047619049,
   "conveyor_gbs_needed": 200.35819001291816,
-  "hbm_bw_provisioned": 1200000000000.0,
+  "hbm_bw_provisioned": 307200000000.0,
   "sustained_avg_gbs": 221.588544
  },
  "thor": {
@@ -372,39 +372,39 @@ const DATA = {
    },
    {
     "label": "VAE encode",
-    "ms": 3.6967962367313274
+    "ms": 3.6965720216858475
    },
    {
     "label": "prefill (KV)",
-    "ms": 6.49016139916775
+    "ms": 25.312111708752937
    },
    {
     "label": "DiT step 1",
-    "ms": 74.97440977371586
+    "ms": 78.5498994106964
    },
    {
     "label": "flow 1",
-    "ms": 1.4848722421522882
+    "ms": 1.4846480271068085
    },
    {
     "label": "DiT step 2",
-    "ms": 74.97440977371586
+    "ms": 78.5498994106964
    },
    {
     "label": "flow 2",
-    "ms": 1.4848722421522882
+    "ms": 1.4846480271068085
    },
    {
     "label": "DiT step 3",
-    "ms": 74.97440977371586
+    "ms": 78.5498994106964
    },
    {
     "label": "flow 3",
-    "ms": 1.4848722421522882
+    "ms": 1.4846480271068085
    },
    {
     "label": "action head",
-    "ms": 1.4848722421522882
+    "ms": 1.4846480271068085
    },
    {
     "label": "emit",
@@ -467,15 +467,15 @@ const DATA = {
    "eta": 1.0,
    "flop_j": 137.2127352657021,
    "byte_j": 8.864771739645946,
-   "static_j": 0.7238047824199445,
-   "p50_ms": 241.26826080664816
+   "static_j": 1.0833600889478738,
+   "p50_ms": 270.8400222369685
   },
   "fmrpu_eta31": {
    "eta": 3.1,
    "flop_j": 44.2621726663555,
    "byte_j": 8.864771739645946,
-   "static_j": 0.7238047824199445,
-   "p50_ms": 241.26826080664816
+   "static_j": 1.0833600889478738,
+   "p50_ms": 270.8400222369685
   },
   "thor_head": {
    "eta": 1.0,
@@ -551,81 +551,81 @@ const DATA = {
   "thor_head_40w": [
    {
     "eta": 1.0,
-    "p50": 0.75,
-    "ci_low": 0.7499999999999999,
-    "ci_high": 0.7500000000000001,
+    "p50": 1.0,
+    "ci_low": 1.0,
+    "ci_high": 1.0,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 1.5,
-    "p50": 1.078305969821606,
-    "ci_low": 1.0547143794200484,
-    "ci_high": 1.1042210551941927,
+    "p50": 1.4809939025541008,
+    "ci_low": 1.4739753366119568,
+    "ci_high": 1.4859032806343884,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 2.0,
-    "p50": 1.3804448990467328,
-    "ci_low": 1.32359304056634,
-    "ci_high": 1.4455944642905292,
+    "p50": 1.9499512287895358,
+    "ci_low": 1.9317844235143058,
+    "ci_high": 1.9627587350911955,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 2.5,
-    "p50": 1.6594253340921017,
-    "ci_low": 1.5626066171227087,
-    "ci_high": 1.7748068231967424,
-    "p_success": 0.0,
+    "p50": 2.407318207795383,
+    "ci_low": 2.3742404851834626,
+    "ci_high": 2.43081674678969,
+    "p_success": 1.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 3.0,
-    "p50": 1.9178116298951897,
-    "ci_low": 1.7764691510552526,
-    "ci_high": 2.0924966559951614,
-    "p_success": 0.296875,
+    "p50": 2.853519280625512,
+    "ci_low": 2.802103101150609,
+    "ci_high": 2.890318544995288,
+    "p_success": 1.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 3.5,
-    "p50": 2.1578030101042076,
-    "ci_low": 1.9689521521605091,
-    "ci_high": 2.3992585501206602,
-    "p_success": 0.921875,
+    "p50": 3.288958414069125,
+    "ci_low": 3.216082557649786,
+    "ci_high": 3.3414966193817754,
+    "p_success": 1.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 4.0,
-    "p50": 2.381296321512125,
-    "ci_low": 2.1431089496475058,
-    "ci_high": 2.695646871866681,
+    "p50": 3.7140203204929736,
+    "ci_low": 3.616843782424559,
+    "ci_high": 3.784575112266706,
     "p_success": 1.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 4.5,
-    "p50": 2.5899362758667426,
-    "ci_low": 2.301437872317728,
-    "ci_high": 2.982179111087453,
+    "p50": 4.129071591497652,
+    "ci_low": 4.005009908545056,
+    "ci_high": 4.219770189910341,
     "p_success": 1.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 5.0,
-    "p50": 2.7851559961806056,
-    "ci_low": 2.4460028703687993,
-    "ci_high": 3.2593388975671296,
+    "p50": 4.534461752409507,
+    "ci_low": 4.381165507412216,
+    "ci_high": 4.647290394170428,
     "p_success": 1.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
@@ -634,81 +634,81 @@ const DATA = {
   "thor_max_130w": [
    {
     "eta": 1.0,
-    "p50": 0.23076923076923078,
-    "ci_low": 0.23076923076923073,
-    "ci_high": 0.2307692307692308,
+    "p50": 0.3076923076923077,
+    "ci_low": 0.30769230769230765,
+    "ci_high": 0.30769230769230776,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 1.5,
-    "p50": 0.3317864522528018,
-    "ci_low": 0.32452750136001485,
-    "ci_high": 0.3397603246751362,
+    "p50": 0.4556904315551079,
+    "ci_low": 0.453530872803679,
+    "ci_high": 0.45720100942596564,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 2.0,
-    "p50": 0.4247522766297639,
-    "ci_low": 0.40725939709733533,
-    "ci_high": 0.44479829670477816,
+    "p50": 0.5999849934737033,
+    "ci_low": 0.594395207235171,
+    "ci_high": 0.6039257646434447,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 2.5,
-    "p50": 0.5105924104898775,
-    "ci_low": 0.48080203603775645,
-    "ci_high": 0.5460944071374593,
+    "p50": 0.7407132947062718,
+    "ci_low": 0.7305355339026038,
+    "ci_high": 0.7479436143968278,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 3.0,
-    "p50": 0.5900958861215968,
-    "ci_low": 0.5466058926323853,
-    "ci_high": 0.6438451249215882,
+    "p50": 0.8780059325001575,
+    "ci_low": 0.8621855695848029,
+    "ci_high": 0.8893287830754733,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 3.5,
-    "p50": 0.6639393877243717,
-    "ci_low": 0.6058314314340028,
-    "ci_high": 0.7382334000371262,
+    "p50": 1.0119872043289615,
+    "ci_low": 0.9895638638922418,
+    "ci_high": 1.0281528059636231,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 4.0,
-    "p50": 0.7327065604652692,
-    "ci_low": 0.6594181383530786,
-    "ci_high": 0.8294298067282097,
+    "p50": 1.1427754832286072,
+    "ci_low": 1.1128750099767875,
+    "ci_high": 1.164484649928217,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 4.5,
-    "p50": 0.7969034694974593,
-    "ci_low": 0.7081347299439162,
-    "ci_high": 0.9175935726422931,
+    "p50": 1.2704835666146623,
+    "ci_low": 1.2323107410907865,
+    "ci_high": 1.2983908276647202,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
    },
    {
     "eta": 5.0,
-    "p50": 0.8569710757478787,
-    "ci_low": 0.7526162678057842,
-    "ci_high": 1.0028735069437322,
+    "p50": 1.3952190007413867,
+    "ci_low": 1.3480509253576052,
+    "ci_high": 1.429935505898593,
     "p_success": 0.0,
     "dut_power_limited": 1.0,
     "base_power_limited": 1.0
@@ -716,8 +716,8 @@ const DATA = {
   ]
  },
  "eta_star": {
-  "thor_head_40w": 3.109634443043433,
-  "thor_max_130w": 25.140408778243
+  "thor_head_40w": 2.0528324928318398,
+  "thor_max_130w": 7.571787433194004
  }
 };
 

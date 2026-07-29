@@ -204,11 +204,13 @@ extraction through the stacked die.
 
 ## 7. The model has to meet us halfway
 
-Silicon alone stops short of the absolute 200 ms goal, which needs η ≈ 12 (Section 6), so
-the model closes the rest. Two families of lever do that work: runtime levers the chip
-exploits inside a chunk, and train-time levers the model team applies before weights ever
-ship. Everything below sits in public literature, and our baseline already banks several of them.
-The open ground sits in one corner, named at the end.
+Better hardware alone will not put today's largest world-action models inside a robot
+head. The model has to become smaller, faster, and easier to execute at the same time.
+Silicon stops short of the absolute 200 ms goal at η ≈ 12 (Section 6), and the model
+closes the rest. Two families of lever do that work: runtime levers the chip exploits
+inside a chunk, and train-time levers the model team applies before weights ever ship.
+These techniques all exist in public literature. The open question is how aggressively
+they combine without degrading closed-loop behavior.
 
 ### 7.1 Runtime levers the chip exploits
 
@@ -231,23 +233,74 @@ reuse saves energy while the miss-rate proof stands; a reuse floor counts agains
 deadline only when training guarantees it. The founder's train-time chunking is the tool
 that can train that floor in [F].
 
-### 7.2 Train-time levers the model team applies
+### 7.2 What the model team changes at training time
 
-The published toolbox splits by model family, and "distillation" names different things in
-each [X, founder survey]. Latent-planning world models (Dreamer, DINO-WM, TD-MPC) distill
-into smaller student networks or policies. Generative-simulator world models (video
-diffusion: Genie, Cosmos-class, our DreamZero fork) distill sampling steps, which dominate
-their cost. Our workload sits in the second family, so step count leads.
+**Quantization.** FP8 and carefully calibrated INT8 already run close to lossless on many
+workloads. Reaching INT4 or FP4 reliably takes quantization-aware training, distillation,
+or both (QVGen, NVIDIA's NVFP4 QAT-distillation) [X]. Precision need not stay uniform:
+sensitive components such as the dynamics or prediction core can hold higher precision
+while quantization-tolerant layers drop lower. For transformer world models, quantizing the KV cache and
+intermediate activations can matter as much as quantizing weights, because long rollouts
+spend as much memory on state as on parameters. Our design point already assumes FP8
+activations and FP4 linear weights, so it presumes a working QAT recipe [S].
 
-| Lever | Representative methods [X] | Effect on our chunk | Status for us |
-|---|---|---|---|
-| Step-reduction distillation | consistency and trajectory (LCM, FRMD), distribution matching (DMD, DMD2), adversarial (LADD), self-distillation flow maps (One-Step Flow Policy), modality-aware (Flash-WAM) | divides every per-step term by the step count | **partly banked**: 16→3 is already in the baseline [F]; 3→1 is the Deadline-mode existence question (§9) |
-| Capacity distillation | teacher→smaller student on predictions or latents; on-policy and closed-loop variants that fight compounding error (ActDistill) | cuts parameters, so weight traffic and matmul energy fall together | available, untested at our scale; action-only students already match or beat teachers (OneDP reports 95–98 % against an 83 % teacher) |
-| Quantization | PTQ (FP8 and INT8 near-lossless), QAT for 4-bit and below (QVGen, NVFP4 QAT-distillation), mixed precision by module sensitivity, KV and activation quantization | sets bytes per weight and per KV entry, the two terms that size the conveyor | **bounded by the recorded constraint** below; our FP4 linear weights already presume QAT, and the conservative memory profile keeps FP8 weights (Section 8) |
-| Pruning and sparsity | structured pruning of heads, channels, layers; unstructured and lottery-ticket sparsification | structured pruning shrinks the mapped shapes; unstructured shrinks storage only | structured only, because our tiles are mask-fixed; 2:4 sits behind the constraint |
-| Latent and token compression | discrete and categorical latents (DreamerV2/V3), VQ token latents (IRIS, TWM), tokenizer and VAE compression, temporal token merging | cuts N_new and N_ctx directly | available, and it lands on the two inputs our sensitivity ranking puts on top |
-| Backbone architecture | state-space and Mamba-style sequence models, linear or masked attention, smaller DiTs, low-rank factorization, LoRA-style adapters, parameter sharing | attacks the attention term that carries ~62 % of dynamic energy | **changes chip assumptions** (see below) |
-| Frozen foundation encoders | build on DINO, SAM, or VAE latents; decoder-free designs (MuDreamer, DINO-WM) | most perception parameters become borrowed and shared | **already banked**: our fork drops the pixel decoder, so this cannot be counted twice |
+**Step-reduction distillation.** For diffusion and flow-based video-action models this
+means fewer denoising steps. Consistency and trajectory distillation (LCM, FRMD),
+progressive distillation, distribution matching (DMD, DMD2), adversarial distillation
+(LADD), and self-distilled flow maps (One-Step Flow Policy) compress a long sampling
+trajectory into one to four steps [X]. Modality-aware methods go further by treating video
+and action differently during training instead of forcing both through one noise schedule
+(Flash-WAM) [X]. This is the largest near-term reduction available to our family, and our
+16→3 step result already banks part of it [F].
+
+**Capacity distillation.** A smaller student can learn to reproduce a larger teacher's
+latent predictions, imagined rollouts, or actions. For control, the strongest versions
+train the student on states reached under its own behavior rather than only copying
+teacher trajectories (ActDistill, on-policy distillation) [X], because small errors that
+look harmless in an offline dataset compound once the student runs in the loop.
+Quantization-aware distillation combines both reductions: the student learns to stay
+accurate while operating at low precision from the start.
+
+**Changing what the model represents.** Pixel reconstruction is expensive and often
+unnecessary for control. Latent-space models predict in a compressed representation and
+decode images only when needed. Reconstruction-free approaches remove the decoder entirely
+and operate over features from a frozen perception model (MuDreamer, DINO-WM) [X].
+Discrete or tokenized latents (DreamerV2/V3 categorical latents, IRIS, TWM), stronger
+spatial and temporal compression, and fewer tokens per frame attack the sequence-length
+cost directly. These change the geometry of the workload the chip executes, which makes
+them chip decisions as much as model decisions.
+
+**Architecture and reuse.** State-space and Mamba-style models, linear or masked
+attention, hybrid backbones, low-rank factorization, parameter sharing, and smaller
+purpose-built DiTs each reduce the cost of long-horizon prediction [X]. Frozen foundation
+encoders (DINO, SAM, VAE latents) supply perception without every world model carrying its
+own visual stack. Structured pruning removes whole heads, channels, or layers in a form
+hardware can exploit, while caching reuses features, keys and values, or activations
+across nearby frames and denoising steps.
+
+**The two families differ, and the word "distilled" hides it.** In latent-planning systems
+(Dreamer, DINO-WM, TD-MPC) the opportunities are compact latent dynamics, smaller
+students, shorter contexts, and distilled policies. In generative video and diffusion
+models the dominant costs are token count, network size, and repeated denoising, so step
+distillation and feature reuse outrank parameter count. Calling a model "distilled" is
+therefore incomplete: it can mean a smaller network, fewer sampling steps, or a separate
+policy distilled from the world model. Our workload sits in the second family.
+
+None of this is speculative. Quantization, step reduction, latent compression, caching,
+structured sparsity, and student-teacher distillation are all established techniques [X].
+The engineering opportunity is to combine them around the requirements of closed-loop
+robotics instead of optimizing each one independently for image quality or offline
+benchmarks. Where each lever stands for us:
+
+| Lever | Effect on our chunk | Status for us |
+|---|---|---|
+| Step-reduction distillation | divides every per-step term by the step count | **partly banked**: 16→3 sits in the baseline [F]; 3→1 is the Deadline-mode existence question (§9) |
+| Capacity distillation | fewer parameters, so weight traffic and matmul energy fall together | available, untested at our scale; action-only students already match or beat teachers (OneDP reports 95–98 % against an 83 % teacher) [X] |
+| Quantization | sets bytes per weight and per KV entry, the two terms that size the conveyor | **bounded by the recorded constraint** below; FP4 linear weights presume QAT, and the conservative memory profile keeps FP8 weights (Section 8) |
+| Pruning and sparsity | structured pruning shrinks the mapped shapes; unstructured shrinks storage only | structured only, because our tiles are mask-fixed; 2:4 sits behind the constraint |
+| Latent and token compression | cuts N_new and N_ctx directly | available, and it lands on the two inputs our sensitivity ranking puts on top |
+| Backbone architecture | attacks the attention term that carries ~62 % of dynamic energy | **changes chip assumptions** (see below) |
+| Frozen encoders, decoder-free designs | most perception parameters become borrowed and shared | **already banked**: our fork drops the pixel decoder, so this cannot be counted twice |
 
 Three consequences follow, and they matter more than the catalogue.
 
@@ -257,24 +310,46 @@ reports. The multipliers in §7.1 sit on top of that baseline, never beside it.
 
 **Some model choices reach back into the chip.** A state-space or linear-attention backbone
 would retire much of the attention energy the chip is built to make cheap, and token
-compression moves the very parameters that size the array and the conveyor. Our
-thesis rests on shape stability (Section 2), so the model roadmap is a chip input rather
-than an independent track. Gate 1 fixes the model contract before RTL commits to a shape.
+compression moves the very parameters that size the array and the conveyor. Our thesis
+rests on shape stability (Section 2), so the model roadmap is a chip input rather than an
+independent track. Gate 1 fixes the model contract before RTL commits to a shape.
 
 **The recorded constraint bounds the quantization column.** The control policy must not
-depend on aggressive quantization (INT2 weights, FP4 KV, 2:4 pruning) [F]. Those remain
-last resorts behind bit-exact and structural options.
+depend on aggressive quantization (INT2 weights, FP4 KV, 2:4 pruning) [F]. FP8 KV is the
+baseline and stays; anything below it is a last resort behind bit-exact and structural
+options.
 
-### 7.3 Where the headroom actually is
+### 7.3 The headroom, and the long game
 
 Every method above is public, so none of it is a moat and all of it is available to Thor
 as well. Two asymmetries survive that. The chip realizes the runtime levers at a cost a
 GPU cannot match, which is §7.1. And on the training side, the action-only setting is
 close to saturated, while joint video-action distillation stays open: the two streams
-carry different signal-to-noise schedules, so a single consistency objective serves
-neither well, and per-modality treatment (Flash-WAM's idea) is the current frontier
-[X, founder survey]. That is our model-side bet, it pairs with the certified reuse floor
-in §9, and it is the one place where being early buys more than being fast.
+carry different signal-to-noise schedules, so one consistency objective serves neither
+well, and per-modality treatment is the current frontier [X]. That is our model-side bet,
+and it pairs with the certified reuse floor in §9.
+
+Real model research remains. Better latent representations could preserve the physical
+information control needs while discarding most visual detail. Better distillation
+objectives could reach one or two steps without collapsing the diversity of possible
+futures. Joint video-action models could run different architectures, precisions, and
+update rates for perception, prediction, and action. A model designed for an accelerator
+from the beginning may look very different from a video generator adapted to robotics
+afterward.
+
+Our roadmap assumes progress on both fronts and depends on a breakthrough in neither. In
+the near term we design for the workload that exists and exploit the optimizations already
+available, so the first product stands on its own. Over time, model compression and
+architectural improvement move more of the workload onto the robot. As the model
+architecture stabilizes, the boundary between model optimization and chip optimization
+becomes artificial, and full co-design opens up: representation, numerical formats,
+dataflow, memory hierarchy, and silicon chosen together.
+
+The chip does not need to carry the whole burden, and neither does the model. Edge
+inference becomes practical when model efficiency and hardware efficiency meet in the
+middle. Our immediate objective is to stay ahead of general-purpose hardware while that
+convergence runs. Our long-term objective is to help decide the architecture it converges
+on, and then build the silicon around it.
 
 ## 8. Engineering the memory wall, honestly
 
