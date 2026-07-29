@@ -7,7 +7,6 @@
 <meta name="description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
-<meta name="robots" content="noindex, nofollow" />
 <meta property="og:title" content="FM-RPU — Feasibility Readout" />
 <meta property="og:description" content="What the calibrated Tier-1 instrument currently reads for a head-resident world-model accelerator." />
 <meta property="og:type" content="website" />
@@ -30,7 +29,7 @@
     <span>FM-RPU</span>
   </a>
   <nav aria-label="Sections">
-    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html">Chip</a><a href="index.html#about">About</a>
+    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html">Chip</a><a href="feasibility.html" aria-current="page">Feasibility</a><a href="index.html#about">About</a>
   </nav>
 </header>
 
@@ -339,20 +338,16 @@ svg .die-lbl { fill: var(--ink) !important; }
   </div>
 
   <header>
-    <p class="eyebrow">etched · Tier-1 analytical roofline instrument</p>
+    <p class="eyebrow">The instrument</p>
     <h1>FM-RPU feasibility readout</h1>
-    <p class="sub">Can a head-resident accelerator run a 14B DreamZero world model at 5 Hz
-    (200 ms deadline, 2 s horizon) inside ~30 W — where Jetson Thor and a head-power B200 cannot?
-    This is what the instrument currently reads.</p>
+    <p class="sub">Can a chip in the robot&rsquo;s head run a 14-billion-parameter world model every 200&nbsp;ms on about 30 watts, when neither a Jetson Thor nor a head-power B200 can? This page is the raw readout. It is deliberately unflattering to us: <b>our own row is scored with no architecture advantage at all</b>, which is the whole point of the exercise below.</p>
     <div class="chips" id="chips"></div>
   </header>
 
   <section id="verdict-sec">
-    <p class="eyebrow">Constraint verdicts · shared utilization model (P1)</p>
+    <p class="eyebrow">Verdicts</p>
     <h2>No row clears all three constraints</h2>
-    <p class="note">Every hardware row is scored under the <b>one identical utilization model</b> —
-    the design-under-test is never granted ideal utilization. Feasibility requires all of:
-    deadline-miss-rate ≤ 10⁻⁴, average power within TDP, and the fanless neck path able to reject the heat.</p>
+    <p class="note">Every row is scored with the same utilization model. We never hand our own design a friendlier assumption than the incumbent gets &mdash; which is why the FM-RPU row looks bad here. It is being run as though it were a small GPU, with none of the etched-dataflow efficiency the chip exists to deliver. To count as feasible a row has to clear all three bars at once: deadline misses at or under one in ten thousand, average power inside its own rating, and heat the neck can actually carry away.</p>
     <div class="chart-box" style="padding:0"><table id="verdict"></table></div>
   </section>
 
@@ -362,46 +357,36 @@ svg .die-lbl { fill: var(--ink) !important; }
   </section>
 
   <section id="roofline-sec">
-    <p class="eyebrow">Roofline · regime is a computed output (P5)</p>
+    <p class="eyebrow">Roofline</p>
     <h2>The workload is compute-bound on every real row</h2>
-    <p class="note">Chunk-wise video diffusion re-diffuses <b>N_new × CFG ≈ 6,240 tokens</b> per weight
-    fetch — not the low-batch decode the bandwidth-bound intuition assumes. Every DiT operator sits far
-    right of every row's ridge point: the binding resource is <b>compute</b>, not the HBM wall.
-    Operator dots are placed on the FM-RPU roofline; hover for all three rows' regimes.</p>
+    <p class="note">Each chunk re-diffuses about <b>6,240 tokens for every weight fetch</b> &mdash; nothing like the low-batch decode people picture when they call a model bandwidth-bound. Every operator lands far to the right of every device&rsquo;s ridge point, so <b>compute is what binds</b>, not memory. Dots sit on the FM-RPU roofline; hover to see how each operator lands on the other two rows.</p>
     <div class="legend" id="roofline-legend"></div>
     <div class="chart-box"><svg id="roofline" viewBox="0 0 1040 420" style="min-width:1040px" role="img"
       aria-label="Log-log roofline chart: three hardware rows' rooflines with DiT operators plotted by arithmetic intensity"></svg></div>
   </section>
 
   <section id="latency-sec">
-    <p class="eyebrow">Latency · A4 sensor-to-action loop</p>
+    <p class="eyebrow">Latency</p>
     <h2>Where the 200 ms budget goes</h2>
-    <p class="note">Per-stage chunk time against the control deadline (ink rule at 200 ms).
-    The FM-RPU sweep point misses by ~9×; B200 alone fits the deadline — at datacenter power.
-    Segment shade encodes pipeline phase; hover any segment.</p>
+    <p class="note">Per-stage chunk time against the 200&nbsp;ms deadline, marked by the vertical rule. The FM-RPU point misses it by roughly 9&times;. The B200 is the only row that fits &mdash; at datacenter power, a thousand miles away, which is the problem this whole project exists to remove. Shade encodes pipeline phase; hover any segment.</p>
     <div class="legend" id="latency-legend"></div>
     <div class="chart-box"><svg id="latency" viewBox="0 0 1040 240" style="min-width:1040px" role="img"
       aria-label="Stacked horizontal bars of per-stage latency per hardware row versus the 200 millisecond deadline"></svg></div>
   </section>
 
   <section id="energy-sec">
-    <p class="eyebrow">Energy · byte-vs-FLOP split is an output (F4)</p>
-    <h2>FLOP energy dominates the chunk — a placeholder-constant finding</h2>
-    <p class="note">Under the measured calibration (e_flop ≈ 0.33 pJ/FLOP at FP4), compute energy is ~96 % of every chunk
-    and <b>every row exceeds its own TDP</b> — including B200 exceeding 1,000 W, the energy-rate bound asserting itself rather than a placeholder artifact. Byte energy (~0.9 J) is nearly
-    invisible at this scale; hover for exact values. Static/leakage term: Part C.3.</p>
+    <p class="eyebrow">Energy</p>
+    <h2>Almost all of it is compute</h2>
+    <p class="note">At the measured calibration of about 0.33&nbsp;pJ per FP4 FLOP, compute is <b>~96&nbsp;% of every chunk&rsquo;s energy</b> and every row draws more than its own rated power &mdash; the B200 by more than three times. That is not a modelling artifact left over from placeholder constants; it survived calibration. It is what the energy-rate bound looks like when you hold real silicon to this workload. Moving bytes costs almost nothing next to it; hover for exact joules.</p>
     <div class="legend" id="energy-legend"></div>
     <div class="chart-box"><svg id="energy" viewBox="0 0 1040 200" style="min-width:1040px" role="img"
       aria-label="Stacked horizontal bars of FLOP, byte, and static energy per chunk per hardware row"></svg></div>
   </section>
 
   <section id="heatmap-sec">
-    <p class="eyebrow">Design-space screen · (FP4 compute × HBM bandwidth)</p>
+    <p class="eyebrow">Design space</p>
     <h2>Feasibility moves with compute, not bandwidth</h2>
-    <p class="note">Chunk p50 latency over the FM-RPU sweep grid (darker = slower, log-scaled color).
-    Cells outlined in green clear the deadline-miss target — they form <b>vertical stripes</b>: at
-    1-step distilled, ≥ 2 PF clears at <i>any</i> bandwidth, even Thor's 273 GB/s.
-    <b>No cell clears the 30 W power budget</b> under measured calibration.</p>
+    <p class="note">Chunk latency across a grid of FP4 compute against memory bandwidth (<b>darker is faster</b>). Cells outlined in green clear the deadline, and they form <b>vertical stripes</b> &mdash; bandwidth barely moves the answer. At one distilled step, anything past 2&nbsp;PF clears at <i>every</i> bandwidth on the chart, Thor&rsquo;s 273&nbsp;GB/s included. <b>No cell clears the 30&nbsp;W budget</b>, which is the wall that actually matters.</p>
     <div class="legend" id="heatmap-legend"></div>
     <div class="duo">
       <div class="chart-box"><svg id="hm0" viewBox="0 0 500 360" style="min-width:500px" role="img" aria-label="Latency heatmap, 3-step CFG schedule"></svg></div>
@@ -410,32 +395,25 @@ svg .die-lbl { fill: var(--ink) !important; }
   </section>
 
   <section id="sens-sec">
-    <p class="eyebrow">Sensitivity · one-at-a-time over the binding feasibility margin (A6.4)</p>
+    <p class="eyebrow">Sensitivity</p>
     <h2>Step compression and token count carry the conclusion</h2>
-    <p class="note">Spread each uncertain input injects into the binding feasibility margin while the
-    others are held at point mass. The two workload-compression knobs dominate; realized bandwidth
-    utilization barely registers — consistent with the compute-bound regime.</p>
+    <p class="note">How far each uncertain input moves the answer on its own, with the others held fixed. The two knobs that shrink the workload &mdash; how many denoising steps, and how many tokens &mdash; dominate everything else. Realized bandwidth utilization barely registers, which is exactly what you would expect if the loop really is compute-bound, and a useful sign the model is not fooling itself.</p>
     <div class="chart-box"><svg id="sens" viewBox="0 0 1040 190" style="min-width:1040px" role="img"
       aria-label="Horizontal bar chart of sensitivity scores per uncertain input"></svg></div>
   </section>
 
   <section id="wall-sec">
-    <p class="eyebrow">Thor wall · bandwidth isolated with infinite compute</p>
+    <p class="eyebrow">The bandwidth wall</p>
     <h2>Even with unlimited compute, 273 GB/s misses the deadline</h2>
-    <p class="note">Deadline-miss-rate vs HBM bandwidth on a synthetic row with compute removed as a
-    constraint. The wall sits at <b id="wall-num"></b> — Thor's 273 GB/s is on the miss side.
-    Bandwidth is an independent kill for Thor; compute is simply the one that binds first.</p>
+    <p class="note">Deadline miss rate against memory bandwidth, on a synthetic row with compute removed as a constraint entirely. The wall sits at <b id="wall-num"></b>, and Thor&rsquo;s 273&nbsp;GB/s is on the wrong side of it. Bandwidth alone would sink Thor here even with infinite compute. Compute is simply the constraint that binds first.</p>
     <div class="chart-box"><svg id="wall" viewBox="0 0 1040 300" style="min-width:1040px" role="img"
       aria-label="Line chart of deadline miss rate versus HBM bandwidth with Thor's bandwidth and the wall marked"></svg></div>
   </section>
 
   <section id="avsb-sec">
-    <p class="eyebrow">Simulator B · cost of generality (Part C), priced not assumed</p>
+    <p class="eyebrow">The cost of generality</p>
     <h2 id="avsb-h2"></h2>
-    <p class="note">The union point (1.5× FP4 for the JEPA-MPC batch, 35 W TDP) vs the DreamZero-specialized
-    point, both running the identical DreamZero hot path (P8b). The gap decomposes into leakage on the
-    extra silicon (Part C.3) and the ~2% programmable update engine (Part C.2). The wide band is honest:
-    placeholder priors are wide by design.</p>
+    <p class="note">What it costs to keep the chip general enough to run a second family of models. The union point &mdash; half again as much FP4 array and a 35&nbsp;W budget, sized to cover a JEPA-MPC workload &mdash; against the DreamZero-specialized point, both running the identical DreamZero path. The gap is leakage on the extra silicon plus the roughly 2&nbsp;% programmable update block. The confidence band is wide because the priors behind it are wide, and we would rather show that than tidy it away.</p>
     <div class="chart-box"><svg id="avsb" viewBox="0 0 1040 150" style="min-width:1040px" role="img"
       aria-label="Dot with confidence interval showing the A versus B perf-per-watt gap"></svg></div>
   </section>
