@@ -37,9 +37,9 @@
   <article>
     <p class="label">Whitepaper &mdash; July 2026</p>
     <h1>A measured case for etching world-model inference into a robot&rsquo;s head</h1>
-                              <p class="doc-lede">The ChatGPT moment for robotics requires world models to run on the robot.</p>
+                                  <p class="doc-lede">The ChatGPT moment for robotics requires world models to run on the robot.</p>
 
-  <p class="prov-note">Every number below says where it came from. <span class="prov prov-m">[M]</span> we measured it ourselves. <span class="prov prov-s">[S]</span> our simulator computed it. <span class="prov prov-f">[F]</span> we measured it in production at a robotics company. <span class="prov prov-x">[X]</span> someone else published it. <span class="prov prov-t">[T]</span> it is a target we have not hit yet. An untagged number is a bug.</p>
+  <p class="prov-note">Source tags: <span class="prov prov-m">[M]</span> measured ourselves &middot; <span class="prov prov-s">[S]</span> computed by our simulator &middot; <span class="prov prov-f">[F]</span> measured in production at a robotics company &middot; <span class="prov prov-x">[X]</span> published elsewhere &middot; <span class="prov prov-t">[T]</span> a target, not yet reached.</p>
 
   <h2>Executive summary</h2>
   <p>Humanoid robotics is converging on video-action diffusion transformers that predict several seconds of motion and must replan fast enough to achieve human-like reaction latency. Today&rsquo;s leading models are still too large to run inside a robot head, forcing teams to rely on kilowatt-class datacenter GPUs and continuous network connections. That puts latency, Wi-Fi jitter, and connectivity failures directly inside the robot&rsquo;s control loop <span class="prov prov-f">[F]</span>.</p>
@@ -183,6 +183,8 @@
     <li>Efficient-WAM (1&nbsp;B world-action model), arXiv:2606.10040; LaWAM (latent world action models), arXiv:2606.15768; NanoVLA, arXiv:2510.25122.</li>
     <li>Epoch AI, &ldquo;Trends in GPU price-performance&rdquo; &mdash; measured FLOP/s per watt doubling time.</li>
   </ol>
+
+    
 
     
 
