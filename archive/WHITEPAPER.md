@@ -232,7 +232,9 @@ reuse saves energy while the miss-rate proof stands; a reuse floor counts agains
 deadline only when training guarantees it. The founder's train-time chunking is the tool
 that can train that floor in [F].
 
-### 7.2 What the model team changes at training time
+### 7.2 The state of the art in model compression
+
+Here is the toolbox as the field currently holds it, ordered by what each part saves us.
 
 **Quantization.** FP8 and carefully calibrated INT8 already run close to lossless on many
 workloads. Reaching INT4 or FP4 reliably takes quantization-aware training, distillation,
