@@ -5,6 +5,8 @@
 - Gate: **PASSED**
 - Tolerance: 15% relative error on latency AND energy
 - Anchors within tolerance: 4 / 7
+- **UNIDENTIFIED** (resting on a box bound, NOT calibrated): e_byte_hbm_pj, bw_util
+  These carry the bound's value, not a measurement. Any downstream number that depends on them inherits that, and a memory-bound anchor is what would fix it.
 
 ## Per-anchor reproduction error
 

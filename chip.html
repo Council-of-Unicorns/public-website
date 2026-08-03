@@ -1109,7 +1109,7 @@ const FLOW = (() => {
 (function foot() {
   const c = DATA.calibration;
   document.getElementById("foot").innerHTML = [
-    `numbers: fmrpu Tier-1 simulator, calibration <b>${c.passed ? "PASSED" : "NOT PASSED"}</b> — ${esc(c.basis)}; compute_util ${c.compute_util.toFixed(3)}, e_flop(FP16) ${c.e_flop_fp16_pj.toFixed(2)} pJ measured`,
+    `numbers: fmrpu Tier-1 simulator, calibration <b>${c.passed ? "PASSED" : "NOT PASSED"}</b> — ${esc(c.basis)}; compute_util ${c.compute_util.toFixed(3)}, e_flop(FP16) ${c.e_flop_fp16_pj.toFixed(2)} pJ fitted to measured anchors`,
     `η is the one assumed input (the etch bet); everything else is modeled or measured. Die geometry illustrative; block numbers are instrument output.`,
     `regenerate: scripts/chipviz_data.py · seed 20260710 · P1 shared utilization · P7 regions · speedup metric per docs/system-design.md §A8a`,
   ].map((s) => `<div>${s}</div>`).join("");

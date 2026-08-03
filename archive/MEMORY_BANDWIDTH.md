@@ -27,7 +27,7 @@ Three stacked explanations, all load-bearing:
    ingested — now a gate-1 item.
 
 **Our candidate config sits near the ridge, not 50× clear of it** (4 PF / 307 GB/s →
-ridge ≈ 10,900 vs intensity ≈ 16,200: only 1.5× compute-side margin, ~1.06× under hot-head
+ridge ≈ 10,500 vs intensity ≈ 16,000: only 1.5× compute-side margin, ~1.06× under hot-head
 refresh derating [S]). The margin must be engineered, not assumed. Hence this ladder.
 
 ## 2. Demand side — cut the bytes (multiplies with everything below)

@@ -60,7 +60,7 @@ detailed simulator. That model already exists and is calibrated:
 | Plan phase | What already exists | State |
 |---|---|---|
 | Phase 0: define the claim | success metric, solid criterion, contract | claim defined; contract drafted, not frozen |
-| Phase 1: measured baseline | 4 RTX PRO 6000 anchors within 0.7-4.6 % latency, 0.2-2.4 % energy; DVFS and FP8 sweeps | **wrong device** — proxy silicon, not Thor |
+| Phase 1: measured baseline | 4 RTX PRO 6000 anchors within 0.5-3.9 % latency, 0.8-2.5 % energy; DVFS and FP8 sweeps | **wrong device** — proxy silicon, not Thor |
 | Phase 2: analytical model | `fmrpu/`, ~2.5k lines: operator costs, roofline, energy, thermal, Monte Carlo, sensitivity | complete and calibrated |
 | Sec 9: apples-to-apples | one shared utilization model across every hardware row, test-enforced | complete |
 | Sec 10.5: sensitivity | Monte Carlo sensitivity ranking with confidence bands | complete |
@@ -205,6 +205,13 @@ both the accelerator-only and the end-to-end boundary, and the miss-rate claim m
 restated against the boundary it actually holds for.
 
 ---
+
+## Phase acceptance gate
+
+Every phase closes with a `review-codify-loop` run: parallel adversarial reviews split by
+axis, every finding triaged into fix / defer-with-note-at-point-of-use / reject-with-reason,
+and the resulting rules committed to [`engineering-lessons.md`](engineering-lessons.md) in
+the same change as the fixes. Phase 3 closed this way on 2026-08-03 with 21 findings.
 
 ## Working rules
 

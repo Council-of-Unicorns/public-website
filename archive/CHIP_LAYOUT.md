@@ -21,7 +21,7 @@ the phase gates evaluate.
   layer-granularity buffering is refuted in CHIP_SPEC §3). KV stream buffers 16 MB.
   Total ≈ **90 MB**.
 - **Conveyor requirement:** stream one step's 14.8 GB [I: 7.0 GB FP4 weights + 7.7 GB
-  FP8 KV] inside the 73.7 ms [I] step compute → ≥ 200 GB/s; provisioned 256-bit
+  FP8 KV] inside the 73.6 ms [S] step compute → ≥ 200 GB/s; provisioned 256-bit
   LPDDR5X @ 307.2 GB/s (1.5× margin). Capacity ≥ 16 GB [I: 7.0 + 7.7 + headroom].
 
 ## 0a. TPU-v1 lineage map (evidence transfer for every major block)

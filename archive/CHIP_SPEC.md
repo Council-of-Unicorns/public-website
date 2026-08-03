@@ -43,16 +43,16 @@ seconds no matter how much silicon is present. At 40 W usable ≈ 36 W:
 
 | bound (3-step CFG, N_new=3120, 4 PF array) | value |
 |---|---|
-| Compute / step (2.36e14 FLOPs @ 4 PF × 0.805) | 73.4 ms |
+| Compute / step (2.36e14 FLOPs @ 4 PF × 0.805) | 73.6 ms |
 | Memory / step (14.8 GB @ 307.2 GB/s) | 48.1 ms |
 | Communication (etched sequencer) | ~0 |
-| **Energy (146 J @ η=1 → 49 J @ η=3, ÷36 W)** | **4,056 → 1,352 ms** |
+| **Energy / chunk (477 J @ η=1 → 161 J @ η=3, ÷36 W)** | **13,251 → 4,470 ms** |
 
 Energy dominates by an order of magnitude. Consequently every efficiency decision (η) is a
 *latency* decision, and the design centers on joules, not on peak anything.
 
 **Regime honesty (added after the WAN-on-B200 memory-bound objection [F]):** the compute-vs-
-memory margin above is thin, not vast — the candidate's ridge (~10,900) sits only ~1.5× below
+memory margin above is thin, not vast — the candidate's ridge (~10,500) sits only ~1.5× below
 the workload's fused intensity (~16,200), and hot-head refresh derating nearly closes it.
 Which side of the ridge the REAL workload sits on depends on realized reuse and fusion —
 measured memory-bound on B200 in the founder's own profiling. The three-wall ordering
@@ -66,14 +66,14 @@ ladder, and the gate-1 anchor requirement: [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWI
 |---|---|---|
 | KV window held in on-chip SRAM ring | **KV lives in DRAM** (shift-in-place ring); on-die SRAM holds stream/window buffers only | the 2 s window is 2·18,720·40·5,120 B ≈ **7.7 GB** — no head-power SRAM exists at that size |
 | 7 GB streamed per step → 22.8 ms | **14.8 GB per step → 48.1 ms** (weights 7.0 + KV 7.7 read each step) | attention reads the full window every step; P2: KV is a first-class term, ≈ the weight term |
-| Compute ≈ 2 ms/step ("negligible") | **73.7 ms/step** (3-step CFG) / 18.4 ms (1-step N=1560) at 4 PF effective | the workload is **compute-bound**: intensity ≈ 16,000 FLOP/B vs ridge ≈ 300; 2 ms would require ~124 PF effective |
+| Compute ≈ 2 ms/step ("negligible") | **73.6 ms/step** (3-step CFG) / 18.4 ms (1-step N=1560) at 4 PF effective | the workload is **compute-bound**: intensity ≈ 16,000 FLOP/B vs ridge ≈ 300; 2 ms would require ~124 PF effective |
 | Double-buffer: Bank A computes step N while Bank B prefetches step N+1 weights | **tile-granularity ping-pong** (2 × ~16 MB FIFOs feeding a weight-streaming systolic array) | step-granularity banks would need 2 × 7 GB of SRAM; weights are consumed as they arrive, never resident |
 | Total 70.4 ms → "crushes the deadline" | see mode table (§5): 3-step CFG ≈ **4.5 s at η=3** (energy-bound) — misses 5 Hz but **beats Thor-in-head 2.86×** (≥ project success); 5 Hz approached only in Deadline Mode at η≈6.4 | the energy bound was missing; 5 Hz at 3-step/40 W would need ~12× better pJ/FLOP than measured Blackwell — beyond all evidence |
 
 ## 4. Memory architecture (v0.1's direction, kept and sized)
 
 - **256-bit LPDDR5X @ 307.2 GB/s** — confirmed sufficient: the conveyor requirement at 4 PF is
-  ~200 GB/s (stream one step's 14.8 GB inside its 73.7 ms compute), so LPDDR5X carries it with
+  ~200 GB/s (stream one step's 14.8 GB inside its 73.6 ms compute), so LPDDR5X carries it with
   1.5× margin and no HBM cost/power. Capacity ≥ 16 GB (7.0 weights + 7.7 KV + activations/headroom).
 - **Conveyor controller:** pure sequential prefetch, open-page burst streaming, identical
   address trace every chunk; no cache, no coherence. ECC on (safety-critical control loop).
@@ -81,7 +81,7 @@ ladder, and the gate-1 anchor requirement: [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWI
   leak: opportunistic all-bank refresh locks the rank for ~hundreds of ns every tREFI≈3.9–7.8 µs
   and is why bounded-latency DRAM is hard in general-purpose systems (automotive LPDDR5 practice
   leans on per-bank/REFsb scheduling for exactly this reason). Our conveyor's address trace is
-  static, and at 4 PF the stream occupies only ~65% of each step (48.1 ms of 73.7 ms) — so the
+  static, and at 4 PF the stream occupies only ~65% of each step (48.1 ms of 73.6 ms) — so the
   **sequencer issues per-bank refresh commands in the known conveyor-idle windows**, per-bank
   rotation aligned to the trace. Refresh interference with the deadline is then **zero by
   construction, not bounded by analysis** — the same proof style as the zero-OS claim, extended
@@ -106,9 +106,9 @@ criterion still requires every mode to clear 2×. (40 W parity, 2026-07-29.)
 
 | Mode | Schedule | Chunk @ η=2.15 | @ η=3 | vs Thor-in-head (η=2.15/3) | 200 ms deadline |
 |---|---|---|---|---|---|
-| **Quality (flagship)** | 3-step CFG, N_new=3120 | 6.2 s | 4.5 s | **2.10× / 2.86×** | misses |
-| **Balanced** | 2-step CFG, N_new=3120 | 4.1 s | 3.0 s | 2.10× / 2.86× | misses |
-| **Deadline** | 1-step distilled, N_new=1560 | 560 ms | 415 ms | 2.05× / 2.74× | needs η≈6.4 |
+| **Quality (flagship)** | 3-step CFG, N_new=3120 | 6.21 s | 4.47 s | **2.13× / 2.97×** | misses |
+| **Balanced** | 2-step CFG, N_new=3120 | 4.14 s | 2.98 s | 2.13× / 2.97× | misses |
+| **Deadline** | 1-step distilled, N_new=1560 | 540 ms | 395 ms | 2.09× / 2.87× | needs η≈6.4 |
 
 *(Historical: the earlier s=10 table met the deadline at η≥5; the measured FP16→FP8 ratio
 of 1.77× — not the naive 2× per halving — moved s from an assumed ~10 to ~3, tripling

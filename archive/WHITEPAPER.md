@@ -17,15 +17,15 @@ World Action Models place a 14 B-parameter diffusion transformer inside a humano
 200 ms balance loop. That model runs today on a kilowatt datacenter GPU or across a radio,
 and both options put facility power or Wi-Fi jitter inside a stability-critical control
 path [F]. We characterized the workload at operator granularity, calibrated an analytical
-performance model to measured Blackwell silicon within 0.7–4.6 % on latency and energy [M],
+performance model to measured Blackwell silicon within 0.5–3.9 % on latency and 0.8–2.5 % on energy [S],
 and derived the design target for a head-resident accelerator. At head power the binding
 constraint is energy rate: chunk time equals chunk joules divided by watts, and peak FLOPS
 cancels out of the comparison [S]. Scored at power parity — both
 chips at the 40 W head ceiling — the speedup IS the efficiency advantage: S = η. Beating
-Thor 2× in the flagship Quality mode needs η ≈ 2.05; beating it SOLIDLY (5th-percentile
+Thor 2× in the flagship Quality mode needs η ≈ 2.02; beating it SOLIDLY (5th-percentile
 S ≥ 2 in every mode, with a 25 % thermal margin granted to Thor) needs η ≈ 2.2–2.8,
 inside the published 1.6–3.2× TPUv4-versus-A100 band; the design target is η = 3 [X, S]. Attention consumes ~62 % of dynamic energy, so matrix-multiply
-specialization alone caps the speedup at 1.17× and any credible datapath must improve the
+specialization alone caps the speedup at 1.59× and any credible datapath must improve the
 attention path [S]. We present the FM-RPU design point (4 PF dense FP4, LPDDR5X conveyor,
 40 W), the workload co-design levers that attack the absolute 5 Hz goal, and a roadmap in
 which a kill test gates every funding tier.
@@ -61,7 +61,7 @@ cross-attention term previously charged the K and V projections over the 3120-to
 chunk instead of the 256-token text sequence, overstating it. An independent
 cycle-level model now reproduces this split exactly.) With CFG fan-out the step
 reads 14.8 GB once and computes both guidance branches; naive double-fetch would double
-that. Arithmetic intensity is ≈ 1.7 × 10⁴ FLOP/byte, far above every edge ridge point, so
+that. Arithmetic intensity is ≈ 1.6 × 10⁴ FLOP/byte, far above every edge ridge point, so
 the loop is compute-bound in the classical roofline sense [S]. Section 9 explains why that
 margin still requires engineering.
 
@@ -90,8 +90,8 @@ is a point of efficiency. The entire product question compresses into one number
 Reproducing built silicon gates every extrapolation to unbuilt silicon. Four authoritative
 anchors ran on an RTX PRO 6000 Blackwell workstation: shape-faithful BF16 chunk proxies at
 one, two, and three steps, with board energy from mean `nvidia-smi` power times duration
-[M]. The fitted model reproduces all four within 0.7–4.6 % latency and 0.2–2.4 % energy;
-fitted compute utilization is 0.80 and per-FLOP energy 1.43 pJ at FP16 [M]. Two of
+[M]. The fitted model reproduces all four within 0.5–3.9 % latency and 0.8–2.5 % energy [S];
+fitted compute utilization is 0.80 and per-FLOP energy 1.43 pJ at FP16 [S]. Two of
 the four fitted coefficients, byte energy and realized bandwidth utilization, rest on
 their box bounds: compute-bound anchors carry no signal about them, so the fit reports
 them as unidentified rather than calibrated (Section 9, item 4). Placeholder anchors for Thor and B200 fail the
@@ -113,7 +113,7 @@ discipline is the working method, and Section 12 states it as policy.
 ## 5. The target: η ≈ 2.2–3 at power parity, and it cannot come from matmul alone
 
 Monte Carlo over token count, step compression, and the precision prior gives
-η\* = 2.05 for median S = 2 in the flagship Quality mode against Thor held to the 40 W
+η\* = 2.02 for median S = 2 in the flagship Quality mode against Thor held to the 40 W
 neck ceiling; the closed form 2 × 40/40 = 2 checks it [S]. The success criterion is the
 SOLID beat: 5th-percentile S ≥ 2 in every mode (η ≥ 2.15), with a design target of η = 3
 that holds even if Thor's in-head budget proves 25 % better than our thermal estimate
@@ -133,9 +133,9 @@ must come from the fabric around the MAC: pipeline and clocking (22 % of the Ham
 ledger), caches (19 %), register files (10 %), control (10 %).
 
 Attention sharpens the requirement. With the mid prior, dynamic energy splits ~62 %
-attention, 36 % matmul and projection, 2 % bytes, because attention runs FP8 against FP4
+attention, 37 % matmul and projection, 0.6 % bytes, because attention runs FP8 against FP4
 linears [S]. Zeroing matmul energy while leaving attention unchanged caps the speedup at
-1.17×. Reaching S = 2 by matmul specialization is impossible under this split. The
+1.59×. Reaching S = 2 by matmul specialization is impossible under this split. The
 attention energy path (online-softmax streaming, FLASH-D-style division hiding, fused
 exponential-multiply operators, and a static per-layer max bound that our fixed geometry
 permits) is load-bearing for the thesis [X: arXiv 2505.14201, 2505.14314; S].
@@ -166,13 +166,13 @@ A head-resident inference engine sized to the shapes above [T unless tagged]:
   per-mode worst-case deadline certificate. Weights, scales, token counts, and schedules
   load from an image; tile geometry and datapath formats are mask-fixed.
 - A programmable update block (~2 % of datapath) runs flow-ODE or CEM-style planning.
-  Supporting a JEPA-family workload costs 1.9 % DreamZero-path perf/W at this design
+  Supporting a JEPA-family workload costs 1.8 % DreamZero-path perf/W at this design
   point; both families stream 7 GB weights, so no memory tier separates them [S].
 
 Modes at the solid bar η = 2.15 against Thor-in-head [S]: **Quality (3-step CFG), the
-flagship: 6.2 s vs 13.0 s, S = 2.10**; Balanced (2-step) 4.1 s vs 8.6 s, S = 2.10;
-Deadline (1-step distilled, N = 1560) 0.56 s vs 1.14 s, S = 2.05. Every mode clears 2× at
-the solid bar; at the η = 3 target Quality reaches 2.86×. No mode meets an absolute
+flagship: 6.21 s vs 13.25 s, S = 2.13**; Balanced (2-step) 4.14 s vs 8.83 s, S = 2.13;
+Deadline (1-step distilled, N = 1560) 0.54 s vs 1.13 s, S = 2.09. Every mode clears 2× at
+the solid bar; at the η = 3 target Quality reaches 2.97×. No mode meets an absolute
 200 ms; the analytical model puts that at η ≈ 12 (η ≈ 6.4 in Deadline mode), outside
 every evidence band. Closing the absolute gap belongs to the workload levers below.
 

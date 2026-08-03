@@ -87,8 +87,8 @@ shows the test, the result, and what would prove us wrong.</p>
 reproduce real hardware before trusting anything it says about hardware that does not
 exist yet. We ran the world-model workload on an NVIDIA Blackwell workstation GPU in our
 lab, measured latency and power at the wall, and tuned the simulator until it matched.
-It now reproduces our measurements within 0.7 to 4.6 percent on latency and within 0.2
-to 2.4 percent on energy, across four different configurations.</p>
+It now reproduces our measurements within 0.5 to 3.9 percent on latency and within 0.8
+to 2.5 percent on energy, across four different configurations.</p>
 
 <p>Every comparison below uses the same rules for both chips: identical power, identical
 utilization assumptions. Our design never gets a friendlier assumption than NVIDIA's.</p>
@@ -115,7 +115,7 @@ trajectory in 4.5 seconds where Thor needs 13.</p>
 <div class="tbl"><table>
 <tr><th>Efficiency advantage we build</th><th>What it gets us</th></tr>
 <tr><td>1× (no advantage)</td><td>a tie with Thor, by physics</td></tr>
-<tr><td>2.15× (what we need)</td><td>2.05× Thor, judged at the pessimistic end rather than the average</td></tr>
+<tr><td>2.15× (what we need)</td><td>2.12× Thor, judged at the pessimistic end rather than the average</td></tr>
 <tr><td>3× (our design target)</td><td>2.9× Thor, and still a win if Thor turns out 25% better than we assume</td></tr>
 </table></div>
 
@@ -171,7 +171,7 @@ assumptions; uncertainty from Monte-Carlo simulation over workload size and meas
 precision scaling; TPU figures from Jouppi et al., ISCA 2017 and 2023. Full technical detail in the <a href="whitepaper.html">whitepaper</a>.</p>
 </main>
 <script>
-const DATA = {"curve":[{"e":1.0,"s":1.00,"lo":1.00,"hi":1.00},{"e":1.5,"s":1.47,"lo":1.46,"hi":1.48},{"e":2.0,"s":1.95,"lo":1.93,"hi":1.96},{"e":2.5,"s":2.42,"lo":2.39,"hi":2.44},{"e":3.0,"s":2.86,"lo":2.81,"hi":2.90},{"e":3.5,"s":3.31,"lo":3.24,"hi":3.36},{"e":4.0,"s":3.75,"lo":3.66,"hi":3.82}]};
+const DATA = {"curve": [{"e": 1.0, "s": 1.0, "lo": 1.0, "hi": 1.0}, {"e": 1.5, "s": 1.494, "lo": 1.492, "hi": 1.496}, {"e": 2.0, "s": 1.985, "lo": 1.979, "hi": 1.988}, {"e": 2.5, "s": 2.471, "lo": 2.46, "hi": 2.478}, {"e": 3.0, "s": 2.954, "lo": 2.937, "hi": 2.965}, {"e": 3.5, "s": 3.434, "lo": 3.408, "hi": 3.449}, {"e": 4.0, "s": 3.91, "lo": 3.875, "hi": 3.93}]};
 const NS="http://www.w3.org/2000/svg";
 const css=(n)=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function el(t,a,p){const e=document.createElementNS(NS,t);for(const[k,v]of Object.entries(a))e.setAttribute(k,v);p.appendChild(e);return e;}

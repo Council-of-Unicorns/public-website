@@ -48,8 +48,8 @@ two-tier:
 | Goal | Status after v2 scrutiny |
 |---|---|
 | **Relative 2× vs Thor** | unchanged — rides on η ≥ 2.15 solid (Ledger A, 40 W parity). Etch realization edge on B2/B3 (~1.2–1.4× relative [T]) is upside, not headline. |
-| **Absolute 5 Hz Deadline Mode** | **v1's "160–250 ms at η=2.79" was WRONG** — it applied B1 and the full stack to a mode where B1 is inapplicable. Corrected (40 W parity): 530 ms ÷ (1.4–2.6) ≈ **205–380 ms at η = 2.15**. 5 Hz closes with **η ≈ 3 AND mid-stack Ledger B** (~185 ms), or a certified-floor B7 at the high end, or further model compression. Honest status: *plausible, not yet on the boundary.* |
-| Quality-mode replan | 6.1 s → **≈ 1.6–3.6 s** at η = 2.15 — approaching 0.5 Hz full-quality replanning. |
+| **Absolute 5 Hz Deadline Mode** | **v1's "160–250 ms at η=2.79" was WRONG** — it applied B1 and the full stack to a mode where B1 is inapplicable. Corrected (40 W parity): 540 ms ÷ (1.4–2.6) ≈ **208–386 ms at η = 2.15**. 5 Hz closes with **η ≈ 3 AND mid-stack Ledger B** (~185 ms), or a certified-floor B7 at the high end, or further model compression. Honest status: *plausible, not yet on the boundary.* |
+| Quality-mode replan | 6.2 s → **≈ 1.6–3.6 s** at η = 2.15 — approaching 0.5 Hz full-quality replanning. |
 
 ## Grand total (v2)
 

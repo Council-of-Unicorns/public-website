@@ -20,7 +20,7 @@ A simulator that predicts a chip that does not yet exist earns trust only by fir
 3. Feasibility is reported as a **region with confidence bands** over the uncertain inputs, never a single point estimate.
 4. Every hardware row is evaluated under **identical utilization assumptions**; the specialized chip is never granted ideal utilization while baselines get realized numbers.
 
-The output that matters is not "the chip is X TOPS." It is: *does a manufacturable (bandwidth, compute, SRAM, watts) point clear the 200 ms deadline at ≤ 35 W for this workload, and where does Thor fall short.*
+The output that matters is not "the chip is X TOPS." It is: *does a manufacturable (bandwidth, compute, SRAM, watts) point clear the 200 ms deadline at ≤ 40 W for this workload, and where does Thor fall short.*
 
 ---
 
@@ -183,7 +183,7 @@ world-model workload. This section defines the metric so it cannot be gamed:
 
 ## A8. What Simulator A proves
 
-- A **feasibility map** over (horizon, steps, tokens, precision, chip params): does the point clear 200 ms at ≤ 35 W with an acceptable deadline-miss-rate.
+- A **feasibility map** over (horizon, steps, tokens, precision, chip params): does the point clear 200 ms at ≤ 40 W with an acceptable deadline-miss-rate.
 - The **bandwidth-vs-compute crossover** for 5 Hz @ 2 s — the number that sets provisioning.
 - The **minimum viable spec**: the (HBM GB/s, FP4 TFLOPS, SRAM MB, W) frontier that clears the deadline; where Thor's 273 GB/s wall falls; and the speedup/energy ratio vs a B200 held to head power.
 
