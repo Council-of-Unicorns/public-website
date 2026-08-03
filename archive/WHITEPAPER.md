@@ -55,8 +55,11 @@ N_ctx ≈ 18 720 tokens, 1 560–3 120 new tokens per step, 1–3 denoising step
 200 ms control period. Four-bit weights occupy 7.0 GB; the FP8 KV window occupies a
 comparable 7.7 GB. Neither fits head-power SRAM, so both stream from DRAM every step [S].
 
-One denoising step splits as: self-attention 38.7 % of FLOPs, FFN 28.6 %, QKV projection
-15.9 %, cross-attention 10.9 %, output projection 5.3 % [S]. With CFG fan-out the step
+One denoising step splits as: self-attention 40.7 % of FLOPs, FFN 30.0 %, QKV projection
+16.7 %, cross-attention 7.0 %, output projection 5.6 % [S]. (Corrected 2026-08-03: the
+cross-attention term previously charged the K and V projections over the 3120-token
+chunk instead of the 256-token text sequence, overstating it. An independent
+cycle-level model now reproduces this split exactly.) With CFG fan-out the step
 reads 14.8 GB once and computes both guidance branches; naive double-fetch would double
 that. Arithmetic intensity is ≈ 1.7 × 10⁴ FLOP/byte, far above every edge ridge point, so
 the loop is compute-bound in the classical roofline sense [S]. Section 9 explains why that
