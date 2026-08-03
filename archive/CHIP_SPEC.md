@@ -43,7 +43,7 @@ seconds no matter how much silicon is present. At 40 W usable ≈ 36 W:
 
 | bound (3-step CFG, N_new=3120, 4 PF array) | value |
 |---|---|
-| Compute / step (2.47e14 FLOPs @ 4 PF × 0.838) | 73.7 ms |
+| Compute / step (2.36e14 FLOPs @ 4 PF × 0.805) | 73.4 ms |
 | Memory / step (14.8 GB @ 307.2 GB/s) | 48.1 ms |
 | Communication (etched sequencer) | ~0 |
 | **Energy (146 J @ η=1 → 49 J @ η=3, ÷36 W)** | **4,056 → 1,352 ms** |

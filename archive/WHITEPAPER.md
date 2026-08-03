@@ -91,7 +91,10 @@ Reproducing built silicon gates every extrapolation to unbuilt silicon. Four aut
 anchors ran on an RTX PRO 6000 Blackwell workstation: shape-faithful BF16 chunk proxies at
 one, two, and three steps, with board energy from mean `nvidia-smi` power times duration
 [M]. The fitted model reproduces all four within 0.7–4.6 % latency and 0.2–2.4 % energy;
-fitted compute utilization is 0.84 [M]. Placeholder anchors for Thor and B200 fail the
+fitted compute utilization is 0.80 and per-FLOP energy 1.43 pJ at FP16 [M]. Two of
+the four fitted coefficients, byte energy and realized bandwidth utilization, rest on
+their box bounds: compute-bound anchors carry no signal about them, so the fit reports
+them as unidentified rather than calibrated (Section 9, item 4). Placeholder anchors for Thor and B200 fail the
 gate at 40–65 % error and carry no authority [S].
 
 Two further measurements killed our own easiest stories [M]:
