@@ -335,60 +335,76 @@ near-threshold operation `[X*]`), and everything in §5 and §6 is pre-silicon.
 
 ---
 
-## 7b. The chip is the minority of the win — arithmetic alone busts the budget
+## 7b. Arithmetic, not memory, is the binding term — and the accumulator decides feasibility
 
-**This is the most consequential number in the report and it inverts the memory-wall
-framing for this workload.** Regenerated from `forward_per_step` at FP4 weights / FP8
-activations, 3 diffusion steps with CFG, N=3120 `[S]`:
+**Corrected 2026-08-04, same day, after the first version of this section was wrong.** The
+original used 0.05 pJ/FLOP — a *BF16* multiplier cost — as the arithmetic floor for an *FP4*
+chip. Multiplier energy scales roughly with the square of operand width, so FP4 is ~16x
+cheaper at the multiply, and that substitution understated the ceiling by an order of
+magnitude. It produced the claim that the requirement "exceeds the physical ceiling by 4.5x
+even granting a perfect chip," which is false. Corrected figures below.
 
-| Term | Value | Share of the 8.00 J chunk budget (40 W at 5 Hz) |
+### The budget
+
+Regenerated from `forward_per_step` at FP4 weights / FP8 activations, 3 diffusion steps with
+CFG, N=3120 `[S]`. Chunk budget is 8.00 J (40 W at 5 Hz) for 7.107e14 FLOP and 45.9 GB of
+DRAM traffic.
+
+| Term | Energy | Share of the 8.00 J budget |
 |---|---|---|
-| Chunk arithmetic | 7.107e14 FLOP | — |
-| Chunk DRAM traffic | 45.9 GB (229 GB/s sustained) | — |
-| **Multipliers alone at 0.01 pJ/FLOP** | **7.11 J** | **89%** |
-| Multipliers alone at 0.05 pJ/FLOP | 35.5 J | **444%** |
-| All DRAM traffic at 5 pJ/B | 0.23 J | 2.9% |
+| All DRAM traffic at 5 pJ/B | 0.23 J | **2.9%** |
 | All DRAM traffic at 10 pJ/B | 0.46 J | 5.7% |
+| FP4 multiply only, 0.0078 pJ/FLOP | 5.54 J | **69%** |
+| FP4 MAC with adder-tree amortised accumulate, 0.0126 pJ/FLOP | 8.92 J | **111%** |
+| FP4 MAC with a naive 32-bit accumulator RMW, 0.0178 pJ/FLOP | 12.65 J | **158%** |
 
-**DRAM costs 1-6% of the budget; the bare multiply costs 89-444%.** And 0.01 pJ/FLOP is
-optimistic even at FP4 — §6 of [`CHIP_SPEC.md`](CHIP_SPEC.md) records a 32-bit accumulator
-read-modify-write at ~0.020 pJ against a 0.0156 pJ FP4 multiply, so realistic MAC-plus-
-accumulate is ~0.017-0.035 pJ after adder-tree amortisation.
+**Two findings, and the second is the actionable one.**
 
-### The ceilings
+*The memory wall is not the wall at this operating point.* DRAM costs 3-6% of the budget
+while arithmetic costs 69-158%. That inverts the usual framing and it is a direct
+consequence of 4-bit weights: the traffic shrank, the FLOPs did not.
 
-Absolute 5 Hz at 40 W requires **139x** over the measured GPU (1110 J against an 8 J
-budget). Against that requirement:
+*The accumulator determines whether the arithmetic fits at all.* 69% versus 158% is the
+entire difference between a multiply-only datapath and one that reads, modifies and writes a
+32-bit accumulator every cycle. **This makes 5a's adder tree a feasibility gate in a
+stronger sense than that section argues** — not a 2.1x optimisation on arithmetic energy,
+but the term that decides whether arithmetic alone busts the budget.
 
-| Ceiling | Value | Assumption |
-|---|---|---|
-| Physical maximum | **31x** | 100% of chip energy reaches the multipliers. Never achieved |
-| Best ever published | **10.9x** | Hameed's 35% FU fraction, which no DNN ASIC has reached |
-| Our estimate (§7) | **~2.6x** | f_ours 15-25% |
+### The ceilings, corrected
 
-**The requirement exceeds the physical ceiling by 4.5x even granting a perfect chip.** No
-architecture, circuit technique or process node closes it. That is arithmetic, not
-pessimism, and it means the remaining gap **must** be closed by reducing FLOPs rather than
-joules per FLOP.
+Absolute 5 Hz at 40 W requires **0.0113 pJ/FLOP all-in**, which is **139x** over the measured
+BF16 GPU (1110 J against an 8 J budget).
+
+| Chip | All-in pJ/FLOP | vs the GPU | Shortfall |
+|---|---|---|---|
+| Perfect, f_ours = 100% | 0.0125 | **125x** | 1.1x — inside the FP4 MAC estimate's own uncertainty |
+| Best ever published, f_ours = 35% | 0.036 | 43.7x | 3.2x |
+| Realistic, f_ours = 20-25% | 0.050-0.063 | 25-31x | **4.4-5.6x** |
+
+**The gap is closable.** A realistic chip falls 4.4-5.6x short of the absolute goal, and that
+is the magnitude the work-reduction levers supply — conditional compute alone is 3-4x, and it
+composes with step reduction and cross-chunk reuse. This is consistent with the repo's
+existing position that absolute 5 Hz at 40 W needs model-side compression.
 
 ### What that implies for the program
 
-Work-reduction levers compose with eta rather than competing with it, and they are where the
-order-of-magnitude lives:
+Work reduction composes with eta rather than competing with it:
 
 | Lever | Worth | Note |
 |---|---|---|
-| **Conditional compute / MoE** — 14B total, 2-4B active | **3-4x** on arithmetic *and* weight traffic | Largest unexploited lever. A model decision, not a chip one, and it does not touch the no-aggressive-quantization constraint `[F]` |
+| **Conditional compute / MoE** — 14B total, 2-4B active | **3-4x** on arithmetic *and* weight traffic | Largest unexploited lever. A model decision, not a chip one, and it does not touch the no-aggressive-quantization constraint `[F]`, which governs numerics rather than routing |
 | Step reduction, 3 -> 1 | up to 3x | 16 -> 3 already done |
 | Cross-chunk receding-horizon reuse | 2.3x at 99.4% quality | Already Ledger B flagship |
 | Token count (N=3120 is a choice) | linear | |
 | Asynchronous hierarchy: cheap policy at 5 Hz, world model at 1 Hz | decouples the deadline from the big forward pass | Unexplored |
 
-**Conclusion, stated plainly: the chip contributes at best ~2.6x of a required 139x, and the
-other ~50x must come from the model and the schedule.** The moat statement in
-`VC_CHEATSHEET.md` — *"not the systolic array, which is textbook; the moat is the system"* —
-is therefore not modesty. It is the actual engineering reality, and the co-design work
-deserves at least the investment the silicon does.
+**The chip remains the minority of the win** — roughly 25-31x of a needed 139x — with the
+remaining ~5x coming from the model and the schedule. The moat statement in
+`VC_CHEATSHEET.md` (*"the moat is the system"*) is the engineering reality, not modesty.
+
+**Keep the two questions separate.** This section is about *absolute* feasibility against a
+workstation GPU baseline. Competitiveness against Thor at equal head power is the separate
+eta question of 7, and the two numbers are not interchangeable.
 
 ---
 
