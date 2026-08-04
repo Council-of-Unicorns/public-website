@@ -408,6 +408,48 @@ eta question of 7, and the two numbers are not interchangeable.
 
 ---
 
+## 7c. The bet, restated as one measurable number: Thor's achieved fraction of peak
+
+**This supersedes the framing in 3b.** `f_gpu` is hard to measure and needs a PDK to pin
+down. The same bet expressed against published Thor specs needs only a benchmark.
+
+| | TFLOP/W |
+|---|---|
+| Thor, **peak**, FP4, from spec (2070 TFLOPS / 130 W) `[X]` | **15.9** |
+| Our chip, **sustained**, at f_ours = 20-25% and 0.0125 pJ/FLOP FP4 arithmetic `[T]` | **16-20** |
+
+**We are claiming to sustain what Thor can only peak at.** Everything then turns on Thor's
+realized fraction of peak on this workload:
+
+| Thor achieves | Our advantage | Against the bars |
+|---|---|---|
+| 50% of peak | 2.0-2.5x | at or below the 2.15 solid bar |
+| 35% of peak | 2.9-3.6x | clears comfortably |
+| 20% of peak | 5.0-6.3x | exceeds the 3.0 target |
+
+The 2.05 / 2.15 / 3.0 bars correspond to Thor landing at roughly 40-50% of peak.
+
+**The warning sign points to the unfavourable end.** Our own measurement (3a) shows the RTX
+achieving **94.7% of peak dense-GEMM efficiency** on this workload. GPUs are not struggling
+with it. If Thor lands above 50% of peak, we graze the bar rather than clear it.
+
+**A comparison retired.** An earlier draft claimed 25-31x against the measured RTX. That
+mixed FP4-projected-sustained against BF16-measured-achieved -- precision and peak-vs-achieved
+compounding. Discard it; the Thor comparison above is the defensible one.
+
+**A baseline clarification.** Published comparisons of Thor against the RTX 6000 **Ada**
+(300 W, Ada Lovelace) do not describe our anchor. We measure an RTX PRO 6000 **Blackwell**
+at 600 W -- the same architecture generation as Thor, with native FP4. Do not carry the
+~1.4x normalized Ada figure into any of our numbers.
+
+**Consequence for the program: the critical experiment has changed.** It is no longer a
+PDK-dependent energy-fraction measurement. It is *run the workload on Thor, record achieved
+TFLOP/s and board watts, divide by 15.9 TFLOP/W*. Orin is the available proxy and the
+prediction is already sealed in [`PREDICTIONS.md`](PREDICTIONS.md). **This is the highest-value
+measurement in the program.**
+
+---
+
 ## 8. What would falsify this
 
 | Measurement | What it settles | Cost |
