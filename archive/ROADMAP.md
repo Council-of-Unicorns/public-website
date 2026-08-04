@@ -60,7 +60,7 @@ detailed simulator. That model already exists and is calibrated:
 | Plan phase | What already exists | State |
 |---|---|---|
 | Phase 0: define the claim | success metric, solid criterion, contract | claim defined; contract drafted, not frozen |
-| Phase 1: measured baseline | 4 RTX PRO 6000 anchors within 0.5-3.9 % latency, 0.8-2.5 % energy; DVFS and FP8 sweeps | **wrong device** — proxy silicon, not Thor |
+| Phase 1: measured baseline | 4 RTX PRO 6000 anchors within 0.5-3.9 % latency, 0.8-2.5 % energy; DVFS and FP8 sweeps | **wrong device and a synthetic workload** — proxy shapes on a workstation GPU, not a real checkpoint on a Jetson |
 | Phase 2: analytical model | `fmrpu/`, ~2.5k lines: operator costs, roofline, energy, thermal, Monte Carlo, sensitivity | complete and calibrated |
 | Sec 9: apples-to-apples | one shared utilization model across every hardware row, test-enforced | complete |
 | Sec 10.5: sensitivity | Monte Carlo sensitivity ranking with confidence bands | complete |
@@ -87,7 +87,29 @@ is the specific hole Phases 3 and 4 close.
 
 ## Phases
 
-### Phase 3 — GEMM-level cycle model  *(in progress)*
+### Phase 1 — measured ground truth  *(unblocked, not started)*
+
+Runs in parallel with everything else and needs no simulator work. It is the only task
+that converts our numbers from `[S]` to `[M]`.
+
+- [ ] **1.1 Freeze the artifact.** Wan2.1-T2V-1.3B as the measurement vehicle: pin the
+      repository revision, checkpoint and weights hash, and set the quality metric,
+      threshold and dataset. Fills 8 of the 14 blocking fields in
+      [`bench/contract.toml`](../bench/contract.toml).
+- [ ] **1.2 Orin benchmark.** The hardware is in hand. Optimized TensorRT, fixed power
+      mode, thermal steady state, external power measurement; report p50/p90/p99, miss
+      rate, energy per inference and per-operator timing.
+- [ ] **1.3 Memory-bound anchor.**  ← **moved here from Phase 4 on 2026-08-03**
+      A bandwidth-bound benchmark on the RTX PRO 6000. This is what identifies `bw_util`,
+      which currently rests on its box bound at 1.000 and which no amount of simulator
+      work can determine. It is also the anchor the founder's B200 WAN observation has
+      been waiting for.
+- [ ] **1.4 Export the operator graph** with exact shapes and traffic, so both sides run
+      the identical workload.
+
+**Gate:** the contract reaches `frozen`, and `bw_util` is identified.
+
+### Phase 3 — GEMM-level cycle model  *(complete 2026-08-03)*
 
 Deliverable: a validated GEMM simulator, cross-checked against independent tools.
 
@@ -144,14 +166,55 @@ Deliverable: a validated GEMM simulator, cross-checked against independent tools
 **Gate:** cycle counts agree with SCALE-Sim within a stated tolerance, and any residual
 difference has a named cause.
 
-### Phase 4 — Memory and system scheduler
+### Phase 4 — Memory and system scheduler  *(in progress)*
 
-SRAM capacity and banking, bank conflicts, DMA engines, double buffering, external memory
-timing via Ramulator, multiple arrays, event-driven dependency scheduling. Replaces the
-two-state DRAM residency policy in `sim/systolic.py` with a real allocator, and replaces
-`bw_util = 1.0` with a modelled controller.
+Ordered by what each step unblocks, not by what is interesting.
 
-**Gate:** defects 1 and 2 above are retired with measured or modelled values.
+- [x] **4.1 Tile scheduler and capacity-aware allocator. DONE.** Replace the two-state
+      residency policy with an explicit blocked-GEMM model: tile shape, loop order,
+      SRAM working set, and per-operand DRAM traffic with real reuse. Search the tiling
+      space for the minimum-traffic schedule that fits capacity. This is the step that
+      makes any memory number meaningful: today `sim` reports 1.4-2.3 TB per chunk where
+      the fused analytical model reports 46 GB. `sim/memory.py` does the standard
+      blocked-GEMM analysis and searches the tiling space for minimum traffic subject to
+      capacity. Result on real DiT shapes: projections improve 9-15x.
+- [x] **4.2 Fused attention. DONE.** (Activation residency across operators is still
+      open.) An intermediate that fits on chip never reaches DRAM. `sim` has no such concept, which is most of the remaining gap, and
+      "fusion by construction" is a CHIP_SPEC claim that nothing checked. Now measured:
+      the unfused score matrix is 233 MB per head per layer, and fusing it away is worth
+      **55.7x** on attention traffic. Combined with 4.1, chunk traffic falls from 4.6 TB
+      to 226 GB, closing the gap to the analytical model from **101x to 4.9x**.
+- [ ] **4.3 Energy ledger, and the first bottom-up η.**  ← **the critical path**
+      Component energies (MAC, SRAM read and write, DRAM access, control) times the
+      activity counts the model already produces, giving mJ per chunk per component and
+      therefore η. Structured as our own Hameed Table 3, cross-checked against Accelergy.
+
+      This was **missing from the plan until the 2026-08-03 re-assessment**, and its
+      absence was the plan's most serious defect: phases 3, 4 and 5 as originally written
+      could all complete without ever producing η, which every claim the company makes
+      depends on. They sharpen predictions of *time and traffic*; η stayed an input.
+
+      It is also the cheap kill test the chip roadmap already specified: mapped η below
+      2.2, or functional units below 35 % of energy, and the project stops before tapeout
+      money.
+- [ ] **4.4 Ramulator cross-check.** A modelled LPDDR5X controller for OUR chip: queues,
+      banks, command scheduling, refresh. Note the correction below — this gives our
+      controller's realized efficiency, and cannot identify the GPU's.
+- [ ] **defer 4.5 Banked SRAM, bank conflicts, DMA engines** and **4.6 event-driven
+      multi-array scheduling** until the energy ledger says cycles matter. Chunk time is
+      `max(compute, memory, comm, E/P)` and the fourth term dominates by roughly an order
+      of magnitude, so refining cycle counts sharpens a term that is ~10x from binding.
+      Revisit if 4.3 changes that ordering.
+
+**Gate (corrected 2026-08-03):** a bottom-up η with a stated uncertainty band, and `sim`'s
+chunk traffic reconciled against `fmrpu`'s with any residual explained.
+
+The previous gate said `e_byte_hbm_pj` and `bw_util` "are no longer reported as
+unidentified", which **no work listed under this phase could deliver**. `bw_util` is a
+coefficient of the *GPU calibration fit*; Ramulator models our own controller and says
+nothing about NVIDIA's realized bandwidth. What identifies it is a memory-bound anchor —
+a measured GPU run in the bandwidth-bound regime — which is a measurement task and now
+sits in Phase 1 where it belongs.
 
 ### Phase 5 — Full-model execution
 
@@ -212,6 +275,13 @@ Every phase closes with a `review-codify-loop` run: parallel adversarial reviews
 axis, every finding triaged into fix / defer-with-note-at-point-of-use / reject-with-reason,
 and the resulting rules committed to [`engineering-lessons.md`](engineering-lessons.md) in
 the same change as the fixes. Phase 3 closed this way on 2026-08-03 with 21 findings.
+
+## Stopping rule for simulator work  *(added 2026-08-03)*
+
+Phases 6-9 need people, EDA licences and money that simulation does not, and simulator
+fidelity can absorb unlimited effort. Once 4.3 produces η with an uncertainty band,
+**any further simulator work must name the decision it changes.** Refining a number that
+cannot move a gate is not progress, however satisfying the number becomes.
 
 ## Working rules
 
