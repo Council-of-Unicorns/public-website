@@ -221,6 +221,37 @@ frequency, which is close to free at 1.05 GHz and expensive for a high-clock par
 single most valuable Tier-2 characterisation in the program, because the table above spans
 "fits comfortably" to "impossible" across its plausible range.
 
+### 5b. Array geometry decides where in the TPU band we land
+
+Hardcoding the transformer buys less than it sounds, because the operator set and static
+dataflow are already what §2's eta describes. What the fixed function *enables* is a free
+choice of array geometry, and our own sweep says that choice is first-order `[S]`:
+
+| Array | MACs/cycle achieved / peak | Geometric utilization |
+|---|---|---|
+| 64x64 | 3,345 / 4,096 | **81.7%** |
+| 128x128 | 11,078 / 16,384 | 67.6% |
+| 256x256 | 29,113 / 65,536 | **44.4%** |
+
+**The mechanism is pipeline fill and drain, not shape mismatch.** Both target models have
+head_dim exactly 128 (5120/40 and 1536/12), so shapes divide cleanly. The loss comes from
+`pass_cycles = S + rows + cols - 2`: a 256x256 array burns 254 cycles per pass regardless of
+work done, which is **49.9% of a 512-long stream and 14.0% of a 3120-long one**.
+
+**This is a self-inflicted loss, not an advantage over the baseline.** The GPU measures
+94.7% of peak GEMM efficiency on this workload (§3a); its tensor cores use small tiles and
+barely pay this penalty. Choosing geometry well recovers ground we would otherwise give
+back — it does not create an edge. Concretely: fine-grained geometry places us in the upper
+half of the published 1.6-3.2x band, and a 256x256 array places us at or below its bottom.
+
+**Counterweight, and the reason this is not yet a recommendation.** `design_space.py`
+states that it does not model NoC, load imbalance across arrays, or bank conflicts, and all
+three worsen as arrays multiply: 1.9 M MACs needs ~465 arrays at 64x64 against 29 at
+256x256, and the sweep scales the fleet linearly while flagging that as optimistic. The
+optimum is interior and the model cannot currently find it. **Adding an interconnect and
+imbalance term (roadmap phase 4.5, unbuilt) is the highest-value simulator work remaining**,
+because without it array sizing is a guess.
+
 ### 5b. What else follows
 
 | Decision | Why, from the evidence above |
