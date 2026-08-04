@@ -335,6 +335,63 @@ near-threshold operation `[X*]`), and everything in §5 and §6 is pre-silicon.
 
 ---
 
+## 7b. The chip is the minority of the win — arithmetic alone busts the budget
+
+**This is the most consequential number in the report and it inverts the memory-wall
+framing for this workload.** Regenerated from `forward_per_step` at FP4 weights / FP8
+activations, 3 diffusion steps with CFG, N=3120 `[S]`:
+
+| Term | Value | Share of the 8.00 J chunk budget (40 W at 5 Hz) |
+|---|---|---|
+| Chunk arithmetic | 7.107e14 FLOP | — |
+| Chunk DRAM traffic | 45.9 GB (229 GB/s sustained) | — |
+| **Multipliers alone at 0.01 pJ/FLOP** | **7.11 J** | **89%** |
+| Multipliers alone at 0.05 pJ/FLOP | 35.5 J | **444%** |
+| All DRAM traffic at 5 pJ/B | 0.23 J | 2.9% |
+| All DRAM traffic at 10 pJ/B | 0.46 J | 5.7% |
+
+**DRAM costs 1-6% of the budget; the bare multiply costs 89-444%.** And 0.01 pJ/FLOP is
+optimistic even at FP4 — §6 of [`CHIP_SPEC.md`](CHIP_SPEC.md) records a 32-bit accumulator
+read-modify-write at ~0.020 pJ against a 0.0156 pJ FP4 multiply, so realistic MAC-plus-
+accumulate is ~0.017-0.035 pJ after adder-tree amortisation.
+
+### The ceilings
+
+Absolute 5 Hz at 40 W requires **139x** over the measured GPU (1110 J against an 8 J
+budget). Against that requirement:
+
+| Ceiling | Value | Assumption |
+|---|---|---|
+| Physical maximum | **31x** | 100% of chip energy reaches the multipliers. Never achieved |
+| Best ever published | **10.9x** | Hameed's 35% FU fraction, which no DNN ASIC has reached |
+| Our estimate (§7) | **~2.6x** | f_ours 15-25% |
+
+**The requirement exceeds the physical ceiling by 4.5x even granting a perfect chip.** No
+architecture, circuit technique or process node closes it. That is arithmetic, not
+pessimism, and it means the remaining gap **must** be closed by reducing FLOPs rather than
+joules per FLOP.
+
+### What that implies for the program
+
+Work-reduction levers compose with eta rather than competing with it, and they are where the
+order-of-magnitude lives:
+
+| Lever | Worth | Note |
+|---|---|---|
+| **Conditional compute / MoE** — 14B total, 2-4B active | **3-4x** on arithmetic *and* weight traffic | Largest unexploited lever. A model decision, not a chip one, and it does not touch the no-aggressive-quantization constraint `[F]` |
+| Step reduction, 3 -> 1 | up to 3x | 16 -> 3 already done |
+| Cross-chunk receding-horizon reuse | 2.3x at 99.4% quality | Already Ledger B flagship |
+| Token count (N=3120 is a choice) | linear | |
+| Asynchronous hierarchy: cheap policy at 5 Hz, world model at 1 Hz | decouples the deadline from the big forward pass | Unexplored |
+
+**Conclusion, stated plainly: the chip contributes at best ~2.6x of a required 139x, and the
+other ~50x must come from the model and the schedule.** The moat statement in
+`VC_CHEATSHEET.md` — *"not the systolic array, which is textbook; the moat is the system"* —
+is therefore not modesty. It is the actual engineering reality, and the co-design work
+deserves at least the investment the silicon does.
+
+---
+
 ## 8. What would falsify this
 
 | Measurement | What it settles | Cost |
