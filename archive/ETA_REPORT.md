@@ -107,6 +107,36 @@ over an 18,700-token context is worst-case for GPU reuse, implying depressed `f_
 headroom. It is not. Whatever η we earn must come from overhead present in the GPU's *best*
 case, not from the GPU handling our workload poorly.
 
+### 3a-bis. What the baseline actually is, and why it flatters us
+
+**Measurement boundary.** `nvidia-smi power.draw` reports **GPU board power** — it excludes
+the host CPU, system memory and PSU losses. Defensible for a chip-to-chip comparison, but it
+is not wall power and the fixtures do not currently say so.
+
+**Baseline selection, and this is the load-bearing caveat.** The RTX PRO 6000 Blackwell is a
+600 W workstation card optimised for throughput with a wall socket behind it. Thor is
+optimised for perf/W at 40-130 W. **Of the whole Blackwell family we characterised the member
+with the least incentive to be efficient**, then used it to define "what a GPU costs per
+FLOP." Three consequences, all unfavourable to our numbers:
+
+1. **`f_gpu` = 3-13 % describes the RTX, not Thor.** Thor's functional-unit fraction is
+   higher by design, so eta against Thor is *smaller* than eta against this anchor.
+2. **The 600 W clamp caps the measured arithmetic ceiling.** FP8 measured 504 TFLOP/s, roughly
+   half the card's FP8 capability, because watts bind. So 1.192 pJ/FLOP is what the part
+   achieves *while power-limited*, not the architecture's floor. The true floor is lower,
+   which shrinks eta again.
+3. **The calibration is fitted entirely to this one part.** All four anchors are RTX PRO 6000;
+   `compute_util = 0.8048` and `e_flop_fp4_pj = 0.3565` were solved against a wall-powered
+   workstation GPU and are then applied to Thor and to the RPU.
+   [`PREDICTIONS.md`](PREDICTIONS.md) already names cross-architecture transfer as "the
+   assumption most likely to be wrong"; this is the concrete mechanism.
+
+**What survives.** Every measurement remains valid *as a measurement* — DVFS flatness, the
+600 W clamp, 81.6 % achieved bandwidth, the roofline positions, the 94.7 %-of-GEMM result.
+What does not survive is using any of them to characterise **Thor**. The ~2.6x central
+estimate does not rest on them: 7c rebuilt it on Thor's published spec precisely because the
+RTX comparison was unsound.
+
 ### 3b. Bounding f_gpu
 
 With the workload measured at 1.562 pJ/FLOP, `f_gpu` depends on one remaining literature
