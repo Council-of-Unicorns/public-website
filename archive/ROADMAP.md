@@ -184,7 +184,7 @@ Ordered by what each step unblocks, not by what is interesting.
       the unfused score matrix is 233 MB per head per layer, and fusing it away is worth
       **55.7x** on attention traffic. Combined with 4.1, chunk traffic falls from 4.6 TB
       to 226 GB, closing the gap to the analytical model from **101x to 4.9x**.
-- [ ] **4.3 Energy ledger, and the first bottom-up η.**  ← **the critical path**
+- [~] **4.3 Energy ledger, and the first bottom-up η. BUILT, NOT YET USABLE.**  ← **the critical path**
       Component energies (MAC, SRAM read and write, DRAM access, control) times the
       activity counts the model already produces, giving mJ per chunk per component and
       therefore η. Structured as our own Hameed Table 3, cross-checked against Accelergy.
@@ -197,6 +197,19 @@ Ordered by what each step unblocks, not by what is interesting.
       It is also the cheap kill test the chip roadmap already specified: mapped η below
       2.2, or functional units below 35 % of energy, and the project stops before tapeout
       money.
+
+      **Status: `sim/energy.py` exists and runs, and its first answer is a defect
+      report.** Against the calibrated GPU baseline on the 14B chunk it returns
+      η = 29-55x, an order of magnitude above TPUv4's published 1.6-3.2x ceiling. That
+      is not a discovery; it means the ledger counts a bare multiplier against a whole
+      measured system. It omits clock distribution, intra-array wire and interconnect,
+      accumulator registers, the memory PHY, and leakage — which is most of a real
+      chip's energy, and is exactly Hameed's point. `implausible_by()` makes the judgment
+      mechanical, and a test pins the incompleteness so it cannot be forgotten; that test
+      flips to failing the moment the missing components land.
+
+      **Remaining work before η can be quoted:** add the five omitted components, then
+      re-derive. Until then η stays an assumed input and no claim may cite this module.
 - [ ] **4.4 Ramulator cross-check.** A modelled LPDDR5X controller for OUR chip: queues,
       banks, command scheduling, refresh. Note the correction below — this gives our
       controller's realized efficiency, and cannot identify the GPU's.
