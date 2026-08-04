@@ -1,0 +1,343 @@
+# The η Report — the energy case for the RPU, and the design it forces
+
+**Status:** synthesis, 2026-08-04. Supersedes no document; consolidates the argument that is
+otherwise spread across [`CHIP_SPEC.md`](CHIP_SPEC.md) §6, [`PERF_LEVERS.md`](PERF_LEVERS.md)
+Ledgers A–D6, [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWIDTH.md) and the measured fixtures.
+
+**Provenance tags, used on every load-bearing number.** `[M]` measured by us on hardware ·
+`[S]` produced by our calibrated simulator · `[F]` founder-measured in production ·
+`[X]` external literature, primary source opened · `[X*]` external, relayed by a research
+agent, primary **not** opened · `[T]` target or estimate, not achieved.
+
+---
+
+## Summary
+
+**We expect a composite multiplier of about 2.6× over Jetson Thor at equal head power, built
+from an architectural bet of ~2.2× and a physical-design bet of ~1.2×.** The success bar is
+2.15× and the design target is 3.0×. Confidence that the composite clears the bar is roughly
+50%, and the dominant remaining uncertainty is a single term — the energy of a raw multiply
+at N4 — that cannot be measured without a PDK.
+
+| Term | Value | Evidence class | Counted in the bars? |
+|---|---|---|---|
+| η, architecture | **2.2×** (1.8–2.8) | `[T]`, bounded by `[M]` and `[X]` | Yes — this *is* the bet |
+| Physical design | **1.2×** (1.15–1.4) at system level | `[X*]` sized, `[M]` explained | No — gated upside |
+| **Composite** | **~2.6×** (2.1–3.2) | | Bar 2.15, target 3.0 |
+
+Three findings from this program constrain everything above, and all three are measured on
+real silicon by us:
+
+1. **DVFS buys nothing.** Energy per FLOP is flat from 1.0 to 3.1 GHz on the baseline `[M]`.
+   The wide-and-slow story requires sub-Vmin custom silicon, not an operating point.
+2. **The baseline is itself energy-bound.** Board power pinned at exactly 600.0 W in every
+   arithmetic configuration we ran, and FP8 bought 1.24× over BF16 rather than the nominal
+   2× `[M]`. The part is clamped by watts, not by multipliers.
+3. **The GPU is not running our workload badly.** It reaches 94.7% of peak dense-GEMM energy
+   efficiency on our workload `[M]`. There is no workload-specific inefficiency to harvest.
+
+---
+
+## 1. The whole question reduces to one ratio, because energy binds first
+
+Four bounds gate a control chunk, and latency is the largest of them:
+
+```
+t = max( t_compute , t_memory , t_comm , E_chunk / (TDP · (1 − f_static)) )
+```
+
+The fourth term exceeds the others by roughly an order of magnitude in our model `[S]`. A
+chunk costing `E` joules cannot complete faster than `E` divided by the watts available,
+whatever the peak TOPS says. This is why the RPU's 4 PFLOPS FP4 peak `[T]` is not the
+interesting number: at 40 W it would imply 100 TFLOP/W, which no silicon achieves.
+
+**When both chips are scored at the same power ceiling, the TDP ratio cancels and speedup
+equals efficiency exactly: S = η.** We score ourselves at 40 W, the same ceiling we grant
+Thor, so we never win on a larger power budget. The design target of 3.0× additionally
+survives granting the baseline 50 W — a 25% thermal advantage `[S]`.
+
+This is also why the memory wall cannot be assumed away. 14B weights at 4 bits is ~7 GB,
+which never fits head-power SRAM (90 MB in the current design point), so weights stream from
+DRAM every step under both DreamZero and JEPA. See [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWIDTH.md).
+
+---
+
+## 2. η is a ratio of overhead fractions, not a claim about better multipliers
+
+Write `f` for the fraction of a chip's energy that reaches its multipliers. Then
+
+```
+η  =  (arithmetic energy ratio)  ×  (f_ours / f_gpu)
+```
+
+**The first factor is approximately 1, and this kills the three differentiators the project
+used to claim.** Blackwell has native FP4 and FP8, so low-bit arithmetic is already in the
+baseline. FlashAttention-class fusion is what our own measured anchors ran. Near-zero
+instruction-fetch overhead has been TPU-standard since 2015. **We are not claiming a cheaper
+multiply; we are claiming a cheaper delivery of operands to it.**
+
+So η reduces to `f_ours / f_gpu`, and the entire bet is that a fixed-function, statically
+scheduled datapath delivers a larger share of its joules to arithmetic than a GPU does.
+
+---
+
+## 3. Measured evidence on the baseline
+
+### 3a. What the GPU actually costs per FLOP
+
+`scripts/measure_fu_fraction.py`, RTX PRO 6000 Blackwell, results in
+`fixtures/crosscheck/rtx_pro_6000_fu_fraction.json` `[M]`:
+
+| Configuration | Best result | At |
+|---|---|---|
+| Dense GEMM, BF16, L2-resident | **1.480 pJ/FLOP** raw, 1.298 marginal | n=4096, 405 TFLOP/s |
+| Dense GEMM, FP8 E4M3 | **1.192 pJ/FLOP** raw, 1.039 marginal | n=8192, 504 TFLOP/s |
+| Our workload (3-step CFG, N=3120) | **1.562 pJ/FLOP** | 384 TFLOP/s |
+| Idle, clocks up | 73.7 W | — |
+| DRAM stream | 1461–1464 GB/s | **81.6% of the 1792 GB/s spec** |
+
+**Interpretation.** A dense GEMM is the most arithmetic-dense kernel this silicon can run, so
+its energy per FLOP bounds multiplier energy from above. That yields `f_gpu ≤ 73%` raw, which
+is true and nearly useless — a GEMM still pays for register files, L2, warp scheduling, clock
+and leakage. The useful result is the comparison at equal precision: **1.562 against 1.480
+means our workload achieves 94.7% of peak GEMM efficiency.**
+
+**That result is unfavourable and it retires an argument.** We had claimed batch-one inference
+over an 18,700-token context is worst-case for GPU reuse, implying depressed `f_gpu` and free
+headroom. It is not. Whatever η we earn must come from overhead present in the GPU's *best*
+case, not from the GPU handling our workload poorly.
+
+### 3b. Bounding f_gpu
+
+With the workload measured at 1.562 pJ/FLOP, `f_gpu` depends on one remaining literature
+term: the energy of a raw BF16 multiply-accumulate at N4, roughly 0.05–0.20 pJ/FLOP `[X]`.
+
+| MAC energy `[X]` | f_gpu | Ceiling 1/f_gpu | f_ours needed for η = 2.15 |
+|---|---|---|---|
+| 0.05 pJ/FLOP | 3.2% | 31× | 6.9% |
+| 0.10 pJ/FLOP | 6.4% | 16× | 13.8% |
+| 0.15 pJ/FLOP | 9.6% | 10× | 20.6% |
+| 0.20 pJ/FLOP | 12.8% | 7.8× | 27.5% |
+
+**`f_gpu` is 3–13%, centred near 6–8%.** Pure overhead removal is therefore capped at roughly
+8–31×, which is why a bottom-up ledger that returned 29–55× (`sim/energy.py`) was always a
+defect rather than a discovery. Clearing the 2.15 bar requires `f_ours ≈ 7–28%`, centred near
+14%.
+
+**Do not use this table as a predictor.** Propagating the same 4× spread forward gives η
+anywhere from 0.9× to 10.9×. The bottom-up route is too sensitive to a term we cannot
+measure, which is why §7 anchors on published whole-architecture results instead.
+
+### 3c. Earlier measured anchors
+
+Four anchors on the same board, reproduced by the calibrated model within **0.5–3.9% on
+latency and 0.8–2.5% on energy** `[M]`. Each runs BF16 and lands at 364–384 TFLOP/s and
+1.562–1.648 pJ/FLOP — consistently just under the 405 TFLOP/s dense-GEMM ceiling, which is
+the physical sanity check that later exposed a 2× FLOP-counting error in an agent's analysis.
+
+Two further measured results constrain the design:
+
+- **DVFS buys ~1.0×.** Energy per FLOP is flat from 1.0 to 3.1 GHz after subtracting idle
+  `[M]`. A GPU cannot go sub-Vmin because its SRAM, cell libraries and clock distribution pin
+  it at its floor.
+- **FP16 → FP8 delivers 1.77×, not 2×** `[M]`, from the DVFS sweep. **This conflicts with the
+  1.24× measured today** at a fixed 600 W cap. The methods differ — today's number is a
+  throughput ratio under a hard power clamp — and the gap is *not yet explained*. Recorded as
+  an open discrepancy rather than reconciled by picking the flattering one.
+
+### 3d. Calibration state, stated honestly
+
+The P6 gate is GREEN, and the fit is **not identified**. Two of four coefficients rest on
+their box bounds and `rpu/report.py` prints them as UNIDENTIFIED:
+
+| Coefficient | Fitted | Status |
+|---|---|---|
+| `compute_util` | 0.8048 | identified |
+| `e_flop_fp4_pj` | 0.3565 | identified |
+| `bw_util` | 1.0000 | **pinned at bound — and now refuted at 0.816** `[M]` |
+| `e_byte_hbm_pj` | 64.0 | **pinned at bound** |
+
+A passing gate is not identification (lesson L2). Today's streaming measurement gives
+`bw_util ≤ 81.6%`, since a contiguous copy is the best case and a scattered workload does
+worse. **The fitted 1.0000 is unattainable.** We deliberately did not fold this back into the
+solver: it shares no assumptions with the least-squares fit, which makes it worth more as an
+independent cross-check (lesson L5). Refitting is a separate, explicit decision.
+
+---
+
+## 4. Where the energy goes, and why f_ours ≈ 35% is harder than it sounds
+
+Measured accelerator silicon says arithmetic is a small minority of chip energy:
+
+| Source | Multipliers | Clock network | Memory / registers |
+|---|---|---|---|
+| Eyeriss, fabricated 65 nm `[X]` | **3.0–8.9%** | **32.9–45.0%** | scratchpads 33–42% |
+| Eyeriss v2, post-layout `[X]` | 2–9% | 20% → **55%** as utilization falls | SPads ~72% of PE area |
+| Simba, measured 16 nm `[X*]` | 11.2% of PE area | — | buffers 71% of PE area |
+| Hameed, ISCA 2010 `[X]` | 10% to functional units | pipeline+clock 22% | caches 19%, RF 10% |
+
+Verbatim from Eyeriss: *"the ALUs only account for less than 10% of the total power"* and
+*"Besides the clock network, the spads dominate."* The clock share **triples as effective
+utilization falls**, and batch-one decode is exactly that regime.
+
+**The gate-1 criterion of `f_ours ≥ 35%` is more ambitious than any purpose-built DNN ASIC has
+published.** Hameed's ladder tops out near 35% for fused custom datapaths, and we wrote our
+gate from that *ceiling*. Two consequences:
+
+- The criterion is **stricter than η requires** (§3b: 14% suffices for the 2.15 bar). It
+  should not be used to kill a design point that would have cleared the bar.
+- The realistic target is `f_ours ≈ 15–25%` — meaningfully above Eyeriss and Simba, well below
+  Hameed's ceiling. Our advantage over Eyeriss is structural: no per-PE scratchpads, and adder
+  trees that attack the register/clock bucket directly (§5).
+
+---
+
+## 5. The design consequences
+
+### 5a. Adder-tree register amortisation is a feasibility gate, not an optimisation
+
+In a naive weight-stationary systolic PE every MAC owns pipeline registers — an activation
+register forwarded to its neighbour and a partial-sum accumulator updated every cycle — and
+both are clocked every cycle. Combining N products in a **combinational adder tree** and
+updating **one accumulator per N MACs** leaves the multiply narrow while touching the wide
+accumulator 1/N as often.
+
+Sizing against the current design point, 1.90 M MACs at 1.05 GHz against a ~19 W fabric
+budget `[T]`:
+
+| Register style | Clocked bits/MAC | Register + clock power |
+|---|---|---|
+| Naive flop-per-MAC systolic PE | 40 | **32–120 W (168–630% of budget)** |
+| FP4, 24-bit psum, 1 reg/MAC | 28 | 22–84 W (118–441%) |
+| **FP4 + 8-wide adder tree** | **7** | **5.6–21 W (29–110%)** |
+| FP4 + 16-wide tree + BF16 accum | 5 | 4.0–15 W (21–79%) |
+
+**A conventionally pipelined array does not fit the power budget at all.** Shipped precedent:
+TPUv4i replaced 128 serial two-input adders with four-input sums, saving **40% area, 25%
+power, and 12% of MXU peak power** `[X*]`. The cost is combinational depth eating clock
+frequency, which is close to free at 1.05 GHz and expensive for a high-clock part.
+
+**Load-bearing unknown:** flop clock-pin and local-tree energy in the target PDK. That is the
+single most valuable Tier-2 characterisation in the program, because the table above spans
+"fits comfortably" to "impossible" across its plausible range.
+
+### 5b. What else follows
+
+| Decision | Why, from the evidence above |
+|---|---|
+| Systolic weight-stationary array, no per-PE scratchpads | Eyeriss spends 33–42% of power on scratchpads; that is the bucket to delete |
+| Static compile-time schedule, no dynamic scheduling | Removes the control silicon Hameed measures at 10%, and enables §6 droop shaping |
+| Large banked SRAM (90 MB) with fused attention | The unfused attention score matrix is 233 MB per head per layer; fusing is worth **55.7×** on attention traffic `[S]` |
+| Low-bit weights, bit-exact control path | Weights stream 7 GB/step regardless; and the control policy must not depend on aggressive quantization `[F]` |
+| Target ~1.05 GHz, not 2.5 GHz | Permits denser, lower-drive cells and a shallower pipeline; makes the adder tree free |
+
+---
+
+## 6. Levers evaluated and rejected
+
+Three research streams evaluated roughly forty techniques. **Nothing additive survived at
+scale.** Full detail in [`PERF_LEVERS.md`](PERF_LEVERS.md) Ledgers D4–D6.
+
+**Pursue.** Adder-tree amortisation (§5a, feasibility). Latch-based design with time
+borrowing, converting ~25% frequency headroom into lower Vdd at fixed throughput `[X*]` —
+the one candidate attacking the DVFS wall with no model-side change. Canary/CPM adaptive
+voltage scaling, which shipped in POWER7 for **−20 to −24% chip power** at 0.2% area `[X*]`.
+Droop-aware static scheduling at 6–10% of logic power. Multi-Vt and body bias. Moderate
+undervolting to ~0.55–0.6 V with a 2–3× wider array, worth **1.4–1.7× on logic** and
+**1.15–1.25× at system level** after LPDDR5X dilution `[X*]`.
+
+**Rejected, each with its reason recorded once so it is not reopened.** Alternative number
+systems (LNS measured *worse* than INT8; L-Mul → 0 on an ASIC). Compute-in-memory (density,
+not weight residency). Razor-class timing speculation (energy-negative per inference; replay
+means variable latency against a deadline proof). Voltage stacking (912 mm² of regulator to
+make reliable). Integrated voltage regulators as efficiency. FD-SOI and body bias at N4.
+LC resonant clocking (needs ~23× the inductance at 1.05 GHz and **detunes under clock
+gating**, our main lever). Low-swing clocking. Clock mesh. Wave pipelining. Adiabatic logic.
+Full asynchronous. Approximate/noise-tolerant MAC (model-specific, and unsafe for a control
+policy).
+
+**One rejection matters for integrity.** Eyeriss's widely-cited 45% zero-operand-gating saving
+is measured against an *ungated* baseline on ReLU CNNs with 77.6% zeros. Transformers have
+essentially none. **Citing it would credit the design under test with sparsity the workload
+does not have, violating the one-utilization-model invariant.** Honest value at our zero
+rates: 2–3% of dynamic power for 5.7% area. Rejected.
+
+**Escalated, not decided.** Backside power delivery is worth **15–20% at iso-speed** `[X*]` —
+the largest single number in the domain — and does not exist at N4/N5 or at TSMC N2/N2P. It
+is available on Intel 18A now and TSMC A16 in 2026–27. This is a roadmap fork. The thermal
+caveat is specific to us: backside power moves transistors away from the heat path, and the
+head is fanless.
+
+---
+
+## 7. The composite, and why it sits where it does
+
+**η, architecture: 2.2×, range 1.8–2.8.** We anchor on TPUv4's published **1.6–3.2×** over a
+same-node A100 `[X]` rather than on the bottom-up ratio, because §3b's spread is too wide to
+predict with and this project has a documented history of bottom-up ledgers returning absurd
+answers. Nothing in three research streams produced a mechanism to exceed that band. We are
+claiming competent execution of a proven architecture class, not new physics.
+
+**Physical design: 1.2×, range 1.15–1.4 at system level.** Sub-Vmin contributes 1.4–1.7× on
+the logic term, diluted by LPDDR5X and its PHY which run at a fixed rail and cannot be
+voltage-scaled at all. Explicitly **not counted in the 2.05/2.15/3.0 bars**; gate is a
+test-structure tile on the gate-4 shuttle.
+
+**Composite ~2.6×, range 2.1–3.2.** Against a 2.15 bar and a 3.0 target.
+
+**Confidence ~50%.** It rose modestly today because one side of the `f_gpu` ratio became
+measured rather than estimated, and because `bw_util` moved from pinned-and-unidentified to
+measured. It did not rise further because the 94.7%-of-GEMM result retired a favourable
+argument, and because every technique that would have been additive turned out to be
+baseline parity or too small.
+
+### Known asymmetries, both directions
+
+*Favouring us:* Thor at module level carries CPU cores, ISP, codecs, PVA and 4×25GbE that leak
+while inference runs, and our comparison is at head power. Our static schedule owes no
+misprediction guardband.
+
+*Against us:* Thor is a 2025–26 part built for this exact market with native FP4. Our
+accelerator needs a host we have not accounted for. Pre-silicon estimates in this domain carry
+a documented **~3× simulation-to-silicon gap** (9.3× simulated versus 3.3× measured for
+near-threshold operation `[X*]`), and everything in §5 and §6 is pre-silicon.
+
+---
+
+## 8. What would falsify this
+
+| Measurement | What it settles | Cost |
+|---|---|---|
+| Raw MAC energy at N4 | The one literature term left in `f_gpu`; collapses the 4× spread in §3b | Needs a PDK |
+| Flop clock-pin + local-tree energy in the target PDK | Whether §5a's array fits at all | Needs a PDK |
+| Jetson Orin against the sealed prediction in [`PREDICTIONS.md`](PREDICTIONS.md) | Whether coefficients transfer across architectures. Predicted 59.1 ms / 2.68 J, unmeasured, unedited since registration | Days, needs the board |
+| Memory-bound anchor on a scattered access pattern | `bw_util` for real workloads, not just a contiguous copy | Hours |
+| Reconciling 1.77× against 1.24× for FP16→FP8 | An open contradiction between two of our own measurements | Hours |
+
+**Kill criteria remain as written** in [`CHIP_ROADMAP.md`](CHIP_ROADMAP.md): mapped η below
+2.2, or `f_ours` below 35%, ends the program before tapeout money. §4 argues the second
+criterion is stricter than η requires and should be restated; that is a proposal, not a change
+made here.
+
+---
+
+## 9. Provenance and open gaps
+
+**Measured by us `[M]`:** the four RTX anchors and their reproduction error; the DVFS
+flatness; FP16→FP8 at 1.77×; today's GEMM ceiling, workload intensity, streaming bandwidth,
+idle floor and 600 W clamp.
+
+**External, primary opened `[X]`:** Eyeriss clock and ALU shares (verified against extracted
+text); Hameed's overhead ledger; TPUv4's 1.6–3.2×; Leng's guardband decomposition.
+
+**External, relayed and not personally verified `[X*]`:** Zimmer's 3.3× near-threshold result;
+the Razor energy-negative curve; TPUv4i's adder-tree savings; POWER7's CPM numbers; TSMC A16
+and Intel PowerVia figures. Labelled per lesson L10 rather than promoted.
+
+**Open gaps, stated rather than filled:**
+- No published clock-power share exists for any 7/5 nm dense datapath or AI accelerator, nor
+  the tree-buffer / ICG / flop-clock-pin split at a modern node. §5a's table is `[T]`.
+- The 1.77× versus 1.24× FP8 discrepancy is unexplained.
+- `e_byte_hbm_pj` remains pinned at its bound and unidentified.
+- No real checkpoint and no real Jetson have been measured. Every Thor number is projected,
+  not measured, and the frozen benchmark contract records that distinction explicitly.
