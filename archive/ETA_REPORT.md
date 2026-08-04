@@ -504,11 +504,20 @@ The workload needs **229 GB/s sustained** at 5 Hz (45.9 GB per chunk, FP4 weight
 | **Thor** | 273.0 GB/s | 222.8 GB/s | **-2.7 % — memory-bound** |
 | **RPU** | 307.2 GB/s | 250.7 GB/s | **+9.5 %** |
 
+**SCOPE — corrected on review. This section is about the ABSOLUTE 5 Hz goal, not the 40 W
+head-to-head.** At 40 W the chunk takes 0.7-2.2 s, so sustained bandwidth needed is only
+15-67 GB/s against 220-250 GB/s available: **neither part is memory-bound at head power, both
+are energy-bound.** Worse for the optimistic reading, Thor's ridge point *falls* from 7,582 to
+**2,333 FLOP/byte** when power-limited to 40 W (peak scales with power, bandwidth does not),
+placing the workload **6.6x above its ridge** — further into compute-bound territory, not less.
+An earlier version of this section claimed the memory-bound result "materially reduces the
+program's largest stated risk". **It does not**: it constrains Thor's ability to reach 5 Hz,
+which is a separate question from its efficiency at 40 W.
+
 **Two consequences, pointing in opposite directions.**
 
-*Favourable:* **Thor cannot stream weights fast enough for 5 Hz.** Memory-bound means its
-tensor cores idle on DRAM, so its achieved fraction of peak is low — which argues 7c's 30-40 %
-column rather than its 70 % one, and materially reduces the program's largest stated risk.
+*Favourable, for the absolute goal only:* **Thor cannot stream weights fast enough for 5 Hz**
+even before energy is considered.
 
 *Unfavourable:* **the RPU's 9.5 % headroom is dangerously thin.** Any traffic-model error or
 scattered-access penalty puts us memory-bound too. And the 81.6 % figure came from a
