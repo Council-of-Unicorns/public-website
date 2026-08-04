@@ -442,11 +442,37 @@ compounding. Discard it; the Thor comparison above is the defensible one.
 at 600 W -- the same architecture generation as Thor, with native FP4. Do not carry the
 ~1.4x normalized Ada figure into any of our numbers.
 
-**Consequence for the program: the critical experiment has changed.** It is no longer a
-PDK-dependent energy-fraction measurement. It is *run the workload on Thor, record achieved
-TFLOP/s and board watts, divide by 15.9 TFLOP/W*. Orin is the available proxy and the
-prediction is already sealed in [`PREDICTIONS.md`](PREDICTIONS.md). **This is the highest-value
-measurement in the program.**
+**Framing correction, and it matters.** Do not measure "fraction of peak." 1 established
+that peak throughput is not what binds — energy is — and expressing the experiment against
+peak smuggles the wrong reference back in. **Measure achieved joules per chunk on the frozen
+workload.** Thor's 15.9 TFLOP/W is an *upper bound* on its achieved efficiency, useful as a
+sanity ceiling and nothing else. The table above uses fraction-of-peak only to bound the
+answer from published specs while the measurement does not exist.
+
+The measurement is already specified: [`PREDICTIONS.md`](PREDICTIONS.md) seals **59.1 ms and
+2.68 J per forward pass** for Orin. Joules, not a fraction of anything.
+
+### The achievable range, and where the risk actually sits
+
+| Scenario | Our chip `[T]` | vs Thor at 30 / 40 / 50 / 70 % of peak |
+|---|---|---|
+| Realistic — f_ours 20 %, adder tree, x1.2 physical | 19 TFLOP/W | 4.0x · **3.0x** · **2.4x** · 1.7x |
+| Optimistic — f_ours 25 %, x1.3 | 26 TFLOP/W | 5.5x · 4.1x · 3.3x · 2.3x |
+| Ceiling — f_ours 35 %, x1.4 | 39-49 TFLOP/W | 8-10x · 6-8x · 5-6x · 4x |
+
+**~2.6x expected, ~5-6x if everything breaks right, ~1.7x if Thor is more efficient than we
+assume.** The ceiling row requires beating every published DNN ASIC on functional-unit
+fraction (Eyeriss 3-9 %, Simba ~11 %, Hameed's 35 % a never-reached ceiling) *and* Thor
+landing at 30-40 % of peak. Not a plan.
+
+**The bottom-right cell is the program's largest risk: at 70 % we miss the bar outright.**
+That is not a tail scenario — 3a measured a GPU hitting 94.7 % of peak dense-GEMM efficiency
+on this very workload. It is unmeasured for Thor.
+
+**Consequence: the priority ordering is forced.** The uncertainty is two-dimensional --
+our `f_ours` and Thor's achieved efficiency -- spanning 1.7x to 13x. One axis needs a board
+and an afternoon; the other needs a PDK. **Measure Thor (or Orin as proxy) first.** This
+supersedes earlier statements in this document that `f_gpu` was the highest-value measurement.
 
 ---
 
