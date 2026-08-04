@@ -187,3 +187,35 @@ moved one level out: the same argument applies wherever untrusted shape meets a 
 **Related:** the cross-check that triggered this is itself an instance of L5 — it shares no
 assumptions with the fit, which is exactly why it must stay out of the solver.
 
+## L12 — a sanity check that fires in only one direction is half a check
+
+**Incident (2026-08-04).** A relayed figure of 0.78 pJ/FLOP was caught within minutes by a
+physical ceiling: nothing can beat a dense GEMM on the same silicon. Hours later, an
+arithmetic-floor calculation substituted a **BF16** multiplier cost into an **FP4** chip's
+budget, understating the ceiling by ~16x and producing the conclusion that the design target
+"exceeds the physical ceiling by 4.5x even granting a perfect chip." That conclusion was
+committed, and stated as *"arithmetic, not pessimism."* It survived because it was
+**pessimistic**: the ceiling check pointed the wrong way, and there was no floor check.
+
+**Rule.** Too-good results get scrutinised by reflex; too-bad results read as rigour and pass.
+When asserting any bound, write down what would catch an error in the **opposite** direction
+before publishing the number. If only one guard exists, say which direction it protects.
+
+---
+
+## L13 — a measurement characterises only what resembles what was measured
+
+**Incident (2026-08-04).** A 94.7 %-of-peak-GEMM efficiency figure, measured on a 600 W
+wall-powered workstation card sitting **19x above its roofline ridge**, was used to infer how
+Jetson Thor would behave at **2x above its ridge** and at 40 W. It was reported as the
+program's largest risk signal. Separately, all four calibration anchors come from that same
+part, so `compute_util` and `e_flop_fp4_pj` were solved on a workstation GPU and then applied
+to Thor and to the un-built chip. The baseline was also the least efficiency-optimised member
+of its own architecture family, which flattered every ratio computed against it.
+
+**Rule.** Before transferring a measurement to a different part, state the regime explicitly —
+power envelope, roofline position, precision, thermal design point — and check it resembles
+the target. Record the instrument's boundary with the number (`nvidia-smi power.draw` is
+**board** power, not wall power). A measurement taken in the wrong regime is not weak
+evidence; it is no evidence, and it is more dangerous than none because it looks like data.
+

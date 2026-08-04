@@ -13,17 +13,27 @@ agent, primary **not** opened · `[T]` target or estimate, not achieved.
 
 ## Summary
 
-**We expect a composite multiplier of about 2.6× over Jetson Thor at equal head power, built
-from an architectural bet of ~2.2× and a physical-design bet of ~1.2×.** The success bar is
-2.15× and the design target is 3.0×. Confidence that the composite clears the bar is roughly
-50%, and the dominant remaining uncertainty is a single term — the energy of a raw multiply
-at N4 — that cannot be measured without a PDK.
+**We expect about 2.6–3.0× over Jetson Thor at equal head power, with a defensible range of
+2.0–4.0× and a ceiling near 7×.** The bar is 2.15× and the design target is 3.0×.
+
+**Two independent derivations converge there.** §7 anchors on TPUv4's published 1.6–3.2×
+against a same-node A100; §7e derives the same band from Thor's spec sheet and the cost of a
+multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for.
 
 | Term | Value | Evidence class | Counted in the bars? |
 |---|---|---|---|
-| η, architecture | **2.2×** (1.8–2.8) | `[T]`, bounded by `[M]` and `[X]` | Yes — this *is* the bet |
-| Physical design | **1.2×** (1.15–1.4) at system level | `[X*]` sized, `[M]` explained | No — gated upside |
-| **Composite** | **~2.6×** (2.1–3.2) | | Bar 2.15, target 3.0 |
+| η, architecture | **2.0–4.0×**, central 2.6–3.0 | `[T]`, bounded by `[M]` and `[X]` | Yes — this *is* the bet |
+| Physical design | 1.2× (1.15–1.4) at system level | `[X*]` sized, `[M]` explained | No — gated upside |
+| Ceiling, f_ours at Hameed's 35% | 3.5–7× | `[T]` | Requires beating every published DNN ASIC |
+| Downside, both inputs pessimistic | **~1.0×** | `[T]` | Not excluded by anything we know |
+| Compiler-maturity derate | **unmodelled** | — | §7f — a real term we do not yet price |
+
+**The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
+§7e shows it fixes our floor *and* Thor's overhead fraction simultaneously, because Thor's
+0.0628 pJ/FLOP peak is published. It is uncertain by 6× inside our own spec, and at
+CHIP_SPEC §6's face value it would put Thor at 20–28% functional-unit fraction and end the
+project. §7e argues that value is excluded by consistency; the accounting should still be
+redone deliberately.
 
 Three findings from this program constrain everything above, and all three are measured on
 real silicon by us:
@@ -611,6 +621,50 @@ it is currently uncertain by 6x within our own spec. Resolving
 correctly reflects an E2M1 format with a one-bit mantissa — is now the highest-value
 analytical work in the program, and unlike the others it needs a datasheet and an afternoon
 rather than a PDK.
+
+---
+
+## 7f. The compiler-maturity derate — a real term we do not price
+
+**Our fairness invariant says both rows run the identical model graph. It does not say both
+rows run equally good software, and they will not.** Thor arrives with CUDA, cuDNN, TensorRT,
+JetPack, PyTorch and Isaac ROS — on the order of fifteen years and thousands of engineer-years
+of kernel tuning, and a robotics team can go from a PyTorch checkpoint to an optimised
+deployment in days. We arrive with a version-one compiler.
+
+**The derate is multiplicative and it lands directly on eta.** If TensorRT extracts 70 % of
+what Thor's silicon can do and our first compiler extracts 50 % of what ours can, we lose
+**1.4x** before any architecture argument is heard. That is over half the margin between the
+2.15 bar and the 3.0 target, and **the model currently has no term for it** `[T]`.
+
+**Our architecture makes this harder in one direction and easier in another.** Harder: a fully
+static schedule has no dynamic recovery, so every tiling, allocation and DMA decision must be
+right at compile time — a GPU can paper over a mediocre schedule with occupancy and caches,
+and we cannot. Easier: the search space is one model family with known shapes, not arbitrary
+graphs, so the compiler can be narrow and deep rather than general.
+
+**What must exist before first silicon is useful**, in dependency order:
+
+| Layer | Why it cannot be skipped |
+|---|---|
+| Graph import (ONNX / PyTorch export) | Without it no real checkpoint runs, and every number stays synthetic |
+| Operator coverage for one model family | The long tail — norms, RoPE, activations, sampling — is where deployments die |
+| Fusion + tiling + SRAM allocation | This *is* the architecture. Section 5's traffic numbers assume a compiler that achieves them |
+| Static scheduler and µcode emitter | No dynamic recovery means the schedule is the product |
+| Numerics toolkit: FP4 calibration, per-channel scales, accuracy gates | The no-aggressive-quantization constraint `[F]` has to be enforced by tooling, not by intention |
+| Runtime: DMA, command submission, host sync | |
+| Profiler that explains a missed deadline | A deadline-miss-rate target is unmeetable if misses are not attributable |
+| Bit-exactness CI against a reference | The only defence against silent numerical drift |
+
+**What we should deliberately not build:** a general-purpose compiler, a full framework
+backend, multi-model support, or dynamic-shape handling. Every one of those is how a small
+team loses two years, and none is needed for a module running one frozen model family.
+
+**Consequence for the program.** Software is not a downstream integration cost, it is a term
+in eta. Two actions follow: price the derate explicitly as a Monte Carlo input rather than
+leaving it at an implicit 1.0, and treat compiler headcount as competing with silicon
+headcount for the same result rather than as support for it. `VC_CHEATSHEET.md` already lists
+software as a top-three risk; this section is the quantitative version of that sentence.
 
 ---
 
