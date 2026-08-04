@@ -569,6 +569,51 @@ deficit.
 
 ---
 
+## 7e. First-principles derivation — an independent route to the same answer
+
+Derived without using TPUv4's band, our RTX anchors, or any published speedup, so it shares
+no assumptions with 7 (lesson L5).
+
+**One identity does the work.** `eta = Thor pJ/FLOP / our pJ/FLOP`, and `our pJ/FLOP =
+arithmetic / f_ours`. Thor's peak is a hard published number — 2070 TFLOPS / 130 W =
+**0.0628 pJ/FLOP** `[X]` — so the same arithmetic primitive that sets our floor *also* fixes
+Thor's own overhead fraction. It is the hinge, not a free parameter:
+
+| FP4 MAC cost | Implies Thor's f | eta at f_ours = 20 % | Ceiling at f_ours = 35 % |
+|---|---|---|---|
+| 0.0031 pJ/FLOP — Horowitz int8 scaled 45->4 nm | 5 % | **4.0x** | 7.0x |
+| 0.0063 — x2 for FP format overhead | 10 % | **2.0x** | 3.5x |
+| 0.0125 — CHIP_SPEC 6 with adder tree | 20 % | **1.0x** | 1.8x |
+| 0.0178 — CHIP_SPEC 6 with 32-bit accumulate | 28 % | **0.71x** | 1.2x |
+
+**Taken at face value, CHIP_SPEC's own MAC cost kills the project**: it would put Thor at
+20-28 % functional-unit fraction against a best-ever published ceiling of 35 %, leaving
+nothing to take.
+
+**The high-MAC rows are excluded by consistency, not by preference.** Thor's 0.0628 pJ/FLOP is
+*module-level*, including a 14-core ARM CPU, memory controllers and I/O. If the tensor cores
+draw half the 130 W, the tensor-core-only figure is ~0.03 pJ/FLOP, and a 0.0125 MAC would put
+Thor at **43 %** — above Hameed's ceiling, which no fused custom datapath has ever reached and
+which a programmable GPU with caches, register files and dynamic scheduling certainly has not.
+Running it backward, a programmable GPU plausibly sits at f <= 10 %, forcing **arithmetic
+<= 0.006 pJ/FLOP** and selecting the top two rows.
+
+**Result: eta = 2.0-4.0x, central 2.6-3.0x, ceiling 3.5-7x at Hameed's 35 %.** The same answer
+as 7, by a route sharing none of its inputs.
+
+### This changes which measurement matters most
+
+Earlier sections named `f_gpu` and then Thor's achieved joules as the critical measurement.
+**First principles says it is neither: it is the energy of an FP4 multiply-accumulate at the
+target node.** That one number sets our floor and Thor's overhead fraction simultaneously, and
+it is currently uncertain by 6x within our own spec. Resolving
+[`CHIP_SPEC.md`](CHIP_SPEC.md) 6's MAC accounting — including whether its 0.0156 pJ multiply
+correctly reflects an E2M1 format with a one-bit mantissa — is now the highest-value
+analytical work in the program, and unlike the others it needs a datasheet and an afternoon
+rather than a PDK.
+
+---
+
 ## 8. What would falsify this
 
 | Measurement | What it settles | Cost |
