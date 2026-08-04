@@ -360,9 +360,12 @@ DRAM traffic.
 
 **Two findings, and the second is the actionable one.**
 
-*The memory wall is not the wall at this operating point.* DRAM costs 3-6% of the budget
-while arithmetic costs 69-158%. That inverts the usual framing and it is a direct
-consequence of 4-bit weights: the traffic shrank, the FLOPs did not.
+*Memory is cheap in ENERGY and expensive in TIME -- do not conflate them.* DRAM costs 3-6%
+of the *energy* budget while arithmetic costs 69-158%, which is a direct consequence of
+4-bit weights shrinking traffic but not FLOPs. **An earlier version of this section
+concluded "the memory wall is not the wall". That was wrong**: it answered a bandwidth claim
+with an energy argument. Memory binds on *time*, and 7d shows it binds hard.
+[`MEMORY_BANDWIDTH.md`](MEMORY_BANDWIDTH.md) was right.
 
 *The accumulator determines whether the arithmetic fits at all.* 69% versus 158% is the
 entire difference between a multiply-only datapath and one that reads, modifies and writes a
@@ -473,6 +476,57 @@ on this very workload. It is unmeasured for Thor.
 our `f_ours` and Thor's achieved efficiency -- spanning 1.7x to 13x. One axis needs a board
 and an afternoon; the other needs a PDK. **Measure Thor (or Orin as proxy) first.** This
 supersedes earlier statements in this document that `f_gpu` was the highest-value measurement.
+
+---
+
+## 7d. Roofline position, and why the RTX measurement does not transfer to Thor
+
+**The regimes are not comparable, and this retires the "warning sign" in 7c.**
+
+| Part | Ridge point (FLOP/byte) | Workload intensity | Margin above ridge |
+|---|---|---|---|
+| RTX PRO 6000 @ BF16 | 279 | 5,315 | **19x** — deep in compute-bound territory |
+| Thor @ FP4 | 7,582 | 15,498 | **2.0x** |
+| **RPU @ FP4** | **13,021** | 15,498 | **1.19x — essentially on the ridge** |
+
+Our 94.7 %-of-peak-GEMM measurement (3a) was taken **19x above the ridge**, where there is
+nothing to stall on. Thor operates at 2x and our own chip at 1.19x. **Inferring Thor's
+achieved efficiency from that measurement is invalid**, and the earlier claim that it points
+to the unfavourable end of 7c's table is withdrawn.
+
+### Applying the MEASURED bandwidth utilization changes who is feasible
+
+The workload needs **229 GB/s sustained** at 5 Hz (45.9 GB per chunk, FP4 weights). Using the
+81.6 % utilization measured today `[M]` rather than the fitted `bw_util = 1.000`:
+
+| Part | Spec | At 81.6 % | Headroom vs 229 GB/s |
+|---|---|---|---|
+| **Thor** | 273.0 GB/s | 222.8 GB/s | **-2.7 % — memory-bound** |
+| **RPU** | 307.2 GB/s | 250.7 GB/s | **+9.5 %** |
+
+**Two consequences, pointing in opposite directions.**
+
+*Favourable:* **Thor cannot stream weights fast enough for 5 Hz.** Memory-bound means its
+tensor cores idle on DRAM, so its achieved fraction of peak is low — which argues 7c's 30-40 %
+column rather than its 70 % one, and materially reduces the program's largest stated risk.
+
+*Unfavourable:* **the RPU's 9.5 % headroom is dangerously thin.** Any traffic-model error or
+scattered-access penalty puts us memory-bound too. And the 81.6 % figure came from a
+*contiguous copy on HBM* — the best case on the friendlier memory technology. LPDDR5X under
+real access patterns will do worse for both parts, which erodes our margin faster than Thor's
+deficit.
+
+### What follows
+
+- **The RPU's 307 GB/s looks under-provisioned.** Revisiting it is cheaper than anything in
+  the energy ledger and should be an explicit design-point decision rather than an inherited
+  constant.
+- **Conditional compute / MoE moves from "largest unexploited lever" to "the thing that makes
+  the design close."** It is the only lever that cuts weight traffic *and* arithmetic by 3-4x
+  simultaneously, and we are 9.5 % from the bandwidth wall and ~4x from the energy budget.
+- **A memory-bound anchor is now a gating measurement, not a nice-to-have.** Everything above
+  rests on an 81.6 % figure measured on HBM with contiguous access. The LPDDR scattered-access
+  number is what actually decides feasibility for both rows.
 
 ---
 
