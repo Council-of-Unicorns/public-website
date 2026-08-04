@@ -96,7 +96,10 @@ that converts our numbers from `[S]` to `[M]`.
       repository revision, checkpoint and weights hash, and set the quality metric,
       threshold and dataset. Fills 8 of the 14 blocking fields in
       [`bench/contract.toml`](../bench/contract.toml).
-- [ ] **1.2 Orin benchmark.** The hardware is in hand. Optimized TensorRT, fixed power
+- [ ] **1.2 Orin benchmark.** The hardware is in hand. **A sealed prediction is already
+      registered** in [`PREDICTIONS.md`](PREDICTIONS.md): 59.1 ms and 2.68 J for one
+      forward pass of the 1.3B vehicle. Do not tune the model before measuring, or the
+      prediction is void and the measurement degrades from a test back into a fit. Optimized TensorRT, fixed power
       mode, thermal steady state, external power measurement; report p50/p90/p99, miss
       rate, energy per inference and per-operator timing.
 - [ ] **1.3 Memory-bound anchor.**  ← **moved here from Phase 4 on 2026-08-03**
