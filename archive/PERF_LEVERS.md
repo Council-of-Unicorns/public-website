@@ -221,25 +221,66 @@ and clock energy by the same V², leaving the *fraction* identical while improvi
 Ledger A and Ledger C were already structured this way; this confirms the separation was
 right, and it means the two must be composed rather than treated as overlapping.
 
-**A bound on eta derived from our own fixtures**, which is the sharpest thing in this
-document because it uses measurements we took [M, ours]:
+**A bound on eta derived from our own fixtures — CORRECTED 2026-08-04, and then MEASURED.**
+The research agent's version of this table divided chunk energy by a FLOP count that
+double-counted forward passes, producing 0.78 pJ/FLOP and implying the workload ran at
+768 TFLOP/s — above this board's dense-GEMM ceiling. A workload cannot be more efficient
+than a pure GEMM on the same silicon; that impossibility is what exposed the error. I had
+already committed the wrong figure before catching it. Correct values, regenerated from
+`forward_per_step(wp).flops * wp.diffusion_steps`:
 
-| Fixture | chunk FLOPs | energy | pJ/FLOP at board level |
-|---|---|---|---|
-| 3step_cfg_n3120 | 1.42e15 | 1110 J | **0.78** |
-| 2step_cfg_n3120 | 9.48e14 | 749 J | 0.79 |
-| 1step_batch1_n3120 | 1.18e14 | 193 J | 1.63 |
+| Anchor | model FLOPs | energy | implied TFLOP/s | pJ/FLOP |
+|---|---|---|---|---|
+| 3step_cfg_n3120 | 7.11e14 | 1110 J | 384 | **1.562** |
+| 2step_cfg_n3120 | 4.74e14 | 749 J | 380 | 1.580 |
+| 3step_cfg_n1560 | 3.59e14 | 591 J | 364 | 1.648 |
+| 1step_batch1_n3120 | 1.18e14 | 193 J | 366 | 1.631 |
 
-A BF16 MAC datapath at N4 costs roughly 0.05-0.20 pJ/FLOP, so **f_gpu is about 6-25 % on our
-actual workload**. Two consequences. Pure overhead removal is capped at roughly **5-16x**, so
-a bottom-up ledger returning 29-55x was never a discovery. And **eta of 2.15-3.0 requires
-f_ours of only about 13-30 %** — a two-to-three-fold improvement in overhead fraction, not
-elimination. That is credible, and it sits exactly where the published 1.6-3.2x band sits.
+**We then measured the arithmetic ceiling on the same board rather than estimating it**
+(`scripts/measure_fu_fraction.py`, fixture `rtx_pro_6000_fu_fraction.json`). An
+L2-resident dense GEMM is the most arithmetic-dense thing this silicon can run, so its
+energy per FLOP bounds multiplier energy from above:
 
-**It also means the roadmap gate-1 criterion of FU fraction >= 35 % is stricter than eta
-actually requires.** That is the safe direction to err, but the gate should not be read as
-"below 35 % the project dies" when 13-30 % would clear the bar. Worth restating before it is
-used to kill a design point.
+| | best measured | at |
+|---|---|---|
+| BF16, same precision as the anchors | **1.480 pJ/FLOP** raw, 1.298 marginal | n=4096, 405 TFLOP/s |
+| FP8 E4M3 | **1.192 pJ/FLOP** raw, 1.039 marginal | n=8192, 504 TFLOP/s |
+| Idle floor, clocks up | 73.7 W | — |
+| **f_gpu ceiling** | **<= 72-76 % raw, 63-67 % marginal** | one-sided |
+
+**Read the f_gpu bound honestly: it is weak and it is not the interesting result.** A GEMM
+still pays for register files, L2, warp scheduling, clock and leakage, so bounding the
+multiplier share by a GEMM's total energy cannot be tight. What the measurement actually
+settles is more useful, and it is unfavourable:
+
+**The workload runs at 1.562 pJ/FLOP against a same-precision dense-GEMM best of 1.480 —
+about 95 % of peak GEMM efficiency.** The GPU is *not* squandering most of its energy on
+workload-specific overhead. There is roughly 5 % of that kind of waste to reclaim, not the
+large "general-purpose tax on our particular workload" the eta story is sometimes told
+with. **Eta cannot come from the GPU running our workload badly, because it does not.** It
+must come from the architectural overhead present even in the GPU's best case — register
+files, cache hierarchy, clock distribution — which is precisely what Eyeriss (multipliers
+3-9 % of power) and Hameed (10 % to functional units) describe. The thesis survives; one
+convenient way of telling it does not.
+
+**Two further measured findings.**
+
+*bw_util is identified, and the fitted value is refuted.* The calibration pinned `bw_util`
+at 1.0000 against its box bound and `rpu/report.py` correctly reported it UNIDENTIFIED.
+A pure DRAM stream achieves **1461-1464 GB/s, or 81.5-81.7 % of the 1792 GB/s spec** — and
+since a contiguous copy is the best case for bandwidth, that is an *upper* bound on what a
+real scattered workload sees. The fit's 1.0000 is not attainable. Deliberately not folded
+back into the solver: this is a cross-check that shares no assumptions with the
+least-squares fit (lesson L5), and it is worth more as an independent check than as another
+fitted point. Refitting is a separate, explicit decision.
+
+*The baseline is itself energy-bound, measured.* Board power sat at **600.0 W in every
+single arithmetic configuration** — a hard cap, never a compute ceiling. FP8 buys only
+1.24x over BF16 here (1.480 -> 1.192 pJ/FLOP) rather than the nominal 2x, because the part
+is clamped by watts and not by multipliers. That is the project's own energy-rate-bound
+thesis appearing on the baseline hardware, and it is the cleanest confirmation of it we
+have. Note it differs from the 1.77x FP16->FP8 figure from the DVFS sweep; the two use
+different methods and the gap is not yet explained.
 
 **Sub-Vmin, resized: 1.4-1.7x on logic, 1.15-1.25x at system level.** Full argument and the
 leakage sign-flip table now live in [`CHIP_SPEC.md`](CHIP_SPEC.md) §6b. **Ledger C is

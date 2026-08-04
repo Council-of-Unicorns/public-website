@@ -167,3 +167,23 @@ because a result that contradicts its own bound is fabricated or misunderstood;
 A precise figure with no readable source is the signature to distrust, and precision is
 what makes it persuasive.
 
+## L11 — a globbed data directory is code; guard its schema at the boundary
+
+**Incident (2026-08-04).** `scripts/measure_fu_fraction.py` wrote its cross-check artifact
+to `fixtures/measured/rtx_pro_6000_fu_fraction.json`. `load_anchors` globs `*.json` from
+that directory and turns every document into an `Anchor`, so the artifact was pulled into
+the least-squares fit as a degenerate anchor and moved the fitted coefficients. No error
+was raised at load time. The symptom surfaced as two *unrelated* calibration-gate tests
+failing, which is an expensive way to discover that a data directory is executable input.
+
+**Rule.** Any directory read by a wholesale glob is part of the program's interface, not a
+scratch space. Validate the schema **at the loader boundary** and fail with a message that
+names the offending file and says why it does not belong — never construct a partially
+defaulted object from an unrecognized document. Artifacts that are deliberately *not*
+inputs (cross-checks, derived reports, plots) live outside the globbed directory, and the
+code that writes them says so at the output path. This is L9 (validate in `__post_init__`)
+moved one level out: the same argument applies wherever untrusted shape meets a constructor.
+
+**Related:** the cross-check that triggered this is itself an instance of L5 — it shares no
+assumptions with the fit, which is exactly why it must stay out of the solver.
+
