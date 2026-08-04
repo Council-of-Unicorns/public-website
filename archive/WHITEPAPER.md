@@ -24,9 +24,11 @@ cancels out of the comparison [S]. Scored at power parity — both
 chips at the 40 W head ceiling — the speedup IS the efficiency advantage: S = η. Beating
 Thor 2× in the flagship Quality mode needs η ≈ 2.02; beating it SOLIDLY (5th-percentile
 S ≥ 2 in every mode, with a 25 % thermal margin granted to Thor) needs η ≈ 2.2–2.8,
-inside the published 1.6–3.2× TPUv4-versus-A100 band; the design target is η = 3 [X, S]. Attention consumes ~62 % of dynamic energy, so matrix-multiply
-specialization alone caps the speedup at 1.59× and any credible datapath must improve the
-attention path [S]. We present the RPU design point (4 PF dense FP4, LPDDR5X conveyor,
+inside the published 1.6–3.2× TPUv4-versus-A100 band; the design target is η = 3 [X, S].
+η factors into a single ratio, f_ours / f_gpu, the share of energy each design delivers to
+its multipliers: the arithmetic term is ~1 because Blackwell has native FP4, so precision
+advantage is already inside the baseline. Attention consumes ~62 % of dynamic energy, so
+matrix-multiply specialization alone caps the speedup at 1.59× [S]. We present the RPU design point (4 PF dense FP4, LPDDR5X conveyor,
 40 W), the workload co-design levers that attack the absolute 5 Hz goal, and a roadmap in
 which a kill test gates every funding tier.
 
@@ -132,13 +134,31 @@ units, and neither instruction removal nor SIMD width, carries the processor-to-
 must come from the fabric around the MAC: pipeline and clocking (22 % of the Hameed
 ledger), caches (19 %), register files (10 %), control (10 %).
 
-Attention sharpens the requirement. With the mid prior, dynamic energy splits ~62 %
-attention, 37 % matmul and projection, 0.6 % bytes, because attention runs FP8 against FP4
-linears [S]. Zeroing matmul energy while leaving attention unchanged caps the speedup at
-1.59×. Reaching S = 2 by matmul specialization is impossible under this split. The
-attention energy path (online-softmax streaming, FLASH-D-style division hiding, fused
-exponential-multiply operators, and a static per-layer max bound that our fixed geometry
-permits) is load-bearing for the thesis [X: arXiv 2505.14201, 2505.14314; S].
+Attention sharpens the requirement, though not in the way we first stated it. With the
+mid prior, dynamic energy splits ~62 % attention, 37 % matmul and projection, 0.6 % bytes
+[S]. The reason is **precision, not data movement**: self-attention is 40.7 % of FLOPs but
+73.3 % of arithmetic energy, because it runs FP8 against FP4 linears and arithmetic cost
+scales with the square of operand width. Zeroing matmul energy while leaving attention
+unchanged caps the speedup at 1.59×, so matmul specialization alone cannot reach S = 2.
+
+**Correction, 2026-08-04.** An earlier version of this section presented fused streaming
+attention as a differentiator stacked on top of a TPU-class control advantage. That was
+double-counting. The optimizations we cited are already standard in the baseline:
+FlashAttention has been the PyTorch SDPA default since 2.0 and **our own measured anchors
+used SDPA**; Blackwell has native FP8 and native FP4. A GPU running this workload already
+fuses its attention and already has both numeric formats.
+
+What remains is real but smaller, and it is implementation efficiency rather than a new
+algorithm: a GPU's fused attention still alternates between tensor cores for the two GEMMs
+and vector units for the exponential and softmax, losing utilization at each handoff; K
+and V still traverse shared memory and the register file per tile; and a fixed geometry
+permits a static per-layer max bound that removes a pass [X: arXiv 2505.14201, 2505.14314].
+
+The consequence for the thesis is a simplification. There is no separate attention
+multiplier to add to a control-path advantage. Everything reduces to one ratio, η =
+f_ours / f_gpu, the share of energy each design delivers to its multipliers. The attention
+datapath is **where f_ours must be earned**, competing for the same overhead budget as
+every other decision, not a bonus on top of it.
 
 ## 6. The RPU design point
 

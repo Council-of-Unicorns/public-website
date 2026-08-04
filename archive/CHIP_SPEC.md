@@ -200,6 +200,27 @@ pipeline.
 | the update-engine ISA (primitive set) | update-engine *program* (flow-ODE vs CEM) |
 | memory channel count, SRAM sizes | conveyor address trace, refresh placement, B-lever profiles |
 
+### 6.0 What is and is not a differentiator  *(added 2026-08-04)*
+
+Verified against the baseline rather than asserted, because three claims we had been
+leading with do not survive the check:
+
+| Claim | Status |
+|---|---|
+| Fused / non-materialized attention scores | **not a differentiator.** FlashAttention is the PyTorch SDPA default and our own measured anchors used it. |
+| FP8 attention, FP4 linears | **not a differentiator.** Blackwell has both natively. |
+| Zero-instruction control path | **parity, not advantage.** TPUv1 already banked this in 2015 with a small CISC set where one instruction drives a whole dataflow; modern tensor cores amortize fetch across thousands of MACs. |
+
+What survives is implementation efficiency inside the same overhead budget: no
+tensor-core-to-vector-unit handoff for softmax, K and V streamed from the conveyor rather
+than through shared memory and the register file, a static per-layer max bound, and the
+cache hierarchy removed entirely. All of it shows up as f_ours in η = f_ours / f_gpu, and
+none of it is a separate multiplier.
+
+The honest position: a well-executed TPU-class design with a better attention datapath
+lands somewhere in the published 1.6-3.2x band, and our solid bar of 2.15 sits inside it.
+We need the upper half of that band, not the band plus a bonus.
+
 ## 6a. Design principles adopted from Hameed et al., ISCA 2010 ("magic instructions")
 
 The canonical quantitative study of the processor→ASIC gap (720p H.264 encoder, Tensilica
