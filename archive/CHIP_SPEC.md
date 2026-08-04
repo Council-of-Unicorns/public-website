@@ -140,6 +140,28 @@ remains the separate stretch that motivates step-distillation quality work in pa
   accumulators held in a dedicated accumulator SRAM below the array** (TPUv1's exact pattern:
   16-bit products → 4 MB of 32-bit accumulators; accumulator traffic ≪ operand traffic, so
   the wide format costs little). FP16 accumulate remains a task-checked fallback (§6a.5).
+
+  **REOPENED 2026-08-04 — "costs little" is wrong at FP4.** The TPUv1 reasoning holds for
+  16-bit products. At FP4 the multiply is tiny and the asymmetry inverts: a 32-bit
+  accumulator read-modify-write costs **~0.020 pJ against a 0.0156 pJ FP4 multiply, i.e.
+  128 % of the MAC**, making the accumulator the largest single term in arithmetic energy
+  (~56 %). Narrow-multiply/wide-accumulate is still right; pricing the wide side as
+  negligible is not.
+
+  Two levers, and they stack [T, component energies from Accelergy 45 nm scaled to 5 nm]:
+
+  | Lever | Effect on arithmetic energy |
+  |---|---|
+  | **Adder tree**: combine 8 products combinationally, one register update per 8 MACs | 0.51x |
+  | **Narrower accumulation**: BF16, or INT8 with block scale (the MXFP4 scales already exist) | accumulator halved to quartered |
+  | **Both** | **2.1x lower; accumulator falls from 56 % to 7 % of arithmetic energy** |
+
+  The adder tree spends combinational depth to buy this, which costs clock frequency. At
+  1.05 GHz wide-and-slow we have the timing budget, so the trade is close to free for us
+  and would not be for a high-clock part. Narrowing the accumulator is a numerics risk in
+  a different category from the recorded no-aggressive-quantization constraint (that
+  covers INT2 weights, FP4 KV and 2:4 pruning), but it still requires task-accuracy
+  validation before adoption. **Gate-1 decision: adder-tree width, and accumulator format.**
 - **Hardwired FP4-dequant → FP8 path** into the array; no format kernels, no register-file
   trips. **Weight format: microscaling, two profiles.** Default **MXFP4** (32-element blocks,
   E8M0 power-of-two scales) — dequant is an **exponent add, zero multipliers**, the cheapest
@@ -273,14 +295,49 @@ provides a concrete technique menu with measured gains:
 |---|---|---|
 | Split voltage domains (logic near-threshold, SRAM higher) | logic MEP sits near Vth; SRAM MEP is higher — never drag SRAM down with the fabric | NTC literature; already our domain plan (CHIP_LAYOUT §4) |
 | 8T/10T SRAM cells + read/write assist | 6T fails static-noise margin below ~0.6 V; 8T decouples read path | demonstrated to 0.26 V (64 kb 8T) |
-| In-situ timing-error detection (Razor-class) + adaptive margin | run at the true silicon margin, not the signoff corner; measured **~47% energy recovery vs signoff margins** at MEP (55 nm NTV µC) | silicon-demonstrated |
+| ~~In-situ timing-error detection (Razor-class)~~ **REFUTED 2026-08-04** | The 47 % was recovery *vs signoff margins*, not energy per inference. Measured on a 16 nm ZCU102 across 5 CNNs, normalized GOPs/J goes **1.00 at Vmin, 0.75 at 560 mV, 0.75 at 540 mV** — underscaling past Vmin is energy-*negative*. Chip-to-chip Vmin spread (31 mV) exceeds the exploitable window (30 mV). And recovery is a **replay**, i.e. variable latency, which is structurally hostile to a provable < 1e-4 deadline-miss bound. | [X*] **rejected** |
+| Canary / tunable-replica / CPM adaptive voltage scaling | The version that actually shipped: POWER7 recovered 113–152 mV for **−20 to −24 % chip power** at no perf loss and 0.2 % area; AMD 28 nm 7–15 %; Qualcomm 16 nm 13–30 % throughput at 5–13 % energy with **no per-part test calibration**; Intel 22 nm improves from +14 %/−3 % at 1.0 V to **+31 %/−15 % at 0.6 V**, so it *composes* with undervolting | [X*] shipped silicon |
 | Canary/monitor circuits + per-tile AVS | track droop and aging without global guardband | standard practice |
 | Splittable/segmented MAC arrays | contain voltage droop blast radius; Etched's own named mechanism | vendor-claimed (A0) |
 
-**Status: NOT counted in the η bars (2.05 bare / 2.15 solid).** The headline bet remains architecture-only. If the
-phase-1b prototype tile demonstrates sub-Vmin operation, every measured multiplier is upside
-on top of the 1.6–3.2× band — potentially the difference between meeting the 2× bar and
-dominating it. Gate: a test-structure tile on the gate-4 shuttle, not before.
+**Status: NOT counted in the η bars (2.05 bare / 2.15 solid).** The headline bet remains
+architecture-only. Gate: a test-structure tile on the gate-4 shuttle, not before.
+
+**Sizing corrected 2026-08-04 — the honest number is ~1.5×, not ~2.5×, and it is logic-only.**
+The canonical 10× (Dreslinski 2010) rests on two 130 nm sensor chips that measured 6.6× and
+9.8× at 9–11× frequency loss. The FinFET simulation figure is 8.2× at 7 nm — but that is a
+31-stage FO4 inverter chain with no SRAM, no clock tree and no NoC. **The measured-silicon
+number for a real DNN accelerator with SRAM and NoC (TSMC 16 nm, 0.41–1.2 V) is ≈3.3×
+corner-to-corner for ≈11× frequency** [X*]. The simulation-to-silicon gap is ~3×, and it comes
+from exactly the parts the FO4 chain omits.
+
+At *fixed throughput* it is smaller again, because N× array width is N× the leaking
+transistors and FinFET's low DIBL (22 mV/V at 7 nm vs 171 mV/V planar) means undervolting
+barely reduces per-transistor leakage:
+
+| Move | Array width | Net @ 20 % leakage | Net @ 30 % leakage |
+|---|---|---|---|
+| 0.85 → 0.62 V | 1.5× | **1.64×** | 1.54× |
+| 0.85 → 0.52 V | 3× | **1.70×** | 1.43× |
+| 0.85 → 0.41 V | 10× | 1.13× | **0.83× — worse than nominal** |
+
+**The model changes sign between a 20 % and a 30 % leakage fraction, and a fanless hot head
+is exactly the high-leakage regime.** Make the nominal-point leakage fraction a load-bearing
+Monte Carlo input, not a constant. Recommended stopping point: **~0.55–0.6 V and 2–3× width**
+— 0.62 V and 0.52 V land within 5 % of each other, so the aggressive end buys almost nothing
+for a lot of area, yield and PDN current. SRAM pins the floor near 0.5 V regardless (N5 Vmin
+improvement over 7 nm is "very little" without write assist), which is why Etched's phrasing
+is *"math blocks"* below half voltage: that is a **dual-rail split**, and it is the right answer.
+
+**Then derate for the memory wall.** This is a lever on the *logic* rail only. LPDDR5X PHY
+runs at a fixed VDDQ and cannot be voltage-scaled at all, and our own non-negotiables say
+7 GB streams from DRAM every step. If DRAM and PHY are 50–70 % of system energy, **a 1.5×
+logic win is a 1.15–1.25× system win.** Score it against the compute budget, never the total.
+
+This *explains* the P6 DVFS-flat result rather than contradicting it: a GPU cannot go there
+because its SRAM, cell libraries and clock distribution pin it at its floor. But sub-Vmin
+silicon buys ~1.2× at system level, not the ~2.8× that η* needs. **It is a contributor to
+η*, not a solution to it.**
 
 ## 6c. Workload-shaping levers (Ledger B)
 

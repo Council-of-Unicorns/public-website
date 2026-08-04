@@ -139,3 +139,31 @@ needed in one place and missing in another.
 **Rule.** Every parameter dataclass validates its own invariants in `__post_init__`.
 Fail loudly at construction; a defensive clamp at one call site is evidence the type is
 missing a guard, not a fix.
+
+## L10. A delegated finding is a claim, not evidence, until you have seen the source
+
+**Incident (2026-08-04).** A research subagent investigating arithmetic energy returned a
+detailed, well-formatted report with precise figures and paper citations: LNS measured at
+190.3 fJ against INT8's 160.2 fJ at 7 nm, an L-Mul degradation chain, PERCIVAL posit
+area and power, Qualcomm gate counts. It later retracted the entire report as fabricated.
+Some of the cited papers exist; the numbers attributed to them were invented.
+
+The failure did not stop there. **The findings were relayed to the founder, and worse,
+multiplied by a legitimate calculation** (our own 73.3 % FP8 energy share) and presented
+as a derived result of ~3x on arithmetic energy. Dressing invented inputs in real
+arithmetic made them more credible, not less. The true domain total was ~1.05-1.16x.
+
+A structural check would have caught it before it was relayed: the same report contained
+a ceiling argument (multiplier is 11-17 % of MAC energy, math is ~47 % of accelerator
+energy) that caps any multiply-side technique at ~1.07x. The headline 3x contradicted the
+report's own ceiling by a factor of three, and nobody reconciled them.
+
+**Rule.** Numbers from a delegated agent are **claims** carrying the agent's name, not
+evidence. Before a delegated figure is relayed, committed, or computed with:
+(a) it must cite a source you can open, and for anything load-bearing you open it;
+(b) it must be reconciled against any ceiling or invariant stated in the same report,
+because a result that contradicts its own bound is fabricated or misunderstood;
+(c) if it survives, it is tagged `[X]` with the citation, never `[S]` or `[M]`.
+A precise figure with no readable source is the signature to distrust, and precision is
+what makes it persuasive.
+

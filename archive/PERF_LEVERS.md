@@ -87,3 +87,196 @@ keeps Ledger B's gains from being clawed back. [X: JEDEC + automotive LPDDR5 pra
 3. Gate-1 addendum: µcode/sequencer budget for static masks, merge permutations, reuse
    thresholds (≪1% die [T]); B7's worst-case-slot scheduling folds into the existing
    deadline analysis.
+
+---
+
+## Ledger D — architecture-agnostic η levers (research 2026-08-04)
+
+Three parallel literature reviews on raising η **without betting on a model shape**.
+Verification status is marked per item, per lesson L10: a delegated finding is a claim
+until someone opens the source.
+
+### D1. Alternative number systems — BRANCH CLOSED
+
+| Technique | Verdict | Evidence | Verified |
+|---|---|---|---|
+| Logarithmic number systems | **worse than INT8** | 7 nm ASAP7, registers counted: Kulisch LNS 190.3 fJ vs INT8 160.2 fJ PDP, 19 % worse. Published wins approximate the accumulate, costing LLaMA-3.1-8B 6.24 → 8.33 ppl | **yes** — figures confirmed in extracted PDF text |
+| L-Mul | **~0 on an ASIC** | 95 % (analytic, vs FP32) → 42 % multiplier-only on FPGA → 14.6 % system → 0, since the win is deleting 1,156 hardened DSP slices | **yes** — figures confirmed in extracted PDF text |
+| Posits | **cost more** | 1.32x area, 1.38x power at matched width; MX gets the taper with a static layout | no |
+| AdderNet / ShiftAdd / BitNet | **disqualified** | require training from scratch, or land on the prohibited quantization axis | no |
+
+### D2. INT vs FP datapath — the one candidate worth an afternoon
+
+INT8 with a fixed-point accumulator is reported as the efficiency floor, FP8-E4 costing
++53 % gates (corroborated ~40 % by synthesis) [X: arXiv:2303.17951]. **Not verified here.**
+It matters because self-attention runs FP8 and is **73.3 % of our arithmetic energy** [S],
+so this lever lands on the dominant term. Verify the source before pricing it.
+
+### D3. Compute-in-memory — REJECTED, but not for the reason we were going to give
+
+Do **not** reject CIM on weight residency. At AI ≈ 16,000 FLOP/byte we have thousands-fold
+reuse per load, so reload energy is negligible and that argument would be refuted. Reject
+on **density and utilization**: TSMC 3 nm DCIM at 3.78 Mb/mm² against ~30 Mb/mm² for plain
+SRAM turns our 90 MB into ~190 mm². [X, unverified.]
+
+**House rule: never cite a CIM macro TOPS/W.** Macro headlines span 89-4094; system-level
+results cluster at 23-37 across nodes. That macro-to-chip collapse is the same error shape
+as our own 29-55x ledger artifact: a subtotal quoted as a total.
+
+### D4. Power-of-two weights — a QUALITY lever, not an energy lever
+
+PoTPTQ matches or beats GPTQ/AWQ at 3-bit, and LRQ-DiT targets text-to-video diffusion
+transformers, our exact model class [X, unverified]. But a PoT weight turns a 4x4
+multiplier into a shifter, and that multiplier is only 11-17 % of MAC energy. Put log-coded
+weights on the **decode path** out of SRAM, not in the arithmetic. It may let us hold a
+bit-width we would otherwise concede, which is the only way this literature helps the
+no-aggressive-quantization constraint.
+
+### The convergent finding, which matters more than any single lever
+
+Three streams reasoning from different literatures, plus our own computation, agree:
+**the multiplier is 11-17 % of MAC energy, and ~85 % of chip energy is operand delivery,
+accumulation, clock, leakage and control.** Our own number: the accumulator alone is 56 %
+of arithmetic energy [S, computed here].
+
+Consequence: **η does not come from better arithmetic.** Multiply-side techniques are
+capped near 1.07x whatever a paper claims, and the whole numerics domain is worth
+~1.05-1.16x against a required 2.15. The remaining levers are all inside that 85 %:
+accumulator amortization (2.1x on arithmetic energy, computed and verified here),
+operand delivery, clock and leakage.
+
+### D5. Circuit and physical-design levers — the clock is the floor
+
+**Measured, and it reframes the problem.** Eyeriss (TSMC 65 nm, fabricated) [M, quotes
+verified in extracted text]: **clock network 33-45 % of power, multiplier+adder 3-9 %**,
+scratchpads 33-42 %. Verbatim: *"the ALUs only account for less than 10 % of the total
+power"* and *"Besides the clock network, the spads dominate."* Eyeriss v2: the clock share
+**triples from ~20 % to ~55 % as effective utilization falls** — and batch-1 attention is
+exactly that regime. Corroborated by Simba (16 nm, measured: MACs 11.2 % of PE area) and
+Hameed (90 % overhead / 10 % functional units).
+
+**Consequence for our fabric [T, load-bearing].** At ~1.9 M MACs and 1.05 GHz against a
+~19 W fabric budget, a conventionally pipelined flop-per-MAC array clocks 40 bits/MAC and
+lands at **32-120 W — it does not fit at all**. An 8-wide adder tree takes it to 7 bits/MAC
+and 5.6-21 W. **The adder tree is therefore a feasibility decision, not an optimization**,
+and flop clock-pin plus local-tree energy in the target PDK is the single most important
+Tier-2 characterization.
+
+Shipped precedent [M]: TPUv4i replaced 128 serial two-input adders with four-input sums,
+saving **40 % area, 25 % power, and 12 % of MXU peak power**.
+
+**Ranked survivors** (full 24-item table in the research transcript): 1) adder-tree
+register amortization; 2) latch-based design with time borrowing, converting ~25 % frequency
+headroom into lower Vdd at fixed throughput — the one candidate that attacks the P6 DVFS
+wall with no model-side change; 3) pulsed latches, derated to 10-18 %; 4) schedule-driven
+spatial PE gating (our static schedule gives zero prediction error, and DiT head dims are
+ragged against a 128-wide array); 5) GALS pausible clocking [M, NVIDIA 16 nm]; 6) multi-Vt
+and body bias.
+
+**Rejected with evidence:** LC resonant clocking (needs ~23x the inductance at 1.05 GHz and
+**detunes under clock gating**, which is our main lever); low-swing clocking (5.8 % of total
+measured, and no swing headroom at 0.7 V); clock mesh (surge current, and we do not need
+20 ps skew at a 1 ns period); wave pipelining; adiabatic logic; full asynchronous.
+
+**One rejection matters for integrity:** zero-operand gating. Eyeriss's famous 45 % is
+measured against an *ungated* baseline on ReLU CNNs with 77.6 % zeros. Transformers have
+essentially no exact zeros. **Citing that number for our accelerator would credit the
+design under test with sparsity the workload does not have, breaking the one-utilization-
+model invariant.** Honestly-baselined value at our zero rates: ~2-3 % of dynamic power for
+5.7 % area. Reject.
+
+**The sobering finding.** Eyeriss achieves 3-9 % of energy in functional units; Hameed's
+ladder tops out near 35 % for fused custom datapaths. **Our gate criterion of FU fraction
+>= 35 % is more ambitious than any purpose-built DNN ASIC has published**, and clocking
+plus sequencing is the largest single bucket standing between us and it.
+
+**Net:** everything below rank 1 composes to roughly **10-20 % of chip power**. Real, worth
+taking, and not a factor of two. Rank 1 is different in kind.
+
+### D6. The voltage and margin stream — and a framing correction that changes the composite
+
+**The correction, which matters more than any technique in this ledger.** `eta = f_ours/f_gpu`
+is the wrong model for circuit-level work. That identity captures *architectural* overhead
+removal: instruction fetch, register file, cache hierarchy, dynamic scheduling. Almost no
+circuit technique changes `f` at all — voltage scaling cuts multiplier energy and SRAM energy
+and clock energy by the same V², leaving the *fraction* identical while improving J/op.
+**Circuit gains are a separate multiplicative ledger on top of eta, not a component of it.**
+Ledger A and Ledger C were already structured this way; this confirms the separation was
+right, and it means the two must be composed rather than treated as overlapping.
+
+**A bound on eta derived from our own fixtures**, which is the sharpest thing in this
+document because it uses measurements we took [M, ours]:
+
+| Fixture | chunk FLOPs | energy | pJ/FLOP at board level |
+|---|---|---|---|
+| 3step_cfg_n3120 | 1.42e15 | 1110 J | **0.78** |
+| 2step_cfg_n3120 | 9.48e14 | 749 J | 0.79 |
+| 1step_batch1_n3120 | 1.18e14 | 193 J | 1.63 |
+
+A BF16 MAC datapath at N4 costs roughly 0.05-0.20 pJ/FLOP, so **f_gpu is about 6-25 % on our
+actual workload**. Two consequences. Pure overhead removal is capped at roughly **5-16x**, so
+a bottom-up ledger returning 29-55x was never a discovery. And **eta of 2.15-3.0 requires
+f_ours of only about 13-30 %** — a two-to-three-fold improvement in overhead fraction, not
+elimination. That is credible, and it sits exactly where the published 1.6-3.2x band sits.
+
+**It also means the roadmap gate-1 criterion of FU fraction >= 35 % is stricter than eta
+actually requires.** That is the safe direction to err, but the gate should not be read as
+"below 35 % the project dies" when 13-30 % would clear the bar. Worth restating before it is
+used to kill a design point.
+
+**Sub-Vmin, resized: 1.4-1.7x on logic, 1.15-1.25x at system level.** Full argument and the
+leakage sign-flip table now live in [`CHIP_SPEC.md`](CHIP_SPEC.md) §6b. **Ledger C is
+downgraded from 1.5-2.5x on everything to ~1.5x on the logic term**, because LPDDR5X and its
+PHY run at a fixed rail and cannot be voltage-scaled at all.
+
+**New entry — droop-aware static scheduling, 6-10 % of logic power (~1.5-2.5 W), and the one
+genuine differentiator in this domain.** Measured guardband on shipping silicon is **9-18 %
+program-dependent on a GTX 680 and ~20 % across four Fermi/Kepler parts**; decomposing the
+0.1 V Vmin spread across 57 programs at fixed temperature gives **voltage noise 0.10 V,
+process 0.07 V, temperature 0.02 V**, and within voltage noise it is **di/dt droop, not IR
+drop**, that dominates [X*]. Every published mitigation predicts droop from performance
+counters and pays a misprediction margin. **A fully static schedule removes the predictor and
+its margin**: worst-case dI/dt is characterizable at compile time because nothing else can
+run, and tile activation ramps can be shaped offline in the µcode toolchain (§6d). The physics
+favors this over the obvious alternative: since ΔV is proportional to ΔI·sqrt(L/C), halving
+droop with decap needs **4x the decap**, while attacking ΔI with the schedule is **linear**.
+
+**Two conditions on that lever, both binding.** The kill risk: one survey finds that on large
+multicore parts the droops are so severe that Vmin becomes *virtually workload-independent*,
+leaving no program-dependent headroom to reclaim. If a 256x256 array behaves that way the
+lever collapses, so it is a Monte Carlo input, not an assumption. The fairness risk: crediting
+us with a smaller guardband because we are statically scheduled gives the design under test
+something Thor and B200 do not get. It is defensible, since they genuinely carry runtime
+predictor margin — but **it must be a separately labeled bet with its own band, exactly like
+eta, and never a term in the shared utilization model.**
+
+**Backside power delivery — escalate as a node decision, not a circuit decision.** Intel
+PowerVia measured on an Intel 4 test chip: **>30 % IR-droop reduction and 6-6.7 % Fmax**.
+TSMC A16 Super Power Rail claims **15-20 % lower power at iso-speed**. This is the largest
+single number in the domain and **it does not exist at N4 or N5** (nor at N2/N2P, which are
+frontside). Available on Intel 18A now and TSMC A16 in 2026-27. Thermal caveat specific to
+us: backside power moves transistors away from the heat-extraction path, and we are fanless.
+
+**Rejected, with the reason stated once so nobody reopens them:** Razor-class timing
+speculation (see §6b — it is energy-negative per inference, chip-to-chip Vmin spread exceeds
+the exploitable window, and replay means variable latency against a hard deadline); voltage
+stacking (unmitigated imbalance drove a measured 230 mV guardband on a 900 mV rail, four times
+the delivery loss it recovers; worst-case-reliable sizing needs 912 mm² of regulator);
+integrated voltage regulators as an efficiency play (90 % measured against 90-93 % for a good
+off-chip buck, and Intel shipped, removed, then reshipped it); FD-SOI and body biasing (no
+5 nm FD-SOI exists, and bulk FinFET has no body contact); deep-trench decap.
+
+**Write the power-delivery ceiling into the spec so nobody spends a quarter on it:** on-die
+plus package I²R loss as a percentage *equals* the IR-drop margin budgeted. At 40 W that is
+~4-6 W, so perfect, free, zero-area delivery buys ~12 %, and best-in-class over standard
+practice buys 4-6 %.
+
+**Composite.** Ledger C at ~1.2x system level, times the architectural eta, is how the
+program reaches its bar. Sub-Vmin is a **contributor to eta* ~= 2.8, not a solution to it**,
+and the honest headline stays architecture-first.
+
+*Provenance note: [X*] marks claims reported by the research agents with primary sources in
+the session scratchpad that I did not personally open. The Eyeriss and Leng material was spot
+-verified against extracted text; the Zimmer 3.3x and the Razor energy-negative result were
+not. Per lesson L10, they are labeled rather than promoted.*
+

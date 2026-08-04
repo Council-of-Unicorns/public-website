@@ -1,7 +1,7 @@
 # Archive — RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-07-29 at etched commit 918c15a (40 W power parity, S = eta; Quality mode leads).
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-04 at etched commit 0d55070 (circuit and physical-design ledgers D5/D6; the sub-Vmin band resized to the logic term only and the Razor margin-recovery claim withdrawn; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
 
 ## Canonical documents
 
