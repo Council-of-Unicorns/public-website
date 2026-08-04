@@ -107,10 +107,23 @@ that converts our numbers from `[S]` to `[M]`.
       which currently rests on its box bound at 1.000 and which no amount of simulator
       work can determine. It is also the anchor the founder's B200 WAN observation has
       been waiting for.
+- [ ] **1.3b Module power decomposition.** NVIDIA publishes no per-block power for
+      NVENC/NVDEC, ISP or the vision cluster, so it must be measured. `tegrastats` exposes
+      three pre-regulator rails via two INA3221 monitors: `VDD_GPU_SOC` (GPU *and* SoC
+      logic, where the codecs live), `VDD_CPU_CV` (Arm cores plus PVA/DLA) and
+      `VIN_SYS_5V0`. The rails do not isolate the codec, so use delta measurement, the
+      same technique as the DVFS idle audit: (a) idle with clocks up, (b) camera plus
+      H.265 encode without inference, (c) inference without codec. That yields the codec
+      cost AND the share of the module budget that never reaches inference, which is the
+      quantity our module-level comparison turns on.
 - [ ] **1.4 Export the operator graph** with exact shapes and traffic, so both sides run
       the identical workload.
 
-**Gate:** the contract reaches `frozen`, and `bw_util` is identified.
+**Gate:** the contract reaches `frozen`, `bw_util` is identified, and the system boundary
+is written down — what is inside the 40 W on each side. Our accelerator needs a host and
+provides no codec; Thor carries CPU, ISP, codecs and vision accelerators that leak into
+the same budget. Undecided boundaries get resolved in whichever direction flatters the
+person writing the slide, so this is decided before any measurement is taken.
 
 ### Phase 3 — GEMM-level cycle model  *(complete 2026-08-03)*
 
