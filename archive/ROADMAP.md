@@ -292,6 +292,29 @@ axis, every finding triaged into fix / defer-with-note-at-point-of-use / reject-
 and the resulting rules committed to [`engineering-lessons.md`](engineering-lessons.md) in
 the same change as the fixes. Phase 3 closed this way on 2026-08-03 with 21 findings.
 
+## Finding: the architecture design space is flat, and that is a model artifact
+
+`scripts/design_space.py` sweeps 84 points over array geometry (64/128/256 edge, MAC
+count held constant), SRAM capacity (8-256 MB) and DRAM bandwidth (150-1200 GB/s), and
+reports which wall binds at each.
+
+**Every point is energy-bound, and forward-pass time is identical to within 2 %.**
+Compute varies 1.8x across the grid and memory varies 9.5x; energy sits 9.3x above the
+best compute time everywhere, so neither matters.
+
+The tempting reading is "geometry does not matter, stop optimising it". The correct
+reading is the opposite: **our energy model contains no term that depends on array
+geometry, SRAM capacity or bandwidth**, so it is flat across those axes by construction.
+Real silicon is not: more SRAM means more leakage and area, more bandwidth means more PHY
+power, a different array shape means different wire energy. Those are exactly the five
+components the Phase-4.3 ledger omits (clock, wire, registers, PHY, leakage) and exactly
+why its bottom-up eta came out implausible. Same missing physics, two symptoms.
+
+**Consequence for tooling:** an interactive design-space explorer over these axes would
+render a flat surface with high production values. It becomes worth building when the
+energy model depends on the parameters being swept, which is Phase 7. Recorded here so
+the idea is not re-proposed before then.
+
 ## Stopping rule for simulator work  *(added 2026-08-03)*
 
 Phases 6-9 need people, EDA licences and money that simulation does not, and simulator
