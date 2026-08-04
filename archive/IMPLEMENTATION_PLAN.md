@@ -1,4 +1,4 @@
-# IMPLEMENTATION_PLAN.md — FM-RPU Tier-1 Concept-Proving Simulator
+# IMPLEMENTATION_PLAN.md — RPU Tier-1 Concept-Proving Simulator
 
 > **STATUS: COMPLETE (2026-07).** Steps 0–11 all shipped; P1–P8 are green CI gates; the
 > P6 calibration gate passed on measured RTX PRO 6000 anchors. This document is retained
@@ -23,7 +23,7 @@ nothing that violates doctrine yet. So this is a **build sequence**, not a migra
   dominate, raw speed does not (the MC is embarrassingly parallel and small).
 - **The one hard external dependency:** the *measured anchor data* (§0.1–0.2 — your B200
   3-step DreamZero fork, a Thor/Orin point, DreamZero public anchors). The simulator cannot
-  invent these; no FM-RPU result is trustworthy until they're supplied and reproduced. See
+  invent these; no RPU result is trustworthy until they're supplied and reproduced. See
   **§D1**. Until they exist, only clearly-flagged synthetic fixtures exercise the pipeline.
 
 ---
@@ -41,7 +41,7 @@ nothing that violates doctrine yet. So this is a **build sequence**, not a migra
 - [ ] **Step 8 — Simulator B (deltas only).** JEPA workload generator, reuse-axis width, programmable-update-engine cost, union provisioning point, A-vs-B gap, Part-C tier-collapse check. Lands P8-isolation.
 - [ ] **Step 9 — CI guards + failure injection.** Freeze P1–P8 as merge gates. *(After Step 8; must not precede it or main goes red.)*
 - [ ] **Step 10 — Reporting / observability.** Feasibility report artifact + sensitivity output. *(Parallel, anytime after Step 6.)*
-- [x] **Step 11 — Success metric: speedup vs Thor (A8a), 2× = success.** `fmrpu/speedup.py`: power-capped chunk time (both rows, one formula — P1), speedup as a region with `P(S≥2)` (P7), `required_efficiency_advantage` (η\*, the D7-labeled etch-efficiency input, DUT-only, never folded into the η=1 headline), FP16→FP4 energy-scaling `s` as an MC input pending an FP8/FP4 anchor. Proved by `tests/test_speedup.py` (region shape, identical-rows S=1, TDP-ratio identity under dual power-limit, uncapped peak-ratio tracking, η\* flips success, η never leaks into the baseline, determinism). Readout: `scripts/speedup_readout.py` (P6-gated on the measured-anchor calibration).
+- [x] **Step 11 — Success metric: speedup vs Thor (A8a), 2× = success.** `rpu/speedup.py`: power-capped chunk time (both rows, one formula — P1), speedup as a region with `P(S≥2)` (P7), `required_efficiency_advantage` (η\*, the D7-labeled etch-efficiency input, DUT-only, never folded into the η=1 headline), FP16→FP4 energy-scaling `s` as an MC input pending an FP8/FP4 anchor. Proved by `tests/test_speedup.py` (region shape, identical-rows S=1, TDP-ratio identity under dual power-limit, uncapped peak-ratio tracking, η\* flips success, η never leaks into the baseline, determinism). Readout: `scripts/speedup_readout.py` (P6-gated on the measured-anchor calibration).
 
 ### Dependency graph
 
@@ -59,7 +59,7 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 
 ### P1 — Fairness: one utilization model, applied to every hardware row
 **Invariant:** every hardware row is scored through one identical `UtilizationModel`; the core (`roofline.py`, `latency.py`, `energy.py`, `thermal.py`) is **row-agnostic**.
-**Forbids:** any hardware-row name literal (`thor`, `b200`, `fm-rpu`, `fmrpu`) inside the core modules; any per-row utilization override; granting the design-under-test ideal utilization while baselines get realized numbers.
+**Forbids:** any hardware-row name literal (`thor`, `b200`, `fm-rpu`, `rpu`) inside the core modules; any per-row utilization override; granting the design-under-test ideal utilization while baselines get realized numbers.
 **Allowed:** rows differing only in their *data* (`HardwareRow` fields); one utilization model *fit from measurement* (Step 4) shared by all.
 **Proved by:** Step 3 (`test_fairness.py`) + Step 9 CI grep guard.
 
@@ -85,9 +85,9 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 **Proved by:** Step 2 (`test_roofline_regime.py`: synthetic op below ridge → bandwidth-bound, above → compute-bound; the sweep finds the crossover).
 
 ### P6 — Measurement-first: no extrapolation without a passing calibration gate
-**Invariant:** an FM-RPU (un-built row) feasibility result is emitted **only** if the calibration anchors reproduce measured latency **and** energy within the stated tolerance (default < 15%).
-**Forbids:** returning any FM-RPU feasibility when the calibration gate is red or anchors are missing — must raise a visible, named error, not silently proceed.
-**Proved by:** Step 4 (`test_calibration_gate.py`: a deliberately mis-fit `e_byte` fails the gate and blocks FM-RPU output).
+**Invariant:** an RPU (un-built row) feasibility result is emitted **only** if the calibration anchors reproduce measured latency **and** energy within the stated tolerance (default < 15%).
+**Forbids:** returning any RPU feasibility when the calibration gate is red or anchors are missing — must raise a visible, named error, not silently proceed.
+**Proved by:** Step 4 (`test_calibration_gate.py`: a deliberately mis-fit `e_byte` fails the gate and blocks RPU output).
 
 ### P7 — Feasibility is a region with confidence bands, never a point
 **Invariant:** every feasibility answer carries a Monte-Carlo distribution (quantiles / confidence band) over the load-bearing uncertain inputs plus a sensitivity ranking.
@@ -124,20 +124,20 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 **Why now:** every later step's acceptance is "a test is green in CI." That machinery must exist first, or acceptance gates are unverifiable.
 
 ### Tests first
-- [ ] `tests/test_smoke.py` — imports the `fmrpu` package; asserts version string. (Proves the harness runs.)
+- [ ] `tests/test_smoke.py` — imports the `rpu` package; asserts version string. (Proves the harness runs.)
 - [ ] `tests/conftest.py` — a `deterministic_rng(seed)` fixture used everywhere randomness appears; a `assert_byte_identical(a, b)` helper (canonicalize floats to a fixed decimal, compare).
 
 ### Implementation
-- [ ] `fmrpu/__init__.py` (package + `__version__`), `pyproject.toml` (deps: numpy, scipy, hypothesis; dev: pytest, ruff, mypy), `ruff.toml` (select `E,F,B,SIM,RET,TRY,BLE,PLC0415,C901`), `mypy` strict config.
-- [ ] `fmrpu/resultlog.py` — append-only TSV writer to `results/results.tsv` (one row per evaluated config; header stamped; idempotent open-append).
+- [ ] `rpu/__init__.py` (package + `__version__`), `pyproject.toml` (deps: numpy, scipy, hypothesis; dev: pytest, ruff, mypy), `ruff.toml` (select `E,F,B,SIM,RET,TRY,BLE,PLC0415,C901`), `mypy` strict config.
+- [ ] `rpu/resultlog.py` — append-only TSV writer to `results/results.tsv` (one row per evaluated config; header stamped; idempotent open-append).
 - [ ] `.github/workflows/ci.yml` (or `scripts/check.sh` if no GH runner) that runs ruff + mypy + pytest and exits non-zero on any failure.
 
 ### Integration check
 - [ ] `scripts/check.sh` exits 0 on a clean checkout.
 
 ### Acceptance
-- [ ] `ruff check . && mypy --strict fmrpu && pytest -q` all exit 0.
-- [ ] `grep -rn "random\." fmrpu/ | grep -v "default_rng"` returns empty (no unseeded randomness).
+- [ ] `ruff check . && mypy --strict rpu && pytest -q` all exit 0.
+- [ ] `grep -rn "random\." rpu/ | grep -v "default_rng"` returns empty (no unseeded randomness).
 - [ ] `results/results.tsv` is created and appended idempotently (run the logger twice → 2 rows, header once).
 
 **Depends on:** nothing.
@@ -156,16 +156,16 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 - [ ] `tests/test_determinism.py` — build params from a seed twice → byte-identical (P8a).
 
 ### Implementation
-- [ ] `fmrpu/opcost.py` — `OpCost(name, flops, weight_bytes, act_bytes, kv_bytes, precision)` frozen; a `total_bytes` property = `weight+act+kv` (P2 completeness lives in the type).
-- [ ] `fmrpu/params.py` — the three frozen dataclasses; `WorkloadParams` defaults from A1 (P=14e9, d=5120, L=40, ffn=13824, heads=40, res 480×832, 1560 tok/frame, horizon 2.0s, N_ctx≈18.7k, steps=3, control_period=200ms, w_bytes for 4-bit, a_bytes for FP8/FP16). `UtilizationModel` holds `{compute_util, bw_util, overlap_factor, e_flop(precision), e_byte(tier)}` — the *only* place utilization lives.
-- [ ] `fmrpu/registry.py` — operator registry (name → emitter) enabling per-op pluggability.
+- [ ] `rpu/opcost.py` — `OpCost(name, flops, weight_bytes, act_bytes, kv_bytes, precision)` frozen; a `total_bytes` property = `weight+act+kv` (P2 completeness lives in the type).
+- [ ] `rpu/params.py` — the three frozen dataclasses; `WorkloadParams` defaults from A1 (P=14e9, d=5120, L=40, ffn=13824, heads=40, res 480×832, 1560 tok/frame, horizon 2.0s, N_ctx≈18.7k, steps=3, control_period=200ms, w_bytes for 4-bit, a_bytes for FP8/FP16). `UtilizationModel` holds `{compute_util, bw_util, overlap_factor, e_flop(precision), e_byte(tier)}` — the *only* place utilization lives.
+- [ ] `rpu/registry.py` — operator registry (name → emitter) enabling per-op pluggability.
 
 ### Integration check
 - [ ] Golden path (§A) is defined but **skipped** with a clear reason (`needs Step 4 calibration`); CI shows it as skipped, not failing.
 
 ### Acceptance
 - [ ] `mypy --strict` green; every field on the three dataclasses is typed.
-- [ ] `grep -rniE "thor|b200|fm.?rpu" fmrpu/roofline.py fmrpu/latency.py fmrpu/energy.py 2>/dev/null` — files may not exist yet; when they do (Steps 2–3) this must return empty (P1). Add the grep to `scripts/check.sh` now so it guards from first appearance.
+- [ ] `grep -rniE "thor|b200|fm.?rpu" rpu/roofline.py rpu/latency.py rpu/energy.py 2>/dev/null` — files may not exist yet; when they do (Steps 2–3) this must return empty (P1). Add the grep to `scripts/check.sh` now so it guards from first appearance.
 - [ ] `test_schema.py`, `test_pluggability.py`, `test_determinism.py` green.
 
 **Depends on:** Step 0.
@@ -183,16 +183,16 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 - [ ] `tests/test_energy_units.py` (F1 — the 8× landmine) — `e_byte` is stored and consumed in **pJ/byte**; a helper `pj_per_bit_to_pj_per_byte(x) == 8·x` is used at every datasheet-ingestion point; assert the HBM3e default rounds to ~20 pJ/byte (≈2.5 pJ/bit), not 30–40; assert `e_flop`/`e_byte`/bandwidth units compose to seconds and joules (dimensional check on a known hand calc).
 
 ### Implementation
-- [ ] `fmrpu/workload.py` — FFN emitter only: `FLOPs_matmul = 2·P_active·N_new`, `weight_bytes = P_active·w_bytes`, `kv_bytes=0` for FFN, `act_bytes` tiled estimate.
-- [ ] `fmrpu/roofline.py` — `score_op(op: OpCost, row: HardwareRow, util: UtilizationModel) -> OpResult(time, energy, regime, intensity)`. Row-agnostic (P1). Regime from intensity vs ridge `= effective_compute / effective_bw`.
+- [ ] `rpu/workload.py` — FFN emitter only: `FLOPs_matmul = 2·P_active·N_new`, `weight_bytes = P_active·w_bytes`, `kv_bytes=0` for FFN, `act_bytes` tiled estimate.
+- [ ] `rpu/roofline.py` — `score_op(op: OpCost, row: HardwareRow, util: UtilizationModel) -> OpResult(time, energy, regime, intensity)`. Row-agnostic (P1). Regime from intensity vs ridge `= effective_compute / effective_bw`.
 
 ### Integration check
 - [ ] Run FFN on one hand-built row; print `(time, energy, regime, intensity)`; sanity-check the regime against a hand calc (leave a comment with the arithmetic).
 
 ### Acceptance
 - [ ] `test_roofline_regime.py`, `test_op_accounting.py` green.
-- [ ] `grep -rniE "thor|b200|fm.?rpu" fmrpu/roofline.py` returns empty (P1).
-- [ ] `grep -rniE "bandwidth.?bound|compute.?bound" fmrpu/ | grep -v "roofline.py"` returns empty — regime label is produced in exactly one place, never hardcoded elsewhere (P5).
+- [ ] `grep -rniE "thor|b200|fm.?rpu" rpu/roofline.py` returns empty (P1).
+- [ ] `grep -rniE "bandwidth.?bound|compute.?bound" rpu/ | grep -v "roofline.py"` returns empty — regime label is produced in exactly one place, never hardcoded elsewhere (P5).
 
 **Depends on:** Step 1.
 
@@ -200,9 +200,9 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 
 ## Step 3 — Second vertical slice: full DreamZero forward on all three rows
 
-**Goal:** the complete Tier-1 Simulator-A forward — every operator (VAE encode, patch embed, per-layer {QKV, self-attn, out proj, cross-attn, FFN}, flow update, action head), video-latent tokens included, KV over the full 2 s window, weight-stationary CFG reuse — run through the A4 latency loop and A5 energy, scored on **Thor, B200, and one FM-RPU sweep row** under one utilization model.
+**Goal:** the complete Tier-1 Simulator-A forward — every operator (VAE encode, patch embed, per-layer {QKV, self-attn, out proj, cross-attn, FFN}, flow update, action head), video-latent tokens included, KV over the full 2 s window, weight-stationary CFG reuse — run through the A4 latency loop and A5 energy, scored on **Thor, B200, and one RPU sweep row** under one utilization model.
 **Why now:** this is the most-complex slice and carries the most invariants; landing it here proves the doctrine on the hard case. Everything after is calibration, uncertainty, and B.
-**Note:** FM-RPU numbers here are **not yet trustworthy** — they become so only after Step 4's calibration gate. This step proves *structure*, Step 4 proves *fidelity*.
+**Note:** RPU numbers here are **not yet trustworthy** — they become so only after Step 4's calibration gate. This step proves *structure*, Step 4 proves *fidelity*.
 
 ### Tests first
 - [ ] `tests/test_fairness.py` (P1) — score all three rows; assert the *same* `UtilizationModel` object reference reaches every row; property test (hypothesis): permuting row order and re-scoring yields identical per-row results (no cross-row state).
@@ -213,19 +213,19 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 - [ ] `tests/test_energy_dominance_is_output.py` (F4, parallel to P5) — the byte-vs-FLOP energy split is an **emitted output** (`EnergyBreakdown{byte_energy, flop_energy, byte_fraction}`), not a hardcoded assumption; assert `byte_fraction` is computed from the actual traffic and precision, and that "HBM byte energy dominates" is reported as a *result* of the default config, not asserted a priori.
 
 ### Implementation
-- [ ] `fmrpu/workload.py` — all operators per A1/A2; `N` includes video-latent tokens; `FLOPs_attn = 4·L·N_new·N_ctx·d`; `bytes_KV = 2·N_ctx·L·d·a_bytes`; **weight *and* context-KV stationary across the CFG pair** (both ÷2 vs per-forward — F2); `drop_pixel_decoder` removes only the decode emitter.
-- [ ] `fmrpu/roofline.py` — residency classifier (`working_set` vs `sram_capacity`) driving per-step vs per-chunk streaming.
-- [ ] `fmrpu/latency.py` — A4 loop `capture→ISP→VAE→prefill→[steps×(CFG DiT over N_new attending N_ctx)→flow]→action→emit`; per-stage `t = max(compute, mem) + overhead` with overlap factor; returns p50, p99.9 under a jitter model, and deadline-miss-rate vs the 200 ms period.
-- [ ] `fmrpu/energy.py` — A5 `Energy = Σ flops·e_flop + Σ bytes·e_byte`; returns an `EnergyBreakdown` (byte vs FLOP split, `byte_fraction`) so dominance is an emitted output (F4); avg/peak power, energy/chunk.
+- [ ] `rpu/workload.py` — all operators per A1/A2; `N` includes video-latent tokens; `FLOPs_attn = 4·L·N_new·N_ctx·d`; `bytes_KV = 2·N_ctx·L·d·a_bytes`; **weight *and* context-KV stationary across the CFG pair** (both ÷2 vs per-forward — F2); `drop_pixel_decoder` removes only the decode emitter.
+- [ ] `rpu/roofline.py` — residency classifier (`working_set` vs `sram_capacity`) driving per-step vs per-chunk streaming.
+- [ ] `rpu/latency.py` — A4 loop `capture→ISP→VAE→prefill→[steps×(CFG DiT over N_new attending N_ctx)→flow]→action→emit`; per-stage `t = max(compute, mem) + overhead` with overlap factor; returns p50, p99.9 under a jitter model, and deadline-miss-rate vs the 200 ms period.
+- [ ] `rpu/energy.py` — A5 `Energy = Σ flops·e_flop + Σ bytes·e_byte`; returns an `EnergyBreakdown` (byte vs FLOP split, `byte_fraction`) so dominance is an emitted output (F4); avg/peak power, energy/chunk.
 
 ### Integration check
 - [ ] Emit a per-operator `(FLOPs, weight_bytes, act_bytes, kv_bytes, time, energy, regime)` table for the default config on each row; log to `results/results.tsv`. Eyeball that the bottleneck operator differs between short- and long-horizon configs (the crossover A2 predicts).
 
 ### Acceptance
 - [ ] P1–P4 tests + `test_cfg_reuse.py` (F2) + `test_energy_units.py` (F1) + `test_energy_dominance_is_output.py` (F4) green.
-- [ ] `grep -rniE "thor|b200|fm.?rpu" fmrpu/{roofline,latency,energy,workload}.py` returns empty (P1) — rows are data, not code.
-- [ ] `grep -rniE "pj_per_b(it|yte)|e_byte" fmrpu/params.py` shows `e_byte` carries an explicit pJ/byte unit and the datasheet ingestion converts from pJ/bit (F1).
-- [ ] Deadline-miss-rate is reported as a rate (a float in [0,1]), never a boolean; `grep -rn "def .*deadline" fmrpu/latency.py` shows a rate return type.
+- [ ] `grep -rniE "thor|b200|fm.?rpu" rpu/{roofline,latency,energy,workload}.py` returns empty (P1) — rows are data, not code.
+- [ ] `grep -rniE "pj_per_b(it|yte)|e_byte" rpu/params.py` shows `e_byte` carries an explicit pJ/byte unit and the datasheet ingestion converts from pJ/bit (F1).
+- [ ] Deadline-miss-rate is reported as a rate (a float in [0,1]), never a boolean; `grep -rn "def .*deadline" rpu/latency.py` shows a rate return type.
 
 **Depends on:** Step 2.
 
@@ -233,18 +233,18 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 
 ## Step 4 — Calibration + the golden path
 
-**Goal:** fit `e_byte` and the utilization model against **measured anchors**, reproduce your B200 3-step DreamZero fork + a Thor/Orin point + DreamZero public anchors within tolerance (default < 15% on latency **and** energy), and gate all FM-RPU extrapolation on that reproduction (P6).
-**Why now:** this is the "measurement-first" contract (§0). Before it passes, no FM-RPU feasibility claim is valid; after it, the golden path (§A) is live and runs on every subsequent step.
-**Note:** requires **user-supplied** anchor fixtures (see §D1). Until real data lands, `fixtures/anchors/*.json` hold clearly-marked `"authoritative": false` synthetic values used only to exercise the pipeline; the gate treats non-authoritative anchors as *not calibrated* and blocks FM-RPU output exactly as if they were missing.
+**Goal:** fit `e_byte` and the utilization model against **measured anchors**, reproduce your B200 3-step DreamZero fork + a Thor/Orin point + DreamZero public anchors within tolerance (default < 15% on latency **and** energy), and gate all RPU extrapolation on that reproduction (P6).
+**Why now:** this is the "measurement-first" contract (§0). Before it passes, no RPU feasibility claim is valid; after it, the golden path (§A) is live and runs on every subsequent step.
+**Note:** requires **user-supplied** anchor fixtures (see §D1). Until real data lands, `fixtures/anchors/*.json` hold clearly-marked `"authoritative": false` synthetic values used only to exercise the pipeline; the gate treats non-authoritative anchors as *not calibrated* and blocks RPU output exactly as if they were missing.
 
 ### Tests first
-- [ ] `tests/test_calibration_gate.py` (P6) — with a deliberately wrong `e_byte`, `reproduce_anchors()` reports error > tolerance and `feasibility(fmrpu_row)` raises `CalibrationNotPassed` (named, visible); with anchors within tolerance, it proceeds.
+- [ ] `tests/test_calibration_gate.py` (P6) — with a deliberately wrong `e_byte`, `reproduce_anchors()` reports error > tolerance and `feasibility(rpu_row)` raises `CalibrationNotPassed` (named, visible); with anchors within tolerance, it proceeds.
 - [ ] `tests/test_calibration_crossval.py` (§D4) — fit on the B200 anchor, hold out the Thor anchor; assert held-out reproduction error < tolerance (guards overfitting to one memory system).
 - [ ] `tests/test_golden_path.py` (§A) — full pipeline on the committed B200 anchor fixture reproduces measured latency & energy within 15%, and the result object matches the stamped golden file after float canonicalization.
 
 ### Implementation
-- [ ] `fmrpu/calibrate.py` — `reproduce_anchors(anchors) -> AnchorReport` (modeled vs measured, per-anchor error); a bounded fit of `{e_byte, compute_util, bw_util, overlap_factor}` (scipy least-squares) constrained to physical ranges; `calibrated_envelope` (min/max of anchor inputs) — extrapolation flagged when a query leaves it.
-- [ ] `fmrpu/params.py` — `CalibrationNotPassed` exception; feasibility entry points require a passed `CalibrationReport` handle (type-enforced, not a flag).
+- [ ] `rpu/calibrate.py` — `reproduce_anchors(anchors) -> AnchorReport` (modeled vs measured, per-anchor error); a bounded fit of `{e_byte, compute_util, bw_util, overlap_factor}` (scipy least-squares) constrained to physical ranges; `calibrated_envelope` (min/max of anchor inputs) — extrapolation flagged when a query leaves it.
+- [ ] `rpu/params.py` — `CalibrationNotPassed` exception; feasibility entry points require a passed `CalibrationReport` handle (type-enforced, not a flag).
 - [ ] `fixtures/anchors/{b200_dreamzero_3step,thor_point,dreamzero_public}.json` (schema + non-authoritative placeholders); `fixtures/golden/b200_dreamzero_3step.json`.
 
 ### Integration check
@@ -252,8 +252,8 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 
 ### Acceptance
 - [ ] P6 test + cross-val + golden-path tests green.
-- [ ] `grep -rn "feasib" fmrpu/ | grep -i "fmrpu\|rpu"` shows every FM-RPU feasibility path takes a `CalibrationReport` argument (no un-gated extrapolation).
-- [ ] Anchor fixtures with `"authoritative": false` cause `feasibility(fmrpu_row)` to raise — verified by a test.
+- [ ] `grep -rn "feasib" rpu/ | grep -i "rpu\|rpu"` shows every RPU feasibility path takes a `CalibrationReport` argument (no un-gated extrapolation).
+- [ ] Anchor fixtures with `"authoritative": false` cause `feasibility(rpu_row)` to raise — verified by a test.
 
 **Depends on:** Step 3.
 
@@ -268,13 +268,13 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 - [ ] `tests/test_thermal.py` — for a given per-stage conductance chain and ambient, `sustained_ceiling_w` solves `ΔT_junction = P · Σ R_thermal`; a point above the ceiling sets `thermal_limited=True`; monotonicity: higher neck conductance → higher ceiling (hypothesis).
 
 ### Implementation
-- [ ] `fmrpu/thermal.py` — resistance-network steady-state solve; inputs are `HardwareRow.tdp` + a `ThermalPath` param block; output `{sustained_ceiling_w, junction_dT, thermal_limited}`. Row-agnostic (P1).
+- [ ] `rpu/thermal.py` — resistance-network steady-state solve; inputs are `HardwareRow.tdp` + a `ThermalPath` param block; output `{sustained_ceiling_w, junction_dT, thermal_limited}`. Row-agnostic (P1).
 
 ### Integration check
-- [ ] Feed Step 3's peak/avg power into the thermal model for the default FM-RPU row; report whether the neck path carries it.
+- [ ] Feed Step 3's peak/avg power into the thermal model for the default RPU row; report whether the neck path carries it.
 
 ### Acceptance
-- [ ] `test_thermal.py` green; `grep -rniE "thor|b200|fm.?rpu" fmrpu/thermal.py` empty (P1).
+- [ ] `test_thermal.py` green; `grep -rniE "thor|b200|fm.?rpu" rpu/thermal.py` empty (P1).
 - [ ] Latency/energy results now carry a `thermal_limited` flag alongside the deadline-miss-rate.
 
 **Depends on:** Step 3.
@@ -292,14 +292,14 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 - [ ] `tests/test_mc_determinism.py` (P8a) — same seed → byte-identical MC output.
 
 ### Implementation
-- [ ] `fmrpu/montecarlo.py` — seeded sampler over declared input distributions; `FeasibilityRegion` with quantiles + CI; Sobol/one-at-a-time sensitivity ranking; append each draw's summary to `results/results.tsv`.
+- [ ] `rpu/montecarlo.py` — seeded sampler over declared input distributions; `FeasibilityRegion` with quantiles + CI; Sobol/one-at-a-time sensitivity ranking; append each draw's summary to `results/results.tsv`.
 
 ### Integration check
-- [ ] Produce the DreamZero feasibility region for the default FM-RPU sweep point; golden path still green.
+- [ ] Produce the DreamZero feasibility region for the default RPU sweep point; golden path still green.
 
 ### Acceptance
 - [ ] P7 + sensitivity + MC-determinism tests green.
-- [ ] `grep -rnE "-> *bool" fmrpu/ | grep -i feasib` returns empty (no point-estimate feasibility API, P7).
+- [ ] `grep -rnE "-> *bool" rpu/ | grep -i feasib` returns empty (no point-estimate feasibility API, P7).
 
 **Depends on:** Step 4.
 
@@ -311,12 +311,12 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 **Why now:** this is what Simulator A exists to produce; it needs calibrated MC (Step 6).
 
 ### Tests first
-- [ ] `tests/test_adversarial_baseline.py` (A6.3) — Thor and B200 evaluated at their *best case* (max distillation/batching) still under the one shared utilization model; the FM-RPU frontier is reported relative to those best cases, not weakened baselines.
+- [ ] `tests/test_adversarial_baseline.py` (A6.3) — Thor and B200 evaluated at their *best case* (max distillation/batching) still under the one shared utilization model; the RPU frontier is reported relative to those best cases, not weakened baselines.
 - [ ] `tests/test_thor_wall.py` — on a synthetic sweep where bandwidth is the binding term, the frontier identifies the BW below which the deadline is missed; Thor's 273 GB/s sits on the miss side for the default 14B/2 s workload (given calibrated inputs).
 - [ ] `tests/test_min_viable_spec.py` — the emitted frontier is the Pareto boundary of {clears 200 ms ∧ ≤ 35 W ∧ miss-rate ≤ target}; a point just inside is feasible, just outside is not.
 
 ### Implementation
-- [ ] `fmrpu/sweep.py` — grid/adaptive sweep over the design space; Pareto frontier extraction; Thor-wall locator; B200-at-head-power comparison; adversarial-baseline harness.
+- [ ] `rpu/sweep.py` — grid/adaptive sweep over the design space; Pareto frontier extraction; Thor-wall locator; B200-at-head-power comparison; adversarial-baseline harness.
 
 ### Integration check
 - [ ] Emit the feasibility map + frontier for the default DreamZero workload to `results/` and log summary rows.
@@ -339,22 +339,22 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 - [ ] `tests/test_reuse_axis.py` (B2) — the same roofline equations, parameterized by reuse-axis width, classify diffusion (CFG pair ≈ 2, low batch) as **bandwidth-bound** and JEPA-MPC (M≈hundreds) as **compute-bound**. Same code, opposite regimes.
 - [ ] `tests/test_union_point.py` (B3) — the union provisioning point satisfies **both** the bandwidth floor (low-batch diffusion) and the compute headroom (MPC batch); a point that clears only one mode is rejected.
 - [ ] `tests/test_part_c_tier_collapse.py` (C4) — at 14B/4-bit (7 GB) both families classify weights as HBM-streamed (no SRAM-resident tier to collapse) → predicted A-vs-B gap is single-digit %; at a synthetic ~1–3B model whose working set fits SRAM, the DreamZero-only design collapses a memory tier and the gap becomes large (the condition that would break the thesis is *detected*, not assumed away).
-- [ ] `tests/test_jepa_size_swept.py` (F3 — thesis-critical) — the JEPA predictor size is a **swept input**, never hardcoded to 14B. Assert (a) the union point and the A-vs-B DreamZero gap are recomputed across a JEPA-size grid that **includes the empirically-real 1–2B point** (V-JEPA 2 ≈ 1.2B), and (b) at a small-JEPA point the reported over-provisioning leakage is priced from the actual `(JEPA_params × M × H)` compute headroom and the actual JEPA residency regime — not assumed equal to the 14B core. `grep -rn "14e9\|14B" fmrpu/jepa.py` returns empty (JEPA size comes from params, not a literal).
+- [ ] `tests/test_jepa_size_swept.py` (F3 — thesis-critical) — the JEPA predictor size is a **swept input**, never hardcoded to 14B. Assert (a) the union point and the A-vs-B DreamZero gap are recomputed across a JEPA-size grid that **includes the empirically-real 1–2B point** (V-JEPA 2 ≈ 1.2B), and (b) at a small-JEPA point the reported over-provisioning leakage is priced from the actual `(JEPA_params × M × H)` compute headroom and the actual JEPA residency regime — not assumed equal to the 14B core. `grep -rn "14e9\|14B" rpu/jepa.py` returns empty (JEPA size comes from params, not a literal).
 
 ### Implementation
-- [ ] `fmrpu/jepa.py` — JEPA workload generator (frozen-ViT encode-once + predictor rollout tokens; **predictor param count is a swept parameter, default ~1.2B per V-JEPA 2, not the 14B core** — F3; batch axis M, horizon H) reusing the **identical** `OpCost` emitter.
-- [ ] `fmrpu/update_engine.py` — programmable-update-engine area/energy cost (a few % of the matmul/attn datapath) running flow-ODE *or* CEM.
-- [ ] `fmrpu/roofline.py` — extend **by parameter only** (reuse-axis width); no row/name special-casing. `fmrpu/latency.py` — swap the inner loop via a strategy passed in, not by editing the loop for JEPA.
-- [ ] `fmrpu/sweep.py` — union-point search + A-vs-B gap on the DreamZero workload.
+- [ ] `rpu/jepa.py` — JEPA workload generator (frozen-ViT encode-once + predictor rollout tokens; **predictor param count is a swept parameter, default ~1.2B per V-JEPA 2, not the 14B core** — F3; batch axis M, horizon H) reusing the **identical** `OpCost` emitter.
+- [ ] `rpu/update_engine.py` — programmable-update-engine area/energy cost (a few % of the matmul/attn datapath) running flow-ODE *or* CEM.
+- [ ] `rpu/roofline.py` — extend **by parameter only** (reuse-axis width); no row/name special-casing. `rpu/latency.py` — swap the inner loop via a strategy passed in, not by editing the loop for JEPA.
+- [ ] `rpu/sweep.py` — union-point search + A-vs-B gap on the DreamZero workload.
 
 ### Integration check
 - [ ] Report the A-vs-B DreamZero perf/watt gap with confidence bands; golden path (DreamZero, Simulator A) still byte-identical.
 
 ### Acceptance
 - [ ] All Step-8 tests green.
-- [ ] **P8b core-freeze guard:** `git diff --stat <step7-tag> -- fmrpu/roofline.py fmrpu/latency.py fmrpu/energy.py fmrpu/thermal.py fmrpu/calibrate.py` shows only *additive parameterization* (no branch on workload name); a test asserts the JEPA path imports the core, never monkeypatches it.
+- [ ] **P8b core-freeze guard:** `git diff --stat <step7-tag> -- rpu/roofline.py rpu/latency.py rpu/energy.py rpu/thermal.py rpu/calibrate.py` shows only *additive parameterization* (no branch on workload name); a test asserts the JEPA path imports the core, never monkeypatches it.
 - [ ] The Part-C gap is emitted as a region (P7), and the tier-collapse condition is a reported check, not a hardcoded conclusion.
-- [ ] `test_jepa_size_swept.py` (F3) green; `grep -rn "14e9\|= *14B" fmrpu/jepa.py` returns empty.
+- [ ] `test_jepa_size_swept.py` (F3) green; `grep -rn "14e9\|= *14B" rpu/jepa.py` returns empty.
 
 **Depends on:** Step 7.
 
@@ -367,7 +367,7 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 
 ### Tests first / Implementation
 - [ ] Add to `scripts/check.sh` / CI: the P1 row-name grep over all core modules; the P7 `-> bool` feasibility grep; the P8b core-freeze diff check; run the full property suite.
-- [ ] `tests/test_failure_injection.py` — inject (a) a NaN-emitting operator, (b) a missing anchor, (c) an FM-RPU query outside the calibrated envelope; assert each produces a **named, visible failure** (not a silent fallback): NaN → raised, missing anchor → `CalibrationNotPassed`, out-of-envelope → flagged extrapolation warning attached to the result.
+- [ ] `tests/test_failure_injection.py` — inject (a) a NaN-emitting operator, (b) a missing anchor, (c) an RPU query outside the calibrated envelope; assert each produces a **named, visible failure** (not a silent fallback): NaN → raised, missing anchor → `CalibrationNotPassed`, out-of-envelope → flagged extrapolation warning attached to the result.
 
 ### Acceptance
 - [ ] CI fails if any P1–P8 guard is violated (verify by temporarily breaking one and seeing red, then revert).
@@ -386,7 +386,7 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 - [ ] `tests/test_report.py` — the report includes, for every feasibility claim, a confidence band and the calibration status; a report generated from a non-calibrated run is refused (consistency with P6).
 
 ### Implementation
-- [ ] `fmrpu/report.py` — Markdown/HTML report generator. (Optionally hand off to the `system-design-visualizer` skill for a polished review artifact, since `docs/system-design.md` is source-grounded.)
+- [ ] `rpu/report.py` — Markdown/HTML report generator. (Optionally hand off to the `system-design-visualizer` skill for a polished review artifact, since `docs/system-design.md` is source-grounded.)
 
 ### Acceptance
 - [ ] `test_report.py` green; a sample report is produced from a golden run.
@@ -399,7 +399,7 @@ Critical path: **0 → 1 → 2 → 3 → 4 → 6 → 7 → 8 → 9.** Steps 5 an
 
 - [ ] Steps 0–9 complete; Step 10 complete or explicitly deferred.
 - [ ] P1–P8 are green CI merge gates.
-- [ ] The golden path (§A) reproduces a **real** measured B200 anchor within 15% on latency **and** energy (requires §D1 data). Until then, the pipeline runs on non-authoritative fixtures and **refuses** to emit FM-RPU feasibility.
+- [ ] The golden path (§A) reproduces a **real** measured B200 anchor within 15% on latency **and** energy (requires §D1 data). Until then, the pipeline runs on non-authoritative fixtures and **refuses** to emit RPU feasibility.
 - [ ] Simulator A emits the A8 deliverables (feasibility map, BW-vs-compute crossover, min-viable-spec frontier, Thor wall, B200-at-head-power ratio) as regions with bands.
 - [ ] Simulator B emits the union provisioning point and the A-vs-B DreamZero gap, with the core proven unedited by B (P8b) and the Part-C tier-collapse condition reported.
 - [ ] Every result carries: confidence bands (P7), calibration status (P6), and a `thermal_limited` flag (Step 5).
@@ -447,9 +447,9 @@ acceptance test; if still stuck, escalate in the PR and do **not** start the nex
 ## §D — Design tensions surfaced for review
 
 **D1. The calibration data is an external input the simulator cannot invent.**
-No FM-RPU result is trustworthy until the measured anchors (§0.1–0.2) are supplied and
+No RPU result is trustworthy until the measured anchors (§0.1–0.2) are supplied and
 reproduced within tolerance.
-- (a) Block all FM-RPU output on real, authoritative anchors — *honest, but nothing ships until data lands.*
+- (a) Block all RPU output on real, authoritative anchors — *honest, but nothing ships until data lands.*
 - (b) Ship the pipeline against clearly-flagged synthetic anchors that **cannot** produce an authoritative feasibility claim — *unblocks development; the gate (P6) still refuses real conclusions.*
 **Recommendation: (b) for the build, (a) for any result you circulate.** The plan wires P6 so the two can't be confused. **You must provide the B200 fork + Thor anchor data before Step 4 can pass authoritatively.**
 
@@ -466,7 +466,7 @@ The conclusion hinges on these two (A6.4).
 **Recommendation:** do not default them to point values anywhere; Step 6's sensitivity output must surface them.
 
 **D4. Overfitting the utilization/`e_byte` fit to the B200 anchor.**
-B200 (HBM3e) and FM-RPU (HBM) are different memory systems; a fit tuned to one may mis-extrapolate.
+B200 (HBM3e) and RPU (HBM) are different memory systems; a fit tuned to one may mis-extrapolate.
 - **Recommendation:** hold out the Thor anchor for cross-validation (wired as `test_calibration_crossval.py` in Step 4); widen `e_byte` priors in MC rather than trusting a single fitted value.
 
 **D5. Simulator-B union gate: hard-AND or soft?**
@@ -483,6 +483,6 @@ JEPA on the 14B backbone. Real JEPA world models are 1.2–2B ([V-JEPA 2 = 1.2B]
 
 **D7. Identical-utilization (P1) is *fair* but not automatically *realistic* (F6).**
 One utilization model for all rows prevents flattering the design-under-test — the honest T1
-stance. But a specialized/systolic FM-RPU may genuinely achieve higher (or lower) utilization
+stance. But a specialized/systolic RPU may genuinely achieve higher (or lower) utilization
 than a GPU on the same operator, so identical-util can under- or over-state its real advantage.
 - **Recommendation:** keep P1 as a **hard T1 invariant** (fairness first); treat per-architecture realized utilization as a **T2/T3 refinement** derived from Timeloop/SCALE-Sim, reported as a separate sensitivity — never leaking a per-row util fudge into T1.

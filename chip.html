@@ -40,7 +40,7 @@
     --surface: #fbfbf9; --surface-2: #f2f2ee; --inset: #f6f6f2;
     --ink: #16181d; --ink-2: #5a5e66; --ink-3: #8b8f98;
     --hair: #e4e4de;
-    --fmrpu: #2a78d6; --thor: #eda100; --mem: #1baf7a;
+    --rpu: #2a78d6; --thor: #eda100; --mem: #1baf7a;
     --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
     --seq-500: #256abf; --seq-700: #0d366b;
     --tax: #c9a08d; --good: #0ca30c; --critical: #d03b3b;
@@ -52,7 +52,7 @@
       --surface: #16181c; --surface-2: #1e2126; --inset: #131519;
       --ink: #f2f2ee; --ink-2: #a8adb8; --ink-3: #767b85;
       --hair: #2a2d33;
-      --fmrpu: #3987e5; --thor: #c98500; --mem: #199e70;
+      --rpu: #3987e5; --thor: #c98500; --mem: #199e70;
       --seq-100: #0d366b; --seq-250: #184f95; --seq-400: #256abf;
       --seq-500: #3987e5; --seq-700: #b7d3f6;
       --tax: #8a5a48; --good: #2fbf2f; --critical: #e05252;
@@ -61,7 +61,7 @@
   :root[data-theme="light"] {
     --surface: #fbfbf9; --surface-2: #f2f2ee; --inset: #f6f6f2;
     --ink: #16181d; --ink-2: #5a5e66; --ink-3: #8b8f98; --hair: #e4e4de;
-    --fmrpu: #2a78d6; --thor: #eda100; --mem: #1baf7a;
+    --rpu: #2a78d6; --thor: #eda100; --mem: #1baf7a;
     --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
     --seq-500: #256abf; --seq-700: #0d366b;
     --tax: #c9a08d; --good: #0ca30c; --critical: #d03b3b;
@@ -69,7 +69,7 @@
   :root[data-theme="dark"] {
     --surface: #16181c; --surface-2: #1e2126; --inset: #131519;
     --ink: #f2f2ee; --ink-2: #a8adb8; --ink-3: #767b85; --hair: #2a2d33;
-    --fmrpu: #3987e5; --thor: #c98500; --mem: #199e70;
+    --rpu: #3987e5; --thor: #c98500; --mem: #199e70;
     --seq-100: #0d366b; --seq-250: #184f95; --seq-400: #256abf;
     --seq-500: #3987e5; --seq-700: #b7d3f6;
     --tax: #8a5a48; --good: #2fbf2f; --critical: #e05252;
@@ -107,9 +107,9 @@
   .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 0 12px; font-family: var(--mono); font-size: 13px; }
   button { font: 600 13px var(--mono); color: var(--ink); background: var(--surface-2); border: 1px solid var(--hair); border-radius: 4px; padding: 6px 14px; cursor: pointer; }
   button:hover { border-color: var(--ink-3); }
-  button:focus-visible { outline: 2px solid var(--fmrpu); outline-offset: 1px; }
-  button[aria-pressed="true"] { border-color: var(--fmrpu); color: var(--fmrpu); }
-  input[type="range"] { accent-color: var(--fmrpu); width: 260px; }
+  button:focus-visible { outline: 2px solid var(--rpu); outline-offset: 1px; }
+  button[aria-pressed="true"] { border-color: var(--rpu); color: var(--rpu); }
+  input[type="range"] { accent-color: var(--rpu); width: 260px; }
   .readout { font-family: var(--mono); font-size: 13px; color: var(--ink-2); }
   .readout b { color: var(--ink); font-size: 15px; }
 
@@ -138,7 +138,7 @@
   --ink-3:     #948CAB;
   --hair:      #2E2941;
 
-  --fmrpu:     #E8A552;
+  --rpu:     #E8A552;
   --thor:      #5C97A0;
   --mem:       #6FB3AE;
   --b200:      #9A8CC4;
@@ -188,7 +188,7 @@ h2 { font-family: var(--sans); font-weight: 400; }
   line-height: 20px !important;
   letter-spacing: .1em !important;
   text-transform: uppercase;
-  color: var(--fmrpu) !important;
+  color: var(--rpu) !important;
 }
 
 .chip, button, .pill, .tile .val {
@@ -214,8 +214,8 @@ button {
   color: var(--ink);
   cursor: pointer;
 }
-button:hover { border-color: var(--fmrpu); color: var(--fmrpu); }
-button[aria-pressed="true"] { border-color: var(--fmrpu); color: var(--fmrpu); }
+button:hover { border-color: var(--rpu); color: var(--rpu); }
+button[aria-pressed="true"] { border-color: var(--rpu); color: var(--rpu); }
 
 .chip { padding: var(--px) calc(var(--px) * 2) !important; }
 
@@ -224,7 +224,7 @@ button[aria-pressed="true"] { border-color: var(--fmrpu); color: var(--fmrpu); }
 #tooltip {
   background: var(--surface-2) !important;
   color: var(--ink) !important;
-  border-left: var(--px) solid var(--fmrpu);
+  border-left: var(--px) solid var(--rpu);
   box-shadow: var(--px) var(--px) 0 rgba(0,0,0,.55) !important;
   font-family: var(--mono) !important;
 }
@@ -238,12 +238,12 @@ button[aria-pressed="true"] { border-color: var(--fmrpu); color: var(--fmrpu); }
 .banner .tag { color: var(--warning) !important; }
 
 table { font-variant-numeric: tabular-nums; }
-th { font-family: var(--pixel) !important; font-size: 8px !important; letter-spacing: 1px; color: var(--fmrpu) !important; }
+th { font-family: var(--pixel) !important; font-size: 8px !important; letter-spacing: 1px; color: var(--rpu) !important; }
 
-input[type="range"] { accent-color: var(--fmrpu); }
+input[type="range"] { accent-color: var(--rpu); }
 
-::selection { background: var(--fmrpu); color: var(--surface); }
-:focus-visible { outline: var(--px) solid var(--fmrpu); outline-offset: var(--px); }
+::selection { background: var(--rpu); color: var(--surface); }
+:focus-visible { outline: var(--px) solid var(--rpu); outline-offset: var(--px); }
 
 main { max-width: 1088px; }
 
@@ -275,14 +275,14 @@ svg .die-lbl { fill: var(--ink) !important; }
     <h2>Where the die area goes</h2>
     <p class="note">A GPU spends most of its area and energy on <b>being able to run anything</b> &mdash; schedulers, instruction caches, register files, coherent caches. None of that is free, and a fixed policy never uses any of it. We hardwire one dataflow and spend what that frees on FP4 multiply-accumulate. Hover any block to see what it costs.</p>
     <div class="legend">
-      <span class="key"><span class="box" style="background:var(--fmrpu)"></span>datapath (does math)</span>
+      <span class="key"><span class="box" style="background:var(--rpu)"></span>datapath (does math)</span>
       <span class="key"><span class="box" style="background:var(--mem)"></span>memory / streaming</span>
       <span class="key"><span class="box" style="background:var(--tax)"></span>generality tax (control, scheduling)</span>
       <span class="key"><span class="box" style="background:var(--blk-face);border:1px solid var(--hair)"></span>fixed-function / other</span>
     </div>
     <div class="duo">
       <div class="panel"><svg id="die-gpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative GPU floorplan with generality-tax blocks highlighted"></svg></div>
-      <div class="panel"><svg id="die-fmrpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative RPU floorplan: MAC array, attention engine, KV window, conveyor memory"></svg></div>
+      <div class="panel"><svg id="die-rpu" viewBox="0 0 500 430" style="min-width:500px" role="img" aria-label="Illustrative RPU floorplan: MAC array, attention engine, KV window, conveyor memory"></svg></div>
     </div>
   </section>
 
@@ -345,7 +345,7 @@ const DATA = {
   "chunk_flops": 710666020454400.0
  },
  "chip": {
-  "name": "FM-RPU (phase-1 candidate)",
+  "name": "RPU (phase-1 candidate)",
   "fp4_peak_pf": 4.0,
   "tdp_w": 40.0,
   "clock_ghz": 1.05,
@@ -361,7 +361,7 @@ const DATA = {
   "tdp_w_head": 40.0
  },
  "stages": {
-  "fmrpu_candidate": [
+  "rpu_candidate": [
    {
     "label": "capture",
     "ms": 0.01
@@ -463,14 +463,14 @@ const DATA = {
   ]
  },
  "energy": {
-  "fmrpu_eta1": {
+  "rpu_eta1": {
    "eta": 1.0,
    "flop_j": 142.26358877478623,
    "byte_j": 2.8375633428479996,
    "static_j": 1.0815396587145314,
    "p50_ms": 270.38491467863287
   },
-  "fmrpu_eta31": {
+  "rpu_eta31": {
    "eta": 3.1,
    "flop_j": 45.89148024993103,
    "byte_j": 2.8375633428479996,
@@ -794,7 +794,7 @@ function dieBlock(svg, x, y, w, h, fill, label, sub, tipRows) {
   txt(s, 250, 20, "GENERAL GPU (Thor-class)", "die-lbl", "middle");
   txt(s, 250, 36, T.fp4_peak_pf.toFixed(2) + " PF FP4 · " + T.bw_gbs.toFixed(0) + " GB/s · " + T.tdp_w_head + "–" + T.tdp_w_max + " W", "tick", "middle");
   el("rect", { x: 20, y: 48, width: 460, height: 360, rx: 6, fill: "var(--inset)", stroke: "var(--hair)" }, s);
-  const tax = css("--tax"), dp = css("--fmrpu"), mm = css("--mem"), other = css("--blk-face");
+  const tax = css("--tax"), dp = css("--rpu"), mm = css("--mem"), other = css("--blk-face");
   // SM grid: each SM = scheduler slice (tax) + tensor slice (datapath) + RF (tax)
   for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
     const x = 34 + c * 100, y = 62 + r * 62;
@@ -819,13 +819,13 @@ function dieBlock(svg, x, y, w, h, fill, label, sub, tipRows) {
     [["kernel launches per chunk", "~1,200 (40 layers × 5 ops × 3 steps × 2 CFG)"], ["RPU equivalent", "zero — schedule is wired"]]);
 })();
 
-(function fmrpuDie() {
-  const s = document.getElementById("die-fmrpu");
+(function rpuDie() {
+  const s = document.getElementById("die-rpu");
   const c = DATA.chip, w = DATA.workload;
   txt(s, 250, 20, "RPU (phase-1 candidate)", "die-lbl", "middle");
   txt(s, 250, 36, c.fp4_peak_pf.toFixed(0) + " PF FP4 · " + c.mac_units_m.toFixed(1) + "M MACs @ " + c.clock_ghz + " GHz wide-and-slow · " + c.tdp_w + " W", "tick", "middle");
   el("rect", { x: 20, y: 48, width: 460, height: 360, rx: 6, fill: "var(--inset)", stroke: "var(--hair)" }, s);
-  const dp = css("--fmrpu"), mm = css("--mem"), other = css("--blk-face");
+  const dp = css("--rpu"), mm = css("--mem"), other = css("--blk-face");
   // MAC array tiles (the bulk of the die)
   for (let r = 0; r < 3; r++) for (let c2 = 0; c2 < 4; c2++) {
     dieBlock(s, 34 + c2 * 88, 62 + r * 60, 80, 52, dp, "MAC tile", r === 0 && c2 === 0 ? "FP4 systolic" : null,
@@ -856,7 +856,7 @@ function dieBlock(svg, x, y, w, h, fill, label, sub, tipRows) {
 const FLOW = (() => {
   const svg = document.getElementById("flow");
   const w = DATA.workload;
-  const stages = DATA.stages.fmrpu_candidate;
+  const stages = DATA.stages.rpu_candidate;
   const total = stages.reduce((a, s) => a + s.ms, 0);
 
   // static scenery
@@ -894,7 +894,7 @@ const FLOW = (() => {
   arrow(150, 120, 210, 100); arrow(150, 235, 210, 237); arrow(310, 237, 340, 220);
   arrow(640, 160, 670, 160); arrow(790, 120, 820, 105); arrow(790, 200, 820, 214);
   // CFG token pair
-  const tokA = el("circle", { cx: 250, cy: 330, r: 7, fill: css("--fmrpu"), stroke: "var(--surface)", "stroke-width": 2 }, svg);
+  const tokA = el("circle", { cx: 250, cy: 330, r: 7, fill: css("--rpu"), stroke: "var(--surface)", "stroke-width": 2 }, svg);
   const tokB = el("circle", { cx: 270, cy: 330, r: 7, fill: css("--seq-250"), stroke: "var(--surface)", "stroke-width": 2 }, svg);
   txt(svg, 300, 334, "CFG pair — one weight stream, two branches", "tick");
   // weight packets
@@ -929,7 +929,7 @@ const FLOW = (() => {
   function activeSpan(tt) { return F.spans.find((s) => tt >= s.t0 && tt < s.t1) || F.spans[F.spans.length - 1]; }
   function setBlock(id, on) {
     const b = F.blocks[id];
-    b.rect.setAttribute("stroke", on ? css("--fmrpu") : "var(--hair)");
+    b.rect.setAttribute("stroke", on ? css("--rpu") : "var(--hair)");
     b.rect.setAttribute("stroke-width", on ? 2.5 : 1.5);
     b.rect.setAttribute("fill", on ? "var(--blk-face-on)" : "var(--blk-face)");
   }
@@ -1047,13 +1047,13 @@ const FLOW = (() => {
     // CI band
     const up = curve.map((d) => `${X(d.eta).toFixed(1)},${Y(d.ci_high).toFixed(1)}`);
     const dn = [...curve].reverse().map((d) => `${X(d.eta).toFixed(1)},${Y(d.ci_low).toFixed(1)}`);
-    el("polygon", { points: [...up, ...dn].join(" "), fill: css("--fmrpu"), opacity: .12 }, chart);
+    el("polygon", { points: [...up, ...dn].join(" "), fill: css("--rpu"), opacity: .12 }, chart);
     el("polyline", {
       points: curve.map((d) => `${X(d.eta).toFixed(1)},${Y(d.p50).toFixed(1)}`).join(" "),
-      fill: "none", stroke: css("--fmrpu"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round",
+      fill: "none", stroke: css("--rpu"), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round",
     }, chart);
     for (const d of curve) {
-      const dot = el("circle", { cx: X(d.eta), cy: Y(d.p50), r: 4.5, fill: css("--fmrpu"), stroke: "var(--surface)", "stroke-width": 2 }, chart);
+      const dot = el("circle", { cx: X(d.eta), cy: Y(d.p50), r: 4.5, fill: css("--rpu"), stroke: "var(--surface)", "stroke-width": 2 }, chart);
       hover(dot, () => `<div class="t-title">η = ${d.eta}</div>` +
         trow("speedup p50", d.p50.toFixed(2) + "×") +
         trow("90% CI", d.ci_low.toFixed(2) + "–" + d.ci_high.toFixed(2) + "×") +
@@ -1075,7 +1075,7 @@ const FLOW = (() => {
       `<b>${d.eta.toFixed(1)}×</b> better pJ/FLOP than measured Blackwell`;
     gEls.marker.setAttribute("cx", X(d.eta)); gEls.marker.setAttribute("cy", Y(d.p50));
     const win = d.p50 >= 2, gate1 = d.p50 >= 1.6;
-    const chunkMs = DATA.energy.fmrpu_eta31.p50_ms;
+    const chunkMs = DATA.energy.rpu_eta31.p50_ms;
     document.getElementById("gauges").innerHTML = `
       <div class="tile"><div class="lbl">Speedup vs ${bases[base]}</div>
         <div class="val ${win ? "win" : d.p50 < 1 ? "lose" : ""}">${d.p50.toFixed(2)}×</div>
@@ -1109,7 +1109,7 @@ const FLOW = (() => {
 (function foot() {
   const c = DATA.calibration;
   document.getElementById("foot").innerHTML = [
-    `numbers: fmrpu Tier-1 simulator, calibration <b>${c.passed ? "PASSED" : "NOT PASSED"}</b> — ${esc(c.basis)}; compute_util ${c.compute_util.toFixed(3)}, e_flop(FP16) ${c.e_flop_fp16_pj.toFixed(2)} pJ fitted to measured anchors`,
+    `numbers: rpu Tier-1 simulator, calibration <b>${c.passed ? "PASSED" : "NOT PASSED"}</b> — ${esc(c.basis)}; compute_util ${c.compute_util.toFixed(3)}, e_flop(FP16) ${c.e_flop_fp16_pj.toFixed(2)} pJ fitted to measured anchors`,
     `η is the one assumed input (the etch bet); everything else is modeled or measured. Die geometry illustrative; block numbers are instrument output.`,
     `regenerate: scripts/chipviz_data.py · seed 20260710 · P1 shared utilization · P7 regions · speedup metric per docs/system-design.md §A8a`,
   ].map((s) => `<div>${s}</div>`).join("");

@@ -1,4 +1,9 @@
-# CHIP_ROADMAP.md — FM-RPU silicon phases
+> **Superseded for simulation and validation planning by [`ROADMAP.md`](ROADMAP.md)**
+> (adopted 2026-08-03). This document still owns the chip-design content: the phase
+> deliverables for the datapath, the Ledger-A/B/C structure, and the tape-out gates.
+> Where the two disagree on simulation methodology, `ROADMAP.md` wins.
+
+# CHIP_ROADMAP.md — RPU silicon phases
 
 Refined roadmap (2026-07). Success bar: **S ≥ 2× Jetson Thor inference speed** on the
 world-model workload, measured per `docs/system-design.md` §A8a (Thor-in-the-head basis,

@@ -1,4 +1,4 @@
-# ROADMAP — FM-RPU accelerator program
+# ROADMAP — RPU accelerator program
 
 **Status: active. Supersedes `CHIP_ROADMAP.md`** (kept for the phase-1/2/3 chip-design
 content it still owns; this document owns the simulation and validation program).
@@ -12,7 +12,7 @@ amendments and one reorganisation are recorded below, with reasons.
 ## The claim, and the standard of proof
 
 > On the same model, inputs, quality threshold, batch size, latency boundary, and power
-> envelope, Jetson Thor measures a specified latency and energy. The FM-RPU architecture
+> envelope, Jetson Thor measures a specified latency and energy. The RPU architecture
 > projects a lower result, using a simulator cross-checked against independent analytical
 > tools, validated against RTL, and calibrated with physical-design estimates.
 
@@ -61,7 +61,7 @@ detailed simulator. That model already exists and is calibrated:
 |---|---|---|
 | Phase 0: define the claim | success metric, solid criterion, contract | claim defined; contract drafted, not frozen |
 | Phase 1: measured baseline | 4 RTX PRO 6000 anchors within 0.5-3.9 % latency, 0.8-2.5 % energy; DVFS and FP8 sweeps | **wrong device and a synthetic workload** — proxy shapes on a workstation GPU, not a real checkpoint on a Jetson |
-| Phase 2: analytical model | `fmrpu/`, ~2.5k lines: operator costs, roofline, energy, thermal, Monte Carlo, sensitivity | complete and calibrated |
+| Phase 2: analytical model | `rpu/`, ~2.5k lines: operator costs, roofline, energy, thermal, Monte Carlo, sensitivity | complete and calibrated |
 | Sec 9: apples-to-apples | one shared utilization model across every hardware row, test-enforced | complete |
 | Sec 10.5: sensitivity | Monte Carlo sensitivity ranking with confidence bands | complete |
 
@@ -115,7 +115,7 @@ Deliverable: a validated GEMM simulator, cross-checked against independent tools
 
 - [x] **3.1 Stage-2 systolic core.** `sim/systolic.py`: array geometry, three dataflows,
       wavefront fill and drain, partial tiles, edge underutilization, SRAM and DRAM
-      traffic, DMA cycles with overlap as opt-in. Stdlib only, independent of `fmrpu/`.
+      traffic, DMA cycles with overlap as opt-in. Stdlib only, independent of `rpu/`.
 - [x] **3.2 Hand-checkable validation.** `sim/systolic_test.py`: the closed-form cycle
       identity proven against a brute-force enumeration of every (cycle, row, col) MAC
       event, exhaustively over dimensions 1-16 and five array geometries, plus
@@ -220,7 +220,7 @@ Ordered by what each step unblocks, not by what is interesting.
       Revisit if 4.3 changes that ordering.
 
 **Gate (corrected 2026-08-03):** a bottom-up η with a stated uncertainty band, and `sim`'s
-chunk traffic reconciled against `fmrpu`'s with any residual explained.
+chunk traffic reconciled against `rpu`'s with any residual explained.
 
 The previous gate said `e_byte_hbm_pj` and `bw_util` "are no longer reported as
 unidentified", which **no work listed under this phase could deliver**. `bw_util` is a
@@ -314,10 +314,10 @@ cannot move a gate is not progress, however satisfying the number becomes.
 ## Build
 
 Bazel 9 with bzlmod. `//sim` and `//bench` are stdlib-only, so the build graph is
-hermetic and needs no package index. The numpy-dependent Phase-2 model in `fmrpu/` stays
+hermetic and needs no package index. The numpy-dependent Phase-2 model in `rpu/` stays
 on the venv and pytest path (`scripts/check.sh`) until its dependencies are vendored in.
 
 ```
 bazel test //...        # sim + bench
-bash scripts/check.sh   # fmrpu (ruff, mypy, pytest, grep guards)
+bash scripts/check.sh   # rpu (ruff, mypy, pytest, grep guards)
 ```

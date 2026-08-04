@@ -44,7 +44,7 @@ every `[M]` in the doc set.
 
 | Directory | ruff | mypy | tests |
 |---|---|---|---|
-| `fmrpu/` | yes | yes | yes |
+| `rpu/` | yes | yes | yes |
 | `sim/` | yes | **added this sweep** | yes (Bazel, now called by `check.sh`) |
 | `bench/` | yes | **added this sweep** | yes (Bazel, now called by `check.sh`) |
 | `scripts/` | yes | no | no direct tests |

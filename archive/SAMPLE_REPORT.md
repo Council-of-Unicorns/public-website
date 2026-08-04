@@ -1,4 +1,4 @@
-# FM-RPU Tier-1 feasibility (measured RTX PRO 6000 calibration)
+# RPU Tier-1 feasibility (measured RTX PRO 6000 calibration)
 
 ## Calibration status
 
@@ -20,7 +20,7 @@
 | rtx_pro_6000_3step_cfg_n1560 | 3.9% | 2.5% | yes |
 | rtx_pro_6000_3step_cfg_n3120 | 0.5% | 2.1% | yes |
 
-## FM-RPU feasibility (region with confidence bands)
+## RPU feasibility (region with confidence bands)
 
 - Feasibility region: p_feasible=0.0%; latency quantiles [p50=284.39 ms, p90=424.00 ms, p99=528.16 ms]; 90% CI on deadline margin [-248.82, +24.99] ms (n=256)
 

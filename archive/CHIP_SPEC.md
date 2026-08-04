@@ -1,4 +1,4 @@
-# CHIP_SPEC.md — FM-RPU v0.2 (builds on v0.1 spec notes)
+# CHIP_SPEC.md — RPU v0.2 (builds on v0.1 spec notes)
 
 Status: working spec. Every number below is output of the calibrated Tier-1 instrument
 (measured RTX PRO 6000 anchors, P6 gate green; FP16→FP4 energy scale s = 2.6–3.4 MEASURED
@@ -165,7 +165,7 @@ of Google's models. We serve one model family, so "compiler output" collapses to
 image loaded at boot** — but something must produce that image. That tool is a first-class
 deliverable, not an afterthought:
 
-**`fmrpu-schedule` (offline, host-side):** model checkpoint → schedule image. Stages:
+**`rpu-schedule` (offline, host-side):** model checkpoint → schedule image. Stages:
 1. **Ingest** the workload as `WorkloadParams` (already the simulator's contract) — shapes,
    step count, precision, N_new, KV geometry.
 2. **Tile & allocate** — map GEMMs/attention to the 120-tile fabric, size FIFO/spine buffers,
@@ -182,7 +182,7 @@ deliverable, not an afterthought:
    proof consumes. A schedule that cannot certify its mode's deadline fails to build (the P6
    discipline, moved into the toolchain).
 
-**What this answers:** (a) *model revisions* — a new checkpoint is a re-run of `fmrpu-schedule`,
+**What this answers:** (a) *model revisions* — a new checkpoint is a re-run of `rpu-schedule`,
 not a re-spin, as long as it stays inside the mask-fixed envelope (shapes, layer count, tile
 geometry); weights, scales, token counts, schedules are all image-loadable. (b) *the "what's
 your compiler story" question* — this is it, and it reuses the calibrated instrument as its
@@ -193,7 +193,7 @@ pipeline.
 
 **Mask-fixed vs image-loaded (the revision contract):**
 
-| Mask-fixed (re-spin to change) | Image-loaded (`fmrpu-schedule` re-run) |
+| Mask-fixed (re-spin to change) | Image-loaded (`rpu-schedule` re-run) |
 |---|---|
 | tile count/geometry, d/ffn divisor structure | weights, MX/NVFP4 scales, INT2 option |
 | accumulator width, dequant-row formats supported | diffusion step count (1–3), N_new, mode table |
@@ -280,7 +280,7 @@ slots so dynamic reuse saves energy without touching the miss-rate proof.
    "measured share of η" to "unproven custom-silicon claim." η must come predominantly
    from architecture (TPUv4-class evidence: ~1.6–3.2×). Data: `fixtures/dvfs_sweep.json`.
 2. **FP8 capture — DONE 2026-07-15.** Measured FP16→FP8 energy ratio **1.77–1.82×**
-   (not 2×). Speedup prior updated to s ~ U(2.6, 3.4) in `fmrpu/speedup.py`; §1/§5 numbers
+   (not 2×). Speedup prior updated to s ~ U(2.6, 3.4) in `rpu/speedup.py`; §1/§5 numbers
    re-derived. Remaining prior: one FP8→FP4 step.
 3. Tier-2 (Accelergy-class) energy model of one MAC tile + conveyor → computes the
    architecture share of η; gate: **η ≥ 2.2 evidenced AND FU-energy fraction ≥ 35%**

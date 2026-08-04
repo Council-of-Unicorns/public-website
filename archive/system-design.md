@@ -1,4 +1,4 @@
-# FM-RPU Concept-Proving Simulator — System Design
+# RPU Concept-Proving Simulator — System Design
 
 **Target being proven:** a head-resident accelerator that runs a DreamZero-style 14B video-action world model at **5 Hz control**, **2 s prediction horizon**, at **40 W head power — scored at power parity with Thor-in-head** — beating Jetson Thor and removing the datacenter-B200 dependency.
 
@@ -96,9 +96,9 @@ Each hardware row is `{peak FLOPS per precision, HBM BW, HBM capacity, SRAM capa
 |---|---|---|---|---|---|
 | Jetson Thor | 2.07 PF | 273 GB/s LPDDR5X | 128 GB | 40–130 W | incumbent to beat |
 | B200 | ~9 PF (dense FP4) | ~8 TB/s HBM3e | 192 GB | ~1000 W | calibration + "what you're replacing" |
-| **FM-RPU-14** | swept | swept (HBM) | ~16–32 GB | 40 W (= Thor-in-head) | design under test |
+| **RPU-14** | swept | swept (HBM) | ~16–32 GB | 40 W (= Thor-in-head) | design under test |
 
-FM-RPU is a **parameter sweep**, not a point, so the output is a design frontier. Utilization factors (compute, BW) are applied identically to all rows.
+RPU is a **parameter sweep**, not a point, so the output is a design frontier. Utilization factors (compute, BW) are applied identically to all rows.
 
 ## A4. Latency model
 
@@ -145,7 +145,7 @@ Promote a design point up a tier only while it is still winning; kill it cheaply
 The project's success criterion is **≥ 2× inference speedup over Jetson Thor** on the identical
 world-model workload. This section defines the metric so it cannot be gamed:
 
-- **Speedup** `S = t_chunk(Thor) / t_chunk(FM-RPU)`, same `WorkloadParams`, same shared
+- **Speedup** `S = t_chunk(Thor) / t_chunk(RPU)`, same `WorkloadParams`, same shared
   `UtilizationModel` (P1). Reported as a **region** (P7): a Monte-Carlo distribution over the
   load-bearing uncertain inputs, with `P(S ≥ 2)` and quantiles — never a scalar.
 - **Power-capped chunk time.** A chip cannot sustain throughput whose energy exceeds its power
@@ -157,7 +157,7 @@ world-model workload. This section defines the metric so it cannot be gamed:
   sustained ceiling (~40 W, from A5's thermal model), the deployment-honest primary basis; and
   (b) *Thor-unconstrained* (130 W) — the A6.3 adversarial basis. Success claims cite (a) and
   must survive (b) being shown alongside.
-- **Etch-efficiency advantage `η`** (FM-RPU per-FLOP energy = shared `e_flop / η`) is the D7
+- **Etch-efficiency advantage `η`** (RPU per-FLOP energy = shared `e_flop / η`) is the D7
   case in energy form: a specialized dataflow part may genuinely beat a GPU's pJ/FLOP, but at
   Tier 1 the headline stays `η = 1` (P1-fair). The simulator emits (i) the headline region at
   `η = 1`, (ii) the **required η\*** for median `S = 2` on each basis — the number the chip
@@ -166,9 +166,9 @@ world-model workload. This section defines the metric so it cannot be gamed:
 - **FP16→FP4 energy-scaling `s`** is a Monte-Carlo input (prior ~U(4, 16)); the measured anchor
   pins `e_flop` at FP16, and the 4-bit workload rides `e_flop_fp4 = e_flop_fp16 / s` until an
   FP8/FP4 anchor pins it. Applied to both rows identically.
-- **P6 applies:** an FM-RPU speedup region is emitted only under a passing calibration.
+- **P6 applies:** an RPU speedup region is emitted only under a passing calibration.
 - **Solid-beat criterion (2026-07-28, supersedes the bare bar as the design target).**
-  (2026-07-29: FM-RPU is scored at 40 W, power parity with Thor-in-head, so S = η and
+  (2026-07-29: RPU is scored at 40 W, power parity with Thor-in-head, so S = η and
   the old 0.75 power handicap is gone.) "Beats Thor" is scored three ways, in increasing
   strictness: (i) *bare*: median S ≥ 2 in the best mode → η ≥ 2.05; (ii) **solid (the
   success criterion): S at the 5th percentile ≥ 2 in EVERY operating mode, including

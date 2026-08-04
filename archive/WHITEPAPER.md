@@ -1,4 +1,4 @@
-# The FM-RPU Whitepaper: A Measured Case for Etching World-Model Inference into a Robot's Head
+# The RPU Whitepaper: A Measured Case for Etching World-Model Inference into a Robot's Head
 
 *Working paper, July 2026. Consolidates the calibrated-simulator results, the chip program
 (spec, layout, roadmap), the memory-wall analysis, and the strategy documents into one
@@ -26,7 +26,7 @@ Thor 2× in the flagship Quality mode needs η ≈ 2.02; beating it SOLIDLY (5th
 S ≥ 2 in every mode, with a 25 % thermal margin granted to Thor) needs η ≈ 2.2–2.8,
 inside the published 1.6–3.2× TPUv4-versus-A100 band; the design target is η = 3 [X, S]. Attention consumes ~62 % of dynamic energy, so matrix-multiply
 specialization alone caps the speedup at 1.59× and any credible datapath must improve the
-attention path [S]. We present the FM-RPU design point (4 PF dense FP4, LPDDR5X conveyor,
+attention path [S]. We present the RPU design point (4 PF dense FP4, LPDDR5X conveyor,
 40 W), the workload co-design levers that attack the absolute 5 Hz goal, and a roadmap in
 which a kill test gates every funding tier.
 
@@ -75,7 +75,7 @@ dominates:
 t = max( t_compute, t_memory, t_comm, E_chunk / (TDP · (1 − f_static)) ).
 
 At the three-step operating point the energy bound exceeds the roofline bound by an order
-of magnitude on Thor and on the FM-RPU alike [S]. Raising peak FLOPS without lowering
+of magnitude on Thor and on the RPU alike [S]. Raising peak FLOPS without lowering
 joules per FLOP moves nothing. When both devices sit on the energy bound with shared
 coefficients, throughput cancels and the speedup reduces to an identity:
 
@@ -121,7 +121,7 @@ that holds even if Thor's in-head budget proves 25 % better than our thermal est
 at its top, so the stacked levers (realized-utilization edge, workload-shaping
 realization, sub-Vmin) buy margin on top rather than carrying the claim; Section 9 still
 owns them. Against Thor's 130 W module rating the same design point reaches S ≈ 0.66 at
-the solid bar and 0.92 at the target; the FM-RPU is a head part, and we say so [S].
+the solid bar and 0.92 at the target; the RPU is a head part, and we say so [S].
 
 The published evidence brackets the target. TPUv4 delivered 1.6–3.2× perf/W over the
 same-node A100 on measured power [X: ISCA 2023]. Hameed et al. showed that a
@@ -140,7 +140,7 @@ attention energy path (online-softmax streaming, FLASH-D-style division hiding, 
 exponential-multiply operators, and a static per-layer max bound that our fixed geometry
 permits) is load-bearing for the thesis [X: arXiv 2505.14201, 2505.14314; S].
 
-## 6. The FM-RPU design point
+## 6. The RPU design point
 
 A head-resident inference engine sized to the shapes above [T unless tagged]:
 
@@ -162,7 +162,7 @@ A head-resident inference engine sized to the shapes above [T unless tagged]:
   bound the TPU held 80 % of peak while the same-node K80 fell to 37 % [X: ISCA 2017].
   Our 200 ms loop is a tighter latency-bound regime than that benchmark.
 - A microcoded schedule ROM (1/2/3-step modes) produced by an offline tool,
-  `fmrpu-schedule`, that reuses the calibrated simulator as its cost model and emits a
+  `rpu-schedule`, that reuses the calibrated simulator as its cost model and emits a
   per-mode worst-case deadline certificate. Weights, scales, token counts, and schedules
   load from an image; tile geometry and datapath formats are mask-fixed.
 - A programmable update block (~2 % of datapath) runs flow-ODE or CEM-style planning.
@@ -408,7 +408,7 @@ Every problem below is open, carries load, and comes with instrumentation that m
 7. **The robot memory engine.** Persistent latent state, episodic retrieval, fast-weight
    layers, and bounded context in hardware. A write-capable weight path breaks the
    read-only conveyor assumption, so scope it before RTL freezes that assumption.
-8. **The compiler.** `fmrpu-schedule` today; a PyTorch→StableHLO→MLIR backend as the
+8. **The compiler.** `rpu-schedule` today; a PyTorch→StableHLO→MLIR backend as the
    platform grows. The moat is compiler plus scheduling plus memory hierarchy, and the
    cost model already exists as the calibrated simulator.
 9. **Deadline-mode existence.** Distill to 1-step at reduced tokens with task success
@@ -477,5 +477,5 @@ data, and the open questions are in this repository. The silicon is waiting on y
    cooling," Nature 585, 2020; flexible cold plates for humanoid chips, Device,
    10.1016/j.device.2024 (S2666-9986(24)00498-8).
 9. Repo companions: `CHIP_SPEC.md`, `CHIP_LAYOUT.md`, `CHIP_ROADMAP.md`, `PERF_LEVERS.md`,
-   `MEMORY_BANDWIDTH.md`, `papers/FMRPU-memo-v2.pdf`, calibrated instrument (`fmrpu/`),
+   `MEMORY_BANDWIDTH.md`, `papers/FMRPU-memo-v2.pdf`, calibrated instrument (`rpu/`),
    measured data (`fixtures/measured/`, `fixtures/dvfs_sweep.json`).

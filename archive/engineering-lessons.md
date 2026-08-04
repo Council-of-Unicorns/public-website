@@ -74,7 +74,7 @@ which mutation the test is there to catch.
 
 **Incident (2026-08-03, roadmap 3.3/3.5).** Three defects this session were found only by
 comparing independent implementations: the cross-attention K/V token-count bug (found by
-the `sim` model disagreeing 4.2% with `fmrpu`), the unphysical byte energy (found by
+the `sim` model disagreeing 4.2% with `rpu`), the unphysical byte energy (found by
 Accelergy's table, 16× lower), and the systolic drain semantics (found by SCALE-Sim). None
 were findable by self-review: the brute-force reference in `systolic_test.py` shared the
 model's own assumption about partial tiles, so it confirmed the wrong answer happily.
@@ -100,10 +100,10 @@ fits the same points, and add a point that separates them. Symmetric test config
 ## L7. A split gate is a gate with a hole in it
 
 **Incident (2026-08-03, reviews C1/M1).** The tree had two verification commands:
-`scripts/check.sh` for `fmrpu/` and `bazel test //...` for `sim/` and `bench/`. Neither
+`scripts/check.sh` for `rpu/` and `bazel test //...` for `sim/` and `bench/`. Neither
 ran the other. Four SCALE-Sim reconciliation tests sat unreachable behind a misplaced
 `if __name__ == "__main__"` guard for a full session, and both halves reported green;
-`mypy` covered `fmrpu` only and a real type error sat unnoticed in `sim/`. The roadmap
+`mypy` covered `rpu` only and a real type error sat unnoticed in `sim/`. The roadmap
 claimed those tests were "regression-tested".
 
 **Recurrence (same day).** The identical defect reappeared in `sim/workload_test.py`

@@ -1,4 +1,4 @@
-# Archive — FM-RPU program documents
+# Archive — RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
 https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-07-29 at etched commit 918c15a (40 W power parity, S = eta; Quality mode leads).
@@ -9,7 +9,7 @@ https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-07-29 at
   solid-beat feasibility, thermal co-design, roadmap).
 - [`system-design.md`](system-design.md) — the simulator's architecture source of truth,
   including the §A8a success metric (solid-beat criterion).
-- [`CHIP_SPEC.md`](CHIP_SPEC.md) — FM-RPU v0.2 working spec (targets, latency bounds,
+- [`CHIP_SPEC.md`](CHIP_SPEC.md) — RPU v0.2 working spec (targets, latency bounds,
   memory architecture, operating modes, gates).
 - [`CHIP_LAYOUT.md`](CHIP_LAYOUT.md) — floorplan, block budgets, dataflows.
 - [`CHIP_ROADMAP.md`](CHIP_ROADMAP.md) — three phases, kill tests, gate criteria.

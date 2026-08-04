@@ -1,4 +1,4 @@
-# CHIP_LAYOUT.md — FM-RPU block-level system design (v0.1)
+# CHIP_LAYOUT.md — RPU block-level system design (v0.1)
 
 Companion to [`CHIP_SPEC.md`](CHIP_SPEC.md) (targets, modes, corrections ledger) and
 [`CHIP_ROADMAP.md`](CHIP_ROADMAP.md) (phases and gates). Numbers marked **[I]** are
@@ -30,7 +30,7 @@ Our η evidence band is the TPU's, so the layout deliberately keeps a block-for-
 correspondence with the best-documented inference ASIC. Where we deviate, the deviation is
 justified by a workload difference, not taste:
 
-| FM-RPU block | TPUv1 ancestor | Same / deviation, and why |
+| RPU block | TPUv1 ancestor | Same / deviation, and why |
 |---|---|---|
 | Weight FIFO A/B (2×16 MB) | Weight FIFO (4 tiles deep, double-buffered off DDR3) | same pattern; deeper tiles because our conveyor feeds 120 tiles not one array |
 | Activation SRAM spine (40 MB) | Unified Buffer (24 MB) | same role (residual stream stays on-die); sized by our CFG-pair token count |
