@@ -175,8 +175,25 @@ and body bias.
 
 **Rejected with evidence:** LC resonant clocking (needs ~23x the inductance at 1.05 GHz and
 **detunes under clock gating**, which is our main lever); low-swing clocking (5.8 % of total
-measured, and no swing headroom at 0.7 V); clock mesh (surge current, and we do not need
-20 ps skew at a 1 ns period); wave pipelining; adiabatic logic; full asynchronous.
+measured on a fabricated 90 nm MAC test chip, and no swing headroom at 0.7 V); clock mesh
+(surge current, and we do not need 20 ps skew at a 1 ns period).
+
+**Three families closed with primary sources — do not spend another research run on them.**
+*Adiabatic and charge-recovery logic* was refuted head-to-head in 1994: *"In almost all cases,
+voltage scaled CMOS dissipates less power for the same level of performance."* Every measured
+win is slow and old, the power-clock generator costs +52 % when it is counted at all, and a
+10x energy win needs ~20x ramp stretch for ~160x throughput loss per unit hardware. It also
+scales **backwards** against the node, because its floor is leakage-limited. *Full asynchronous
+/ QDI* costs **70-100 % area** by its proponents' own words, and dual-rail forces activity
+factor 1.0 per bit on ~2x wire capacitance against a real 0.1-0.25 — a 4-10x datapath penalty
+before completion detection, with the async community's own tools paper calling the EDA
+landscape *"bleak"* and sub-10 nm *"future work."* *Wave pipelining* has a delay-balance floor
+of ±20 %, which is smaller than 4 nm variation alone, and no published energy story at all.
+
+**Two widely-cited numbers that do not survive checking**, recorded so we never repeat them:
+AMD Piledriver's resonant clocking is **4.5 % of core power** in the peer-reviewed paper, not
+the "10 % of total IC power" that circulates from the press release; and Eyeriss's famous 45 %
+zero-gating saving is measured against an *ungated* baseline on ReLU CNNs.
 
 **One rejection matters for integrity:** zero-operand gating. Eyeriss's famous 45 % is
 measured against an *ungated* baseline on ReLU CNNs with 77.6 % zeros. Transformers have
