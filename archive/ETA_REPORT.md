@@ -26,7 +26,7 @@ multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for
 | Physical design | 1.2× (1.15–1.4) at system level | `[X*]` sized, `[M]` explained | No — gated upside |
 | Ceiling, f_ours at Hameed's 35% | 3.5–7× | `[T]` | Requires beating every published DNN ASIC |
 | Downside, both inputs pessimistic | **~1.0×** | `[T]` | Not excluded by anything we know |
-| Compiler-maturity derate | **unmodelled** | — | §7f — a real term we do not yet price |
+| Compiler-maturity derate | **0.6–0.8× at launch** | `[T]` | §7f — gives **1.7–2.1× at first silicon**, 2.6–3.0× mature |
 
 **The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
 §7e shows it fixes our floor *and* Thor's overhead fraction simultaneously, because Thor's
@@ -659,6 +659,46 @@ graphs, so the compiler can be narrow and deep rather than general.
 **What we should deliberately not build:** a general-purpose compiler, a full framework
 backend, multi-model support, or dynamic-shape handling. Every one of those is how a small
 team loses two years, and none is needed for a module running one frozen model family.
+
+### Sizing, and the staged eta that follows
+
+**Industry pattern first: in this category the compiler fails, not the silicon.** Graphcore
+shipped good hardware and lost on software; Wave Computing died on it; Groq narrowed its
+market partly because arbitrary models were too hard to compile; Habana shipped with software
+as the gating item for years. TensorRT and XLA each represent well over a hundred
+engineer-years across roughly a decade `[X*, industry history, not a citation]`.
+
+| Layer | Engineer-years to a good v1 `[T]` |
+|---|---|
+| Fusion, tiling, SRAM allocation, static scheduling — the hard core | **5-15** |
+| Graph import + operator coverage, one family | 2-4 |
+| Runtime, DMA, driver, host sync | 2-4 |
+| Numerics toolkit and accuracy gates | 2-3 |
+| Profiler that attributes a missed deadline | 2-3 |
+| Bit-exactness CI | 1-2 |
+| **Total** | **~15-30** |
+
+At 5-8 software engineers that is **3-4 years — the same duration as the silicon.**
+
+**The derate is not a separate term; it determines the realized `f_ours`.** Our architectural
+ceiling only materialises if the compiler reaches it, and Thor's achieved efficiency already
+includes TensorRT's maturity.
+
+| Stage | Compiler extraction | eta |
+|---|---|---|
+| **First silicon, v1 compiler** | ~50-60 % of our ceiling vs TensorRT at 75-85 % of Thor's | **1.7-2.1x** |
+| **Mature, ~2-3 years post-silicon** | 75-85 % | **2.6-3.0x** |
+| Ceiling at f_ours = 35 % | — | 3.5-7x |
+
+**The chip probably does not clear its own 2.15 bar on the day it powers on.** It clears it
+when the compiler matures. Three consequences:
+
+1. **Publish a launch number and a mature number separately.** A single figure invites a
+   broken promise at the moment credibility matters most.
+2. **The gate-1 kill criterion needs a stage attached.** Measuring eta at first silicon against
+   a bar calibrated for maturity would kill a working design.
+3. **Compiler headcount is the pacing item, not support.** Starting it when the RTL is done
+   puts the mature number 3-4 years after tapeout instead of 2.
 
 **Consequence for the program.** Software is not a downstream integration cost, it is a term
 in eta. Two actions follow: price the derate explicitly as a Monte Carlo input rather than
