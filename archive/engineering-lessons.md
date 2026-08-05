@@ -219,3 +219,19 @@ the target. Record the instrument's boundary with the number (`nvidia-smi power.
 **board** power, not wall power). A measurement taken in the wrong regime is not weak
 evidence; it is no evidence, and it is more dangerous than none because it looks like data.
 
+## L14 — a physical rule lives in one function; sibling models import it or drift
+
+**Incident (2026-08-05).** `rpu/latency.py` decided weight traffic through the shared
+`weight_residency` classifier (stream once per chunk when the working set fits SRAM);
+`rpu/energy.py` re-derived the same physics inline as "weights x steps, always." The two
+models silently disagreed about the same draw's traffic whenever weights fit SRAM. No test
+caught it because every current row streams (7 GB against 90 MB) — the divergence sat
+exactly in the region the fixtures never visit.
+
+**Rule.** Any decision about physical behaviour — residency, roofline regime, precision
+pricing, CFG reuse — is computed in exactly one function, and every model that needs it
+calls that function. A module that re-states the decision inline is a defect even while
+its output is numerically identical, because the models can only drift apart silently,
+and they will drift first in the region no fixture exercises. Sweep: S9 in
+[`review-audit.md`](review-audit.md).
+
