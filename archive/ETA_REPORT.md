@@ -364,9 +364,30 @@ baseline parity or too small.
 
 ### Known asymmetries, both directions
 
-*Favouring us:* Thor at module level carries CPU cores, ISP, codecs, PVA and 4×25GbE that leak
-while inference runs, and our comparison is at head power. Our static schedule owes no
-misprediction guardband.
+**Three favourable terms are currently priced at 1.0, and that is a bias, not caution (added
+2026-08-04 after challenge).** Each is real, sized, and measurable:
+
+1. **Thor's 40 W includes silicon we do not carry.** It is an SoC — 14-core CPU, ISP, codecs,
+   PVA, 4x25GbE — while our host lives outside the head budget by declared architecture. If
+   Thor's uncore burns 8-15 W of its 40, its compute budget is 25-32 W against our 40:
+   a **1.25-1.6x** term the model ignores by granting both rows identical ceilings `[T]`.
+   Measurable on any Jetson: idle and uncore power in the constrained mode.
+2. **The TPU anchor was measured in the GPU's best regime.** TPUv4's 1.6-3.2x is against an
+   A100 at datacenter batch under mature CUDA — maximum amortization. Batch-one with a hard
+   deadline is the GPU's *worst* regime. The band is closer to a floor for our comparison
+   than a prediction `[X]/[T]`.
+3. **The compiler derate was applied to us and not to them.** TensorRT's assumed 75-85 %
+   extraction is earned on CNNs and LLMs at batch; on batch-one FP4 video-diffusion models —
+   months-old NVFP4 workflows, nobody's tuned path — it may be nearer 60 %, returning most of
+   the 1.4x launch derate we charged ourselves `[T]`. Measurable in the Orin benchmark by
+   profiling achieved-vs-peak on the frozen workload.
+
+Compounded at modest values these move the central estimate from 2.6-3.0x to **3.5-4.5x** and
+put first silicon above the 2.15 bar rather than below it. They are held out of the headline
+because each is unmeasured — but they are recorded here so the conservatism is visible rather
+than silent, and so the Orin measurement can price the first and third directly.
+
+*Also favouring us:* our static schedule owes no misprediction guardband.
 
 *Against us:* Thor is a 2025–26 part built for this exact market with native FP4. Our
 accelerator needs a host we have not accounted for. Pre-silicon estimates in this domain carry
