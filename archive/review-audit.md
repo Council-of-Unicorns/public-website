@@ -310,3 +310,25 @@ OLD value across generators, presets, fixtures and provenance stamps — not jus
 correction that reaches the documentation but not the artifact leaves the artifact stating
 the refuted claim to anyone who looks at it rather than reads about it.
 
+### S15. The F1 landmine, stepped on despite the written rule (2026-08-06)
+
+Incident: the explorer budget panel and ETA_REPORT 7b priced DRAM at "5 pJ/B [X,
+LPDDR5X-class]" — 0.625 pJ/bit, below the best DRAM interface ever measured (WideIO 3D,
+0.9 pJ/bit, VLSI 2013). A pJ/bit-class figure used as pJ/byte: exactly the 8x landmine
+design F1 documents in rpu/units.py, and exactly why `pj_per_bit_to_pj_per_byte` exists.
+The constant bypassed ingestion, so the converter could not protect it. Found by
+cross-checking research-agent DRAM numbers (SpAtten 69% DRAM, T-REX 81% EMA) against our
+"3-6% of budget" claim — the discrepancy was the alarm.
+
+Blast radius: the calibrated model, bars and eta were NEVER affected (they use the fitted
+e_byte = 64 pJ/B = 8 pJ/bit, which was right all along). Wrong were: the explorer budget
+panel, 7b's two DRAM rows and its "memory is cheap in energy (3-6%)" claim, HANDOFF item
+4, and session summaries. Corrected to 32-64 pJ/B -> DRAM is 18-37% of the chunk budget.
+
+Fix beyond the number: a value guard now sits next to the constant — any DRAM pJ/byte
+below 8 (i.e. under 1 pJ/bit) raises at build time with the F1 citation. The rule failed
+as prose; it is now unrepresentable at the one site that bypassed the converter.
+
+Sweep: grepped all pJ/B literals in scripts/ and docs/ for values under 8 used as DRAM
+byte energy — no other instance.
+

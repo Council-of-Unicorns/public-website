@@ -427,17 +427,21 @@ DRAM traffic.
 
 | Term | Energy | Share of the 8.00 J budget |
 |---|---|---|
-| All DRAM traffic at 5 pJ/B | 0.23 J | **2.9%** |
-| All DRAM traffic at 10 pJ/B | 0.46 J | 5.7% |
+| All DRAM traffic at 32 pJ/B (4 pJ/bit, best-case LPDDR5X) | 1.47 J | **18%** |
+| All DRAM traffic at 64 pJ/B (8 pJ/bit — the fitted e_byte) | 2.94 J | **37%** |
 | FP4 multiply only, 0.0078 pJ/FLOP | 5.54 J | **69%** |
 | FP4 MAC with adder-tree amortised accumulate, 0.0126 pJ/FLOP | 8.92 J | **111%** |
 | FP4 MAC with a naive 32-bit accumulator RMW, 0.0178 pJ/FLOP | 12.65 J | **158%** |
 
 **Two findings, and the second is the actionable one.**
 
-*Memory is cheap in ENERGY and expensive in TIME -- do not conflate them.* DRAM costs 3-6%
-of the *energy* budget while arithmetic costs 69-158%, which is a direct consequence of
-4-bit weights shrinking traffic but not FLOPs. **An earlier version of this section
+*Memory and arithmetic are BOTH first-order energy terms — corrected 2026-08-06.* An
+earlier version of this table priced DRAM at "5 pJ/B", a pJ/bit-class figure used as
+pJ/byte — the exact 8x landmine design F1 documents — and concluded DRAM was 3-6% of the
+budget. At LPDDR5X system energy (4-8 pJ/bit = 32-64 pJ/byte, consistent with the fitted
+e_byte of 64 the calibrated model has used all along), **DRAM is 18-37% of the chunk
+budget**. The calibrated model, the bars and eta were never affected — they always used
+the fitted value; the error lived in this budget table and the explorer's budget panel. **An earlier version of this section
 concluded "the memory wall is not the wall". That was wrong**: it answered a bandwidth claim
 with an energy argument. Memory binds on *time*, and 7d shows it binds hard.
 [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWIDTH.md) was right.
