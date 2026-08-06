@@ -286,3 +286,27 @@ reconciliation moved to `tests/test_model_seam.py`, where the figure is computed
 tests as their acceptance gate) and `bench.require_frozen` (forward-looking, and the gate
 that makes the frozen-contract discipline real).
 
+### S14. A superseded input surviving in a place the correction did not reach
+
+Incident (2026-08-06): when 7e corrected the FP4 MAC energy (0.0125 was a double count),
+the explorer's slider PINS were relabelled superseded and its PRESETS were not. The page
+therefore showed a 0.73x downside corner computed from an arithmetic error we had already
+published a correction for — a *fabricated pessimism*, which costs credibility exactly as
+much as a fabricated optimism. Caught by the reader asking why the number looked so bad.
+At the corrected pessimistic MAC energy the same corner is **1.60x**.
+
+Signature swept: every place a corrected constant might still be embedded.
+
+| Site | Result |
+|---|---|
+| explorer presets (`launch`, `mature`, `ceiling`) | clean — 0.006 / 0.006 / 0.0031, all inside the corrected range |
+| explorer `downside` preset | **DEFECT** — fixed; test tightened from `< 2.05` to a `1.3 < eta < 2.05` band so a preset can no longer drift downward into refuted territory unnoticed |
+| explorer pins | relabelled at correction time, correct |
+| `docs/` prose | corrected at the same time as 7e |
+| `archive/README.md` provenance | **STALE** — recorded commit 0d55070 while 24 commits had landed since. Updated to b188846 |
+
+**Rule of thumb this reinforces (L15's cousin):** when a number is corrected, grep for the
+OLD value across generators, presets, fixtures and provenance stamps — not just prose. A
+correction that reaches the documentation but not the artifact leaves the artifact stating
+the refuted claim to anyone who looks at it rather than reads about it.
+

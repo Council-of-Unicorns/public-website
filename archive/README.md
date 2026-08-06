@@ -1,7 +1,7 @@
 # Archive — RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-04 at etched commit 0d55070 (circuit and physical-design ledgers D5/D6; the sub-Vmin band resized to the logic term only and the Razor margin-recovery claim withdrawn; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-06 at etched commit b188846 (full-repo review and simplification: the FP4 MAC accounting corrected after a double count was found, the FP8 1.24x-vs-1.77x contradiction resolved as a harness bug, attention fusion restated 55.7x -> 56.7x, four code defects fixed and three toothless tests replaced, 582 lines removed; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
 
 ## Canonical documents
 
