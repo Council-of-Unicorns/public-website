@@ -214,7 +214,7 @@ Ordered by what each step unblocks, not by what is interesting.
       2.2, or functional units below 35 % of energy, and the project stops before tapeout
       money.
 
-      **Status: `sim/energy.py` exists and runs, and its first answer is a defect
+      **Status: REMOVED 2026-08-06 after the finding below was recorded. `sim/energy.py` ran, and its first answer was a defect
       report.** Against the calibrated GPU baseline on the 14B chunk it returns
       η = 29-55x, an order of magnitude above TPUv4's published 1.6-3.2x ceiling. That
       is not a discovery; it means the ledger counts a bare multiplier against a whole

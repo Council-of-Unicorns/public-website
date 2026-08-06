@@ -164,7 +164,7 @@ term: the energy of a raw BF16 multiply-accumulate at N4, roughly 0.05–0.20 pJ
 | 0.20 pJ/FLOP | 12.8% | 7.8× | 27.5% |
 
 **`f_gpu` is 3–13%, centred near 6–8%.** Pure overhead removal is therefore capped at roughly
-8–31×, which is why a bottom-up ledger that returned 29–55× (`sim/energy.py`) was always a
+8–31×, which is why a bottom-up ledger that returned 29–55× (`sim/energy.py`, since removed) was always a
 defect rather than a discovery. Clearing the 2.15 bar requires `f_ours ≈ 7–28%`, centred near
 14%.
 

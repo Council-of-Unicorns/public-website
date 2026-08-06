@@ -234,9 +234,14 @@ reads their source and fails if either re-derives the static term.
 
 ### Not fixed, deliberately
 
-- `sim/energy.py` (263 lines) has zero consumers. **Kept**: it is a published negative
-  result — its bottom-up ledger returns eta 29-55x, and `implausible_by` is the mechanical
-  guard that says so. Recorded as unwired rather than deleted.
+- `sim/energy.py` (263 lines) has zero consumers. **Kept in the first pass** as a published
+  negative result — its bottom-up ledger returns eta 29-55x, and `implausible_by` was the
+  mechanical guard saying so. **Deleted on 2026-08-06** in the simplification pass: the
+  negative result is recorded in four documents (`ETA_REPORT` 3b, `ROADMAP`, `PERF_LEVERS`,
+  this file), so the module was carrying no information the docs did not already hold, and a
+  wired-to-nothing module whose only output is a number we do not believe is a maintenance
+  liability rather than an epistemic asset. `WorkReport.sram_bytes` and `per_op_cycles`, which
+  existed only to feed it, went with it.
 - `b200_at_head_power` (~65 lines, no callers, 35 W default against the 40 W parity rule)
   and most of `sweep.py`'s design-space surface are §A8 deliverables with tests as their
   acceptance gate. **Kept**, but the 35 W default is now a documented hazard.
@@ -252,4 +257,32 @@ so that six subsequent results were void, and once producing a false failure fro
 both mutations in the working tree and correctly flagged them as suspicious. **Mutation
 testing must restore under `trap`, verify restoration with `git diff`, and clear
 `__pycache__` — same-size edits do not invalidate bytecode.**
+
+### S13. Simplification pass (2026-08-06)
+
+Bias toward simplicity, applied after the review's findings were verified. **582 lines
+removed, 74 added.** Every deletion was grep-verified for callers first, and every script
+that emits a published artifact was diffed before and after to prove the output is
+byte-identical.
+
+| Removed | Lines | Why it was safe |
+|---|---|---|
+| `sim/energy.py` + its test + BUILD targets | ~420 | Zero consumers; its negative result lives in four docs |
+| `WorkReport.sram_bytes`, `per_op_cycles` | 8 | Existed only to feed the above |
+| `b200_at_head_power`, `HeadPowerRatio`, `_scaled_to_power` | ~70 | Zero callers; superseded by `rpu/speedup.py`; its 35 W default contradicted the 40 W parity rule |
+| `_RankedInput` | 8 | Built, sorted, immediately flattened to tuples |
+| `_PJ_PER_J` / `_MS_PER_S` in four modules | 7 | Consolidated into `rpu/units.py` |
+| `FM_RPU_UNION` x2, `_stage_labels` x2 in scripts | 24 | Consolidated into `scripts/_shared.py` |
+
+**Two duplications that mattered more than their line count.** `scripts/design_space.py`
+carried its own `TDP_W = 40.0` and `STATIC_FRACTION = 0.10` literals *and* re-implemented
+the power cap that `rpu.speedup` owns — the identity the whole S = eta argument rests on,
+duplicated into the script that emits the explorer grid. Now sourced from `RPU_14` and
+`UtilizationModel`; output verified byte-identical. And `sim/workload_test.py` hand-wrote
+`analytical_bytes = 45.9e9` because the hermetic suite cannot import `rpu`; that
+reconciliation moved to `tests/test_model_seam.py`, where the figure is computed.
+
+**Kept deliberately:** most of `sweep.py`'s design-space surface (the A8 deliverables, with
+tests as their acceptance gate) and `bench.require_frozen` (forward-looking, and the gate
+that makes the frozen-contract discipline real).
 
