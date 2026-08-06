@@ -42,9 +42,11 @@ real silicon by us:
 
 1. **DVFS buys nothing.** Energy per FLOP is flat from 1.0 to 3.1 GHz on the baseline `[M]`.
    The wide-and-slow story requires sub-Vmin custom silicon, not an operating point.
-2. **The baseline is itself energy-bound.** Board power pinned at exactly 600.0 W in every
-   arithmetic configuration we ran, and FP8 bought 1.24× over BF16 rather than the nominal
-   2× `[M]`. The part is clamped by watts, not by multipliers.
+2. **The baseline is itself energy-bound — and under the cap, throughput ∝ efficiency.**
+   Board power pinned at exactly 600.0 W in every arithmetic configuration we ran, and FP8
+   delivered **1.76× the BF16 throughput at identical watts** — because it is 1.77× more
+   energy-efficient per FLOP `[M]`. That is the project's S = η thesis measured on the
+   baseline's own silicon. (An earlier 1.24× figure was a harness artifact; see §3c.)
 3. **The GPU is not running our workload badly.** It reaches 94.7% of peak dense-GEMM energy
    efficiency on our workload `[M]`. There is no workload-specific inefficiency to harvest.
 
@@ -103,7 +105,7 @@ scheduled datapath delivers a larger share of its joules to arithmetic than a GP
 | Configuration | Best result | At |
 |---|---|---|
 | Dense GEMM, BF16, L2-resident | **1.480 pJ/FLOP** raw, 1.298 marginal | n=4096, 405 TFLOP/s |
-| Dense GEMM, FP8 E4M3 | **1.192 pJ/FLOP** raw, 1.039 marginal | n=8192, 504 TFLOP/s |
+| Dense GEMM, FP8 E4M3 | **0.956 pJ/FLOP** raw, 0.839 marginal | n=8192, 628 TFLOP/s (corrected 2026-08-05) |
 | Our workload (3-step CFG, N=3120) | **1.562 pJ/FLOP** | 384 TFLOP/s |
 | Idle, clocks up | 73.7 W | — |
 | DRAM stream | 1461–1464 GB/s | **81.6% of the 1792 GB/s spec** |
@@ -133,10 +135,10 @@ FLOP." Three consequences, all unfavourable to our numbers:
 
 1. **`f_gpu` = 3-13 % describes the RTX, not Thor.** Thor's functional-unit fraction is
    higher by design, so eta against Thor is *smaller* than eta against this anchor.
-2. **The 600 W clamp caps the measured arithmetic ceiling.** FP8 measured 504 TFLOP/s, roughly
-   half the card's FP8 capability, because watts bind. So 1.192 pJ/FLOP is what the part
-   achieves *while power-limited*, not the architecture's floor. The true floor is lower,
-   which shrinks eta again.
+2. **The 600 W clamp caps the measured arithmetic ceiling.** FP8 measures 628 TFLOP/s
+   (corrected 2026-08-05) against a much higher unconstrained-capability spec, because watts
+   bind. So 0.956 pJ/FLOP is what the part achieves *while power-limited*, not the
+   architecture's floor. The true floor is lower, which shrinks eta again.
 3. **The calibration is fitted entirely to this one part.** All four anchors are RTX PRO 6000;
    `compute_util = 0.8048` and `e_flop_fp4_pj = 0.3565` were solved against a wall-powered
    workstation GPU and are then applied to Thor and to the RPU.
@@ -182,10 +184,14 @@ Two further measured results constrain the design:
 - **DVFS buys ~1.0×.** Energy per FLOP is flat from 1.0 to 3.1 GHz after subtracting idle
   `[M]`. A GPU cannot go sub-Vmin because its SRAM, cell libraries and clock distribution pin
   it at its floor.
-- **FP16 → FP8 delivers 1.77×, not 2×** `[M]`, from the DVFS sweep. **This conflicts with the
-  1.24× measured today** at a fixed 600 W cap. The methods differ — today's number is a
-  throughput ratio under a hard power clamp — and the gap is *not yet explained*. Recorded as
-  an open discrepancy rather than reconciled by picking the flattering one.
+- **FP16 → FP8 delivers 1.77×, not 2×** `[M]`, from the DVFS sweep. A conflicting 1.24×
+  from the fu-fraction harness was recorded here as an open discrepancy for a day.
+  **Resolved 2026-08-05: the 1.24× was a harness artifact** — the FP8 kernel's operand
+  layout prep (`b.t().contiguous().t()`) executed *inside* the timed loop, adding a 128 MB
+  copy per iteration and depressing FP8 throughput 30 %. With the copy hoisted, the two
+  instruments agree at the same shape to **0.5 %** (1.76× vs 1.768×). Recording the
+  contradiction instead of picking a side is what made it findable; the fix predicted the
+  corrected throughput before re-measuring (~650 predicted, 628 observed).
 
 ### 3d. Calibration state, stated honestly
 
