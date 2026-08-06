@@ -143,8 +143,14 @@ remains the separate stretch that motivates step-distillation quality work in pa
 
   **REOPENED 2026-08-04 — "costs little" is wrong at FP4.** The TPUv1 reasoning holds for
   16-bit products. At FP4 the multiply is tiny and the asymmetry inverts: a 32-bit
-  accumulator read-modify-write costs **~0.020 pJ against a 0.0156 pJ FP4 multiply, i.e.
-  128 % of the MAC**, making the accumulator the largest single term in arithmetic energy
+  accumulator read-modify-write costs ~0.020 pJ against what we had called a "0.0156 pJ
+  FP4 multiply." **Corrected 2026-08-05: that 0.0156 was itself a scaled 16-bit INT *MAC*
+  (Accelergy's 3.0 pJ, accumulate included, x(4/16)^2 /12), so adding an accumulator on
+  top double-counted it — and the quadratic width rule was applied at INT width 4 when an
+  E2M1 multiply has a 2-bit significand.** Redone from Horowitz 45 nm primitives
+  (sig-mult 2bx2b + 3b exponent add + normalize, /8-/12 node scaling): multiply
+  ~0.0032-0.0048 pJ, naive 32-bit accumulate ~0.0083-0.0125 pJ — the accumulator is
+  ~2.6x the multiply, still the largest single term in arithmetic energy
   (~56 %). Narrow-multiply/wide-accumulate is still right; pricing the wide side as
   negligible is not.
 

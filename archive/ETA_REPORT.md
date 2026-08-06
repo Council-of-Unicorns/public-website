@@ -30,10 +30,12 @@ multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for
 
 **The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
 §7e shows it fixes our floor *and* Thor's overhead fraction simultaneously, because Thor's
-0.0628 pJ/FLOP peak is published. It is uncertain by 6× inside our own spec, and at
-CHIP_SPEC §6's face value it would put Thor at 20–28% functional-unit fraction and end the
-project. §7e argues that value is excluded by consistency; the accounting should still be
-redone deliberately.
+0.0628 pJ/FLOP peak is published. **The accounting was redone 2026-08-05** (§7e): the old
+worst case — CHIP_SPEC §6's 0.0125–0.0178, which would have put Thor at 20–28% FU fraction
+and ended the project — was a double count (a scaled MAC relabelled as a multiply, plus an
+accumulator again). Corrected E2M1-with-adder-tree arithmetic is **0.0038–0.0057 pJ/FLOP**,
+implying Thor at 6–9% and eta 2.2–3.3× at f_ours = 20% — reinforcing the central estimate
+from a route that previously threatened it.
 
 Three findings from this program constrain everything above, and all three are measured on
 real silicon by us:
@@ -631,6 +633,39 @@ Running it backward, a programmable GPU plausibly sits at f <= 10 %, forcing **a
 
 **Result: eta = 2.0-4.0x, central 2.6-3.0x, ceiling 3.5-7x at Hameed's 35 %.** The same answer
 as 7, by a route sharing none of its inputs.
+
+### The accounting, redone (2026-08-05) — the kill-row was a double count
+
+Tracing CHIP_SPEC 6's 0.0156 pJ to its source settles the hinge's worst case: it is
+Accelergy's 3.0 pJ **16-bit INT MAC — accumulate included** — scaled by (4/16)^2 /12.
+Calling that a "multiply" and adding a 0.020 pJ accumulator on top counted accumulation
+twice, and the quadratic width rule was applied at INT width 4 when an **E2M1 multiply has
+a 2-bit significand**. Redone from Horowitz 45 nm primitives (2bx2b significand multiply +
+3b exponent add + normalize; node scaling /8 to /12) `[X]/[T]`:
+
+| Term | pJ/FLOP at ~4 nm | Thor implied f | eta at f_ours = 20 % |
+|---|---|---|---|
+| Multiply only | 0.0016-0.0024 | 2.6-3.9 % | 5.2-7.9x |
+| **+ 8-wide adder tree accumulate** | **0.0038-0.0057** | **6.0-9.1 %** | **2.2-3.3x** |
+| + naive 32-bit accumulate | 0.0058-0.0087 | 9.2-13.8 % | 1.4-2.2x |
+
+**Three consequences.** The 7e table rows at 0.0125-0.0178 are superseded — the tension
+"CHIP_SPEC's face value kills the project" dissolves, because the face value was a double
+count. The central estimate is *reinforced, slightly favourably*: tree-accumulate
+arithmetic gives eta 2.2-3.3x at f_ours = 20 % without touching Thor's slider. And 7b's
+budget figures shrink the same way: chunk arithmetic with tree accumulation is **2.6-3.8 J
+= 32-48 % of the 8 J budget**, not the 111 % previously stated — arithmetic alone no
+longer busts the budget, though a naive 32-bit accumulator (~47-77 %) still roughly
+doubles it, so **the adder tree remains the decision between comfortable and marginal**
+rather than between possible and impossible.
+
+**The boundary caveat, stated because it cuts against us.** These are bare-datapath
+numbers. The same method applied to BF16 implies the measured RTX runs at f ~ 1.1-1.6 % —
+*below* the 3 % Eyeriss floor used by the consistency guards. The implied-f band therefore
+depends on where the "datapath" boundary is drawn (bare arithmetic here; arithmetic plus
+local operand registers in the Eyeriss-derived floors). The guards remain valid as
+*relative* checks; absolute f comparisons across boundary conventions are not meaningful,
+and this is now the sharpest remaining softness in the first-principles route.
 
 ### This changes which measurement matters most
 
