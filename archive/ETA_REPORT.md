@@ -16,6 +16,12 @@ agent, primary **not** opened · `[T]` target or estimate, not achieved.
 **We expect about 2.6–3.0× over Jetson Thor at equal head power, with a defensible range of
 2.0–4.0× and a ceiling near 7×.** The bar is 2.15× and the design target is 3.0×.
 
+**The baseline is Jetson Thor at 40 W head power, always.** Every multiplier in this
+document is η against Thor. The RTX PRO 6000 appears only as the **calibration anchor** — the
+silicon we can physically measure — and never as the thing we claim to beat; §3a-bis records
+why it would flatter us if used that way. Any ratio in this report that is not against Thor
+is labelled as such at the point of use.
+
 **Two independent derivations converge there.** §7 anchors on TPUv4's published 1.6–3.2×
 against a same-node A100; §7e derives the same band from Thor's spec sheet and the cost of a
 multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for.
@@ -26,7 +32,6 @@ multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for
 | Physical design | 1.2× (1.15–1.4) at system level | `[X*]` sized, `[M]` explained | No — gated upside |
 | Ceiling, f_ours at Hameed's 35% | 3.5–7× | `[T]` | Requires beating every published DNN ASIC |
 | Downside, defensible pessimism | **1.6×** | `[T]` | f_ours 15 %, Thor at 72 % of peak, v1 compiler. Below the bare bar |
-| Floor, if the accumulator stays 32-bit too | ~1.05× | `[T]` | Adds the naive-accumulate MAC energy. This is why §5a's adder tree is a gate |
 | Compiler-maturity derate | **0.6–0.8× at launch** | `[T]` | §7f — gives **1.7–2.1× at first silicon**, 2.6–3.0× mature |
 
 **The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
@@ -445,14 +450,16 @@ but the term that decides whether arithmetic alone busts the budget.
 
 ### The ceilings, corrected
 
-Absolute 5 Hz at 40 W requires **0.0113 pJ/FLOP all-in**, which is **139x** over the measured
-BF16 GPU (1110 J against an 8 J budget).
+Absolute 5 Hz at 40 W requires **0.0113 pJ/FLOP all-in — 88.8 TFLOP/W sustained.**
+Stated in absolute units on purpose: an earlier draft expressed this as a ratio against the
+measured RTX, and a ratio against the *calibration anchor* is too easily misread as the
+multiplier against *Thor*, which is a different number answering a different question.
 
-| Chip | All-in pJ/FLOP | vs the GPU | Shortfall |
+| Our chip at | All-in pJ/FLOP | Sustained TFLOP/W | Work reduction still needed |
 |---|---|---|---|
-| Perfect, f_ours = 100% | 0.0125 | **125x** | 1.1x — inside the FP4 MAC estimate's own uncertainty |
-| Best ever published, f_ours = 35% | 0.036 | 43.7x | 3.2x |
-| Realistic, f_ours = 20-25% | 0.050-0.063 | 25-31x | **4.4-5.6x** |
+| Architectural ceiling (f_ours 20 %, no compiler derate) | 0.030 | 33.3 | **2.7x** |
+| Mature (compiler 0.80) | 0.038 | 26.7 | **3.3x** |
+| First silicon (compiler 0.55) | 0.055 | 18.3 | **4.8x** |
 
 **The gap is closable.** A realistic chip falls 4.4-5.6x short of the absolute goal, and that
 is the magnitude the work-reduction levers supply — conditional compute alone is 3-4x, and it
@@ -471,8 +478,8 @@ Work reduction composes with eta rather than competing with it:
 | Token count (N=3120 is a choice) | linear | |
 | Asynchronous hierarchy: cheap policy at 5 Hz, world model at 1 Hz | decouples the deadline from the big forward pass | Unexplored |
 
-**The chip remains the minority of the win** — roughly 25-31x of a needed 139x — with the
-remaining ~5x coming from the model and the schedule. The moat statement in
+**The chip is the minority of the win**: it closes the gap to within 2.7-4.8x, and the
+remainder comes from the model and the schedule. The moat statement in
 `VC_CHEATSHEET.md` (*"the moat is the system"*) is the engineering reality, not modesty.
 
 **Keep the two questions separate.** This section is about *absolute* feasibility against a
