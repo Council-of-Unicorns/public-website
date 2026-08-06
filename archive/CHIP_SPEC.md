@@ -66,7 +66,7 @@ ladder, and the gate-1 anchor requirement: [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWI
 |---|---|---|
 | KV window held in on-chip SRAM ring | **KV lives in DRAM** (shift-in-place ring); on-die SRAM holds stream/window buffers only | the 2 s window is 2·18,720·40·5,120 B ≈ **7.7 GB** — no head-power SRAM exists at that size |
 | 7 GB streamed per step → 22.8 ms | **14.8 GB per step → 48.1 ms** (weights 7.0 + KV 7.7 read each step) | attention reads the full window every step; P2: KV is a first-class term, ≈ the weight term |
-| Compute ≈ 2 ms/step ("negligible") | **73.6 ms/step** (3-step CFG) / 18.4 ms (1-step N=1560) at 4 PF effective | the workload is **compute-bound**: intensity ≈ 16,000 FLOP/B vs ridge ≈ 300; 2 ms would require ~124 PF effective |
+| Compute ≈ 2 ms/step ("negligible") | **73.6 ms/step** (3-step CFG) / 18.4 ms (1-step N=1560) at 4 PF effective | the workload is **compute-bound**: intensity ≈ 16,000 FLOP/B vs ridge ≈ 10,500; 2 ms would require ~124 PF effective |
 | Double-buffer: Bank A computes step N while Bank B prefetches step N+1 weights | **tile-granularity ping-pong** (2 × ~16 MB FIFOs feeding a weight-streaming systolic array) | step-granularity banks would need 2 × 7 GB of SRAM; weights are consumed as they arrive, never resident |
 | Total 70.4 ms → "crushes the deadline" | see mode table (§5): 3-step CFG ≈ **4.5 s at η=3** (energy-bound) — misses 5 Hz but **beats Thor-in-head 2.86×** (≥ project success); 5 Hz approached only in Deadline Mode at η≈6.4 | the energy bound was missing; 5 Hz at 3-step/40 W would need ~12× better pJ/FLOP than measured Blackwell — beyond all evidence |
 

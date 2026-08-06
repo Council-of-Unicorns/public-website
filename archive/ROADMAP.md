@@ -198,7 +198,7 @@ Ordered by what each step unblocks, not by what is interesting.
       open.) An intermediate that fits on chip never reaches DRAM. `sim` has no such concept, which is most of the remaining gap, and
       "fusion by construction" is a CHIP_SPEC claim that nothing checked. Now measured:
       the unfused score matrix is 233 MB per head per layer, and fusing it away is worth
-      **55.7x** on attention traffic. Combined with 4.1, chunk traffic falls from 4.6 TB
+      **56.7x** on attention traffic. Combined with 4.1, chunk traffic falls from 4.6 TB
       to 226 GB, closing the gap to the analytical model from **101x to 4.9x**.
 - [~] **4.3 Energy ledger, and the first bottom-up η. BUILT, NOT YET USABLE.**  ← **the critical path**
       Component energies (MAC, SRAM read and write, DRAM access, control) times the

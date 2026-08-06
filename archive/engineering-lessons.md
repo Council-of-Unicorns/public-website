@@ -235,3 +235,24 @@ its output is numerically identical, because the models can only drift apart sil
 and they will drift first in the region no fixture exercises. Sweep: S9 in
 [`review-audit.md`](review-audit.md).
 
+## L15 — a test that cannot distinguish the fix from the bug is decoration
+
+**Incident (2026-08-05).** Three load-bearing tests were proved toothless by mutation.
+`test_wall_is_a_real_crossover` asserted only that bandwidths *below* the reported wall
+miss the deadline, so a mutant reporting the wall at a bandwidth with a **0.998 miss rate**
+kept the entire suite green. `test_one_util_model_reaches_every_row` — the only test of the
+repo's hard P1 fairness invariant — compared a dict comprehension's keys to the set it was
+built from; a row-identity branch keyed on `hbm_bw` (naming no vendor, so the `check.sh`
+grep guard also missed it) passed it. The weight-residency identity, on which the entire
+HBM-streaming thesis rests, was tested only on hand-supplied numbers, so raising a shipped
+row's `sram_capacity` would have flipped the thesis silently.
+
+**Rule.** Before a test is finished, name the specific wrong implementation it exists to
+reject, then **write that implementation and watch the test fail.** L4 says a test that
+cannot fail is worse than none; this is its sharper form — a test can fail in principle
+(the assertion is not a tautology) and still be unable to fail *for the reason it claims*.
+Two consequences observed here: an invariant guarded only by a grep for vendor names is
+guarded against spelling, not behaviour; and a threshold branch can be found only by
+sweeping a range, never by perturbing one point — the first two replacement tests written
+for the fairness invariant were themselves toothless against the same mutation.
+

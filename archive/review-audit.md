@@ -190,3 +190,66 @@ module and independently hard-assumed in another.
 | `rpu/jepa.py` latency + energy | clean — classifier for time; weights-once is the stated weight-stationary assumption |
 | `sim/` vs `rpu/` traffic rules | intentionally separate tiers; reconciled via cross-checks, not shared code |
 
+---
+
+## 2026-08-05 (2) — full-repo review: code-vs-docs, test quality, complexity
+
+Method: three parallel adversarial subagents split by axis (per the review-codify loop),
+every finding re-verified by me against the source before any edit (L10). Two agents proved
+findings by mutation; I replayed each mutation myself after fixing.
+
+### Code defects (all verified by running the code)
+
+| Defect | Evidence | Fix |
+|---|---|---|
+| `calibrate._util_from_vector` reset `static_fraction` to the class default | `fit(base=UtilizationModel(static_fraction=0.30)).util.static_fraction` returned 0.1 | `dataclasses.replace` so no future field can be dropped by omission; red test first |
+| `memory.fusion_gain` computed `(total+scores)/total` = 56.71 while its docstring described `scores/total` = 55.71, and four doc sites published the docstring's number | ran it | docstring corrected to the code's (correct) quantity, `score_matrix_ratio` added, 55.7x -> 56.7x propagated |
+| `CHIP_SPEC` quoted `ridge ~ 300` for the RPU | code gives 10,482; the same doc says ~10,500 fourteen lines earlier; 300 is the RTX's ridge | corrected |
+| `hardware.py` carried a refuted `~250 TF` comment above the corrected 500 TF | both present in the file | corrected |
+| `JepaParams` validated six fields, not `d` or `control_period_ms` | both load-bearing (L9) | validated |
+
+Stale docstrings corrected: `report.py` and `calibrate.py` described a pre-measurement world
+where the gate could not pass; `workload.py` said 87 % where the code gives 94 %; `simb.py`
+quoted a 25x SRAM/HBM ratio true only of the defaults (80x fitted) and claimed both families'
+residency used the weight working set (JEPA uses weights+act+KV).
+
+### S11. Tests whose failure-detecting power was compromised  (lesson L15)
+
+| Test | Defect | Proof | Fix verified by replaying the mutation |
+|---|---|---|---|
+| `test_thor_wall::test_wall_is_a_real_crossover` | asserted only "below the wall misses" | a mutant reporting the wall at a 0.998-miss bandwidth kept the suite green | both directions + "lowest clearing point" — mutation now fails it |
+| `test_fairness::test_one_util_model_reaches_every_row` | compared a comprehension's keys to the set it was built from | a row-identity branch keyed on `hbm_bw` (naming no vendor, so `check.sh`'s grep guard missed it) passed the whole fairness suite | took THREE attempts, recorded in the test: a name-only twin sits on the same side of the threshold; epsilon-perturbation straddles no row's band; a fine sweep for step discontinuities works |
+| weight-residency identity | tested only on hand values and `replace` overrides, never on `ALL_ROWS` as shipped | raising `RPU_14.sram_capacity` to 9e9 broke the central thesis with no test failing | asserted over `ALL_ROWS` — verified to fail on that edit |
+
+### S12. Dead code and duplicated physical rules
+
+Deleted after grepping each symbol: four `HardwareRow` fields with zero reads
+(`hbm_capacity`, `dequant_tput`, `attn_engine_tput`, `interconnect_bw`), `ORIN_AGX_64`,
+`jepa_chunk_energy_j`, `jepa_regime`, and `part_c_tier_collapse`'s ignored `base_util`
+(the repo's only `_ = param`). ~180 lines.
+
+The chunk power/energy formula was written out in **seven** places. Consolidated into
+`rpu.energy.chunk_power`; `sweep` (x2) and `montecarlo` now delegate, pinned by a test that
+reads their source and fails if either re-derives the static term.
+
+### Not fixed, deliberately
+
+- `sim/energy.py` (263 lines) has zero consumers. **Kept**: it is a published negative
+  result — its bottom-up ledger returns eta 29-55x, and `implausible_by` is the mechanical
+  guard that says so. Recorded as unwired rather than deleted.
+- `b200_at_head_power` (~65 lines, no callers, 35 W default against the 40 W parity rule)
+  and most of `sweep.py`'s design-space surface are §A8 deliverables with tests as their
+  acceptance gate. **Kept**, but the 35 W default is now a documented hazard.
+- The `<1e-4` deadline-miss target is below the 20,000-sample estimator's 5e-5 resolution.
+  Real, unfixed, and now recorded: the check is "<= 2 misses in 20,000 draws" and cannot
+  distinguish 1e-4 from 6e-5.
+
+### Method note against myself
+
+My own mutation harness failed twice during this review: once leaving `roofline.py` mutated
+so that six subsequent results were void, and once producing a false failure from stale
+`__pycache__` after a byte-identical mutation. The concurrent code-vs-docs agent observed
+both mutations in the working tree and correctly flagged them as suspicious. **Mutation
+testing must restore under `trap`, verify restoration with `git diff`, and clear
+`__pycache__` — same-size edits do not invalidate bytecode.**
+

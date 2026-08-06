@@ -306,7 +306,7 @@ because without it array sizing is a guess.
 |---|---|
 | Systolic weight-stationary array, no per-PE scratchpads | Eyeriss spends 33–42% of power on scratchpads; that is the bucket to delete |
 | Static compile-time schedule, no dynamic scheduling | Removes the control silicon Hameed measures at 10%, and enables §6 droop shaping |
-| Large banked SRAM (90 MB) with fused attention | The unfused attention score matrix is 233 MB per head per layer; fusing is worth **55.7×** on attention traffic `[S]` |
+| Large banked SRAM (90 MB) with fused attention | The unfused attention score matrix is 233 MB per head per layer; fusing is worth **56.7×** on attention traffic `[S]` |
 | Low-bit weights, bit-exact control path | Weights stream 7 GB/step regardless; and the control policy must not depend on aggressive quantization `[F]` |
 | Target ~1.05 GHz, not 2.5 GHz | Permits denser, lower-drive cells and a shallower pipeline; makes the adder tree free |
 
