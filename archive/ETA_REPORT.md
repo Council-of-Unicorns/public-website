@@ -25,7 +25,8 @@ multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for
 | η, architecture | **2.0–4.0×**, central 2.6–3.0 | `[T]`, bounded by `[M]` and `[X]` | Yes — this *is* the bet |
 | Physical design | 1.2× (1.15–1.4) at system level | `[X*]` sized, `[M]` explained | No — gated upside |
 | Ceiling, f_ours at Hameed's 35% | 3.5–7× | `[T]` | Requires beating every published DNN ASIC |
-| Downside, both inputs pessimistic | **~1.0×** | `[T]` | Not excluded by anything we know |
+| Downside, defensible pessimism | **1.6×** | `[T]` | f_ours 15 %, Thor at 72 % of peak, v1 compiler. Below the bare bar |
+| Floor, if the accumulator stays 32-bit too | ~1.05× | `[T]` | Adds the naive-accumulate MAC energy. This is why §5a's adder tree is a gate |
 | Compiler-maturity derate | **0.6–0.8× at launch** | `[T]` | §7f — gives **1.7–2.1× at first silicon**, 2.6–3.0× mature |
 
 **The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
