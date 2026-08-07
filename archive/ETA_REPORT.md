@@ -782,6 +782,59 @@ software as a top-three risk; this section is the quantitative version of that s
 
 ---
 
+## 7g. Future directions — the architecture research program (2026-08-06)
+
+Three parallel research streams (dataflow architectures, attention/memory hierarchy, a
+measured-silicon survey) plus an external deep-dive were completed on 2026-08-06. Full
+detail in [`ARCH_RESEARCH_HANDOFF.md`](../ARCH_RESEARCH_HANDOFF.md). **Nothing here is
+counted in the eta bars**; everything follows the sub-Vmin pattern — labeled, gated,
+upside only when demonstrated.
+
+**The headline negative result, which is a positive.** The current design point —
+static-scheduled weight-stationary systolic fleet, adder trees, FlashAttention fusion —
+already occupies the winning position on the 2D-architecture axis. Every measured
+commercial deviation costs: grid-of-cores ~2-2.5 FP8 TOPS/W [X*], CGRA fabric tax [X*],
+TTA an order of magnitude behind [X*]. Groq's TSP is measured silicon validating our
+central control-architecture bet at batch 1 [X*]. Dataflow choice is second-order once
+blocking is right (Interstellar) [X*].
+
+**Surviving 2D levers, gated on spec work that does not yet exist:**
+
+| Lever | Potential | Gate |
+|---|---|---|
+| DRAM interface: many slow channels, minimal-reach PHY, row-locality layout | ~1.1-1.4x system (DRAM is 18-37% of chunk energy) | Channel/package architecture unspecified beyond "256-bit LPDDR5X" |
+| SRAM organization for the 90 MB + transpose-capable buffers | 1.0-1.2x | Bank geometry unspecified; T-REX-style buffer is measured [X*] and portable |
+| Fleet interconnect (Phase 4.5) | unknown, could be NEGATIVE | Our own model's blind spot: geometry optimum currently assumes free NoC |
+| Digital CIM tiles | 1.05-1.2x | Hardens 4-bit into silicon — narrows the FP8 policy-path escape hatch. Rank last |
+
+**The 3D direction — the highest-upside unexplored family.** Hybrid-bonded bank-local
+DRAM + vertical register-to-register operator pipelining + digital CIM, treated as ONE
+architecture. It collapses the first three levers above into a single decision and is the
+only proposal that attacks the dominant clock/register/scratchpad bucket (33-45% of
+measured accelerator power [X]) directly. Verified anchors: d-Matrix Pavehawk 3D-DRAM
+test silicon at **0.4 pJ/bit measured worst-case** vs 3-4 for HBM4 [X, vendor silicon];
+3D-Flow (arXiv 2602.11016) demonstrating register-level vertical pipelining of the
+attention chain, claiming >60% of post-fusion energy is SRAM access [X, simulation].
+Fully digital, bit-exact, MORE static than 2D — passes every constraint filter. And
+asymmetric: Thor is a shipped product and cannot re-stack itself.
+
+**Two kill questions gate the 3D family, both answerable at a desk:** (1) *thermal* —
+DRAM stacked on compute in a fanless head, where refresh roughly doubles per ~10 C and
+every cited silicon datapoint is actively cooled; (2) *capacity and supply chain* — 7 GB
+of hybrid-bonded DRAM is a 2027-class custom-DRAM roadmap item, against the commodity
+LPDDR that is a quiet strength of the current design.
+
+**Research-target ladder** [T, not headline]: interface-only, thermal-permitting ~1.25x
+(mature 2.9 -> ~3.6x); vertical-pipeline wins surviving our energy breakdown ~1.5x
+(-> ~4.4x). The evaluation vehicle is Phase 4.5's interconnect model, which prices a
+vertical tier stack as naturally as a 2D NoC; ATLAS [X*] is the external cross-check.
+
+**Monitored, not pursued:** analog gain-cell attention (violates bit-exactness; targets
+decode-reuse regime) [X*]; photonics (sub-4-bit effective precision, conversion
+overheads) [X*]; weight-resident NVM (structurally mismatched to 7 GB).
+
+---
+
 ## 8. What would falsify this
 
 | Measurement | What it settles | Cost |

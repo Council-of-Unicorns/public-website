@@ -114,3 +114,15 @@ quality checks on the local RTX proxy. µcode/sequencer budget lands in gate 1.
 Every phase gate is a **kill test**: a phase that misses its η contribution sends the
 design back to the sweep, not onward to more expensive fidelity. (§A7 discipline: promote
 only survivors.)
+
+## Future directions (2026-08-06)
+
+The completed architecture-research program (three streams + external deep-dive) is
+summarized in [`ETA_REPORT.md`](ETA_REPORT.md) 7g and detailed in
+[`ARCH_RESEARCH_HANDOFF.md`](../ARCH_RESEARCH_HANDOFF.md). Two consequences for this
+roadmap: **Phase 4.5 (fleet interconnect) doubles as the evaluation vehicle for the 3D
+tier-stack architecture**, raising its priority; and the two 3D kill questions (fanless
+thermal envelope of stacked DRAM; 7 GB capacity/supply chain) are desk research that
+should precede any gate-4 shuttle commitment they might affect. None of this moves the
+bars.
+
