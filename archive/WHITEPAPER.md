@@ -443,6 +443,70 @@ Every problem below is open, carries load, and comes with instrumentation that m
     against the gate-1 anchor alongside the LPDDR rungs so the ruling rests on measured
     numbers.
 
+## 9b. Future extensions: where the multiplier could go next
+
+A completed research program (three parallel surveys plus an external deep-dive,
+2026-08-06; working detail in [`ARCH_RESEARCH_HANDOFF.md`](../ARCH_RESEARCH_HANDOFF.md),
+synthesis in [`ETA_REPORT.md`](ETA_REPORT.md) §7g) maps what lies beyond the current
+design. **Nothing in this section is counted in the 2.05 / 2.15 / 3.0 bars.** Each item
+is a labeled bet that enters the headline only when demonstrated — the same rule that
+governs sub-Vmin operation.
+
+**The 2D design point is validated, which is itself a result.** Every measured commercial
+deviation from a static-scheduled weight-stationary array — grids of independently
+controlled cores, reconfigurable fabrics, exposed datapaths — pays for its flexibility in
+measured TOPS/W [X*]. Groq's deterministic streaming silicon independently validates the
+control-architecture bet at batch 1 [X*]. We are not leaving 2D gains on the table; the
+published record says we hold the winning point.
+
+**Near-term extensions (spec work, no new physics):**
+- *Memory-interface architecture.* Our streams are perfectly sequential, which permits
+  many slow channels with minimal-reach PHYs — the same physics that separates GDDR5's
+  14 pJ/bit from HBM2's 4 [X]. At DRAM's 18-37 % share of chunk energy, worth ~1.1-1.4×
+  at system level. Gated on channel/package specification that does not yet exist.
+- *SRAM organization.* Bank geometry for the 90 MB is unspecified; access energy spans
+  64× with organization [X]. Includes a measured, portable transpose-capable buffer
+  design worth 12-20 % utilization [X*].
+- *Fleet interconnect.* The one term that could subtract: our geometry optimum currently
+  assumes free interconnect between arrays. Pricing it (roadmap Phase 4.5) precedes
+  trusting any array-size decision.
+
+**The 3D direction — the highest-upside unexplored family.** Hybrid-bonded bank-local
+DRAM with vertical register-to-register operator pipelining would collapse all three
+near-term extensions into one architectural decision and is the only known approach that
+attacks the dominant clock-and-operand-delivery energy bucket directly. The anchors are
+real: measured 3D-DRAM test silicon at 0.4 pJ/bit worst-case [X, vendor], and a
+register-level vertical attention pipeline demonstrated in simulation [X]. It is fully
+digital, bit-exact, and *more* statically schedulable than 2D — and a shipped competitor
+cannot re-stack itself. **Two kill questions gate it, both answerable at a desk:** the
+thermal envelope of DRAM stacked on compute in a fanless head, and 7 GB of hybrid-bonded
+capacity against a custom-DRAM supply chain. If both survive, the research-target ladder
+reads: interface-only ~1.25× (mature 2.9× → ~3.6×); with the vertical pipeline, ~1.5×
+(→ ~4.4×) [T].
+
+**What these extensions cost, and what they lock in.** The near-term items are
+transformer-general: the memory interface moves bytes it never interprets, and banking
+adds only the shape-divisibility preference the array geometry already has (odd head
+dimensions degrade gracefully; they do not break). Their price is package cost, pins and
+specification work, not model commitment. Two items genuinely harden something. Digital
+CIM tiles harden **4-bit weights** into silicon, narrowing the FP8 escape hatch the
+policy-path constraint depends on — which is why they rank last. The 3D tier stack
+hardens the **attention operator chain** (QK → softmax → PV) into physical tiers: every
+standard transformer variant — MHA, GQA, MQA, cross-attention, DiT, JEPA's planner —
+runs on it, because they all share that chain and the GEMM tiers remain general arrays.
+What it does NOT gracefully serve is a post-transformer shift (state-space models,
+linear-attention variants with no softmax): a 2D array would run those as ordinary
+GEMM chains at full efficiency, while a tier stack would idle its softmax tier and lose
+part of its vertical advantage. The honest statement: **3D deepens the existing
+transformer-family bet — it does not add a new single-model bet.** A third gate belongs
+beside the two kill questions: hybrid-bond **reliability under robot conditions** —
+thermal cycling and vibration in a head, where automotive-grade qualification for
+hybrid bonding is still nascent.
+
+**Monitored, not pursued:** analog in-memory attention (violates bit-exactness), photonic
+tensor cores (sub-4-bit effective precision), weight-resident non-volatile memory
+(structurally mismatched to a 7 GB working set).
+
 ## 10. Roadmap: a kill test gates every dollar tier
 
 | Gate | Resolves | Cost | Kill condition |

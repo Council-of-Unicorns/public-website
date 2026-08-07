@@ -155,6 +155,35 @@
     <li><strong>How far the schedule distils.</strong> Getting to one step at reduced token count with task success intact is unproven. It is the lever that moves absolute latency rather than the ratio, so it decides whether 5&nbsp;Hz is ever reachable.</li>
   </ol>
 
+  <h2>9b. Future extensions &mdash; and what each would cost us</h2>
+  <p>A research pass in August 2026 mapped what lies beyond the current design. None of it is
+  counted in our success bars; each item earns its way in only when demonstrated. The first
+  result was a validation: every commercial architecture that deviates from our design point
+  &mdash; grids of small cores, reconfigurable fabrics, exposed datapaths &mdash; pays for its
+  flexibility in measured efficiency. We are not leaving conventional gains on the table.</p>
+  <p>The nearer extensions are engineering rather than research. Our memory traffic is perfectly
+  sequential, which permits many slow memory channels with short-reach interfaces &mdash; the same
+  physics that makes on-package memory several times cheaper per bit than off-package. With memory
+  now priced at roughly a fifth to a third of the energy budget, that is worth perhaps 10&ndash;40&nbsp;%
+  at system level. The internal memory organisation and the interconnect between compute arrays are
+  specification gaps rather than open questions &mdash; though the interconnect is the one term that
+  could subtract rather than add, and we will price it before trusting any array-size decision.</p>
+  <p>The furthest extension is three-dimensional integration: memory die bonded directly above the
+  compute die, with intermediate values passed vertically between stacked compute tiers instead of
+  through large on-chip memories. Real test silicon exists elsewhere at a tenth of the usual
+  interface energy, and it is the only known approach that attacks the largest single energy
+  category &mdash; moving operands around &mdash; head on. It is fully digital and bit-exact, and a
+  shipped competitor cannot re-stack itself. Three questions gate it, and we will answer them at a
+  desk before spending anything: whether stacked memory survives the temperatures of a fanless head,
+  whether the capacity we need exists outside custom supply agreements, and whether hybrid bonds
+  hold up to the vibration and thermal cycling of a machine that moves.</p>
+  <p>On what these extensions would lock in: the near ones commit us to nothing about the model.
+  Three-dimensional stacking deepens a commitment we have already made &mdash; the attention
+  operation chain shared by every standard transformer, including both model families we serve.
+  It would not serve a post-transformer architecture as gracefully as our current design would.
+  That is a deeper version of an existing bet, not a new one, and we state it rather than
+  discover it later.</p>
+
   <h2>10. Every funding tier has something that can kill it</h2>
   <div class="tbl"><table>
     <thead><tr><th scope="col">Gate</th><th scope="col">What it settles</th><th scope="col">Cost</th><th scope="col">What kills it</th></tr></thead>

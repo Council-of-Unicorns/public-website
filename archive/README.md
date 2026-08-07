@@ -1,7 +1,7 @@
 # Archive — RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-06 at etched commit 1ccbd78 (architecture research incorporated as future directions: 2D design point validated, 3D hybrid-bonded direction added as a gated bet with two kill questions; DRAM byte-energy F1 correction — memory is 18-37% of the chunk budget; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-06 at etched commit HEAD-whitepaper-9b (future extensions with downsides and lock-in analysis added to WHITEPAPER and the public page; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
 
 ## Canonical documents
 
