@@ -1,7 +1,7 @@
 # Archive — RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-06 at etched commit HEAD-whitepaper-9b (future extensions with downsides and lock-in analysis added to WHITEPAPER and the public page; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-06 at etched commit 9dbbf5c (future extensions with downsides and lock-in analysis added to WHITEPAPER and the public page; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
 
 ## Canonical documents
 
