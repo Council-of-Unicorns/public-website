@@ -21,7 +21,7 @@ performance model to measured Blackwell silicon within 0.5–3.9 % on latency an
 and derived the design target for a head-resident accelerator. At head power the binding
 constraint is energy rate: chunk time equals chunk joules divided by watts, and peak FLOPS
 cancels out of the comparison [S]. Scored at power parity — both
-chips at the 40 W head ceiling — the speedup IS the efficiency advantage: S = η. Beating
+modules at the 40 W head ceiling — the speedup IS the efficiency advantage: S = η. Beating
 Thor 2× in the flagship Quality mode needs η ≈ 2.02; beating it SOLIDLY (5th-percentile
 S ≥ 2 in every mode, with a 25 % thermal margin granted to Thor) needs η ≈ 2.2–2.8,
 inside the published 1.6–3.2× TPUv4-versus-A100 band; the design target is η = 3 [X, S].
