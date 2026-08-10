@@ -29,7 +29,7 @@
     <span>Substrate</span>
   </a>
   <nav aria-label="Sections">
-    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html" aria-current="page">Chip</a><a href="feasibility.html">Feasibility</a><a href="explorer.html">Explorer</a><a href="index.html#about">About</a>
+    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html" aria-current="page">Chip</a><a href="feasibility.html">Feasibility</a><a href="index.html#about">About</a>
   </nav>
 </header>
 
@@ -303,7 +303,7 @@ svg .die-lbl { fill: var(--ink) !important; }
   <section>
     <p class="eyebrow">The payoff</p>
     <h2>How much faster, and what it depends on</h2>
-    <p class="note">Both chips run out of power before they run out of arithmetic, so what sets the speed is energy per FLOP, not peak FLOPS. The slider is <b>&eta;</b>, how much less energy our datapath spends per FLOP than the Blackwell silicon we measured. Everything else is held fixed: same workload, same utilization model for both chips, and the uncertain inputs swept rather than guessed. Transformer ASICs have historically landed somewhere around &eta; = 2&ndash;5.</p>
+    <p class="note">Both chips run out of power before they run out of arithmetic, so what sets the speed is energy per FLOP, not peak FLOPS. The slider is <b>&eta;</b>, how much less energy our datapath spends per FLOP than the Blackwell silicon we measured. Everything else is held fixed: same workload, same utilization model for both chips, and the uncertain inputs swept rather than guessed. Transformer ASICs have historically landed somewhere around &eta; = 2&ndash;5. For the full &eta; sweep with confidence bands, open the <a href="explorer.html">&eta; explorer</a>.</p>
     <div class="controls">
       <label for="eta">η =</label>
       <input type="range" id="eta" min="0" max="8" step="1" value="4" aria-label="etch efficiency advantage eta">

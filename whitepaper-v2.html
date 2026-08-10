@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Substrate — Whitepaper v2 (draft)</title>
+<meta name="description" content="A measured case for etching world-model inference into a robot's head." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<meta name="theme-color" content="#100E18" />
+<meta name="robots" content="noindex, nofollow" />
+<meta property="og:title" content="Substrate — Whitepaper v2 (draft)" />
+<meta property="og:description" content="A measured case for etching world-model inference into a robot's head." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="wordmark" href="index.html">
+    <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+      <rect x="0" y="0" width="8" height="8" fill="currentColor" opacity=".18"/>
+      <rect x="1" y="1" width="2" height="2" fill="currentColor"/>
+      <rect x="5" y="1" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
+    </svg>
+    <span>Substrate</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html" aria-current="page">Whitepaper</a><a href="chip.html">Chip</a><a href="feasibility.html">Feasibility</a><a href="index.html#about">About</a>
+  </nav>
+</header>
+<main id="main" tabindex="-1" class="doc">
+  <article>
+    <p class="label">Whitepaper v2 &mdash; working draft</p>
+    <h1>Substrate: the compute platform for embodied AI</h1>
+
+    <p class="doc-lede">Frontier physical AI increasingly wants datacenter-class inference inside machines that live on tens of watts and hard real-time deadlines. The interesting question is not whether we can build a chip a few times more efficient than a GPU. It is whether that efficiency, together with model and compiler co-design, can move important robot workloads across the physical boundaries that today keep them off the machine.</p>
+
+    <p class="doc-lede"><strong>Substrate does not assume that a 2&ndash;3&times; accelerator is intrinsically worth building.</strong> Its value depends on whether that improvement crosses a hard physical constraint and enables materially more capable intelligence onboard a robot. Our program is explicitly designed to test that question before committing substantial capital to silicon.</p>
+
+    <p class="prov-note">Source tags: <span class="prov prov-m">[M]</span> measured ourselves &middot; <span class="prov prov-s">[S]</span> computed by our simulator &middot; <span class="prov prov-f">[F]</span> measured in production at a robotics company &middot; <span class="prov prov-x">[X]</span> published elsewhere &middot; <span class="prov prov-t">[T]</span> a target, not yet reached.</p>
+
+    <h2>Executive summary</h2>
+    <p>Humanoid robotics is converging on video-action models that predict several seconds of motion and replan fast enough for human-like reaction latency. The leading models are still too large to run inside a robot head, so teams run them on kilowatt-class datacenter GPUs and stream the answer back over a network. That puts latency, jitter, and connectivity failures directly inside the control loop <span class="prov prov-f">[F]</span>.</p>
+    <p>Early architectural analysis suggests specialization alone may yield roughly <strong>2&ndash;3&times;</strong> more useful work per watt than a general-purpose edge GPU held to the same power <span class="prov prov-s">[S]</span>. We do not claim this alone runs today&rsquo;s largest world models onboard &mdash; it does not. We claim something more defensible: physical-AI inference contains enough stable, exploitable structure that co-designing hardware, compiler, and model together can move important workloads from impractical to deployable.</p>
+    <p>So the paper is organized around a distinction we think matters more than any single multiplier: the difference between making a workload <em>faster</em> and making it <em>possible</em>. In edge robotics, crossing a hard constraint changes a workload from off-board to on-board, and that is where the value is.</p>
+
+    <h2>1. The problem</h2>
+    <p>A robot&rsquo;s controller now runs on a large video-action diffusion transformer that has to answer within a hard control period, from inside a head that can reject only tens of watts. Neither the datacenter nor the radio is a real answer. A datacenter GPU meets the deadline at a kilowatt and a network hop away; a radio link carries the answer back until the channel gets busy, at which point jitter and loss land inside a stability-critical loop <span class="prov prov-f">[F]</span>. A machine that needs connectivity to stay upright is a demo, not a product. The inference has to live on the robot.</p>
+
+    <h2>2. Physical-AI inference is structurally different</h2>
+    <p>General-purpose AI inference optimizes throughput across many requests. Embodied inference does not look like that. It is batch-one, under a hard deadline, on a bounded power budget, with continual sensor input and a great deal of temporal redundancy between one observation and the next. Those differences are not incidental. They are what create room to specialize &mdash; and, just as importantly, they are properties we expect embodied AI to keep even as specific model architectures churn.</p>
+
+    <h2>3. What are we actually specializing?</h2>
+    <p>The failure mode for a silicon company is to hardwire the wrong thing. If we etch a 14-billion-parameter diffusion transformer into a mask and the field moves to a recurrent state-space model in eighteen months, the chip is scrap. So we separate the workload into what is likely stable and what is not.</p>
+    <p><strong>Stable properties</strong>, the ones we expect embodied inference to retain across architecture changes, and therefore the ones worth building into hardware: batch-one inference; hard latency deadlines; a bounded power and thermal envelope; a continual stream of sensor input; temporal redundancy between successive observations; persistent state; multimodality; repeated inference over slowly-evolving observations; low-precision tensor math; heavy tensor movement; predictable deployment shapes; and long-running control loops.</p>
+    <p><strong>Unstable properties</strong>, the ones we should not freeze into silicon yet: diffusion versus autoregressive generation; softmax attention versus state-space models; JEPA versus pixel prediction; exact tensor shapes; tokenization; the number of denoising steps; and any one current VLA architecture.</p>
+    <p>The architectural philosophy follows directly: <strong>hardwire the invariants, and keep programmability around the uncertainty.</strong> DreamZero is our reference workload for stressing the architecture, not the thing we specialize for. The boundary we specialize is embodied inference.</p>
+
+    <h2>4. Efficiency is not capability: the capability boundary</h2>
+    <p>A multiplier only matters insofar as it changes what the robot can do. Performance has highly nonlinear commercial value in edge robotics, because robots operate under hard constraints, and crossing a threshold turns a workload from impossible to possible. We call each such threshold a <strong>capability boundary</strong>.</p>
+    <p>Consider a workload with a 200&nbsp;ms control deadline. A general-purpose part that takes 350&nbsp;ms misses it; a specialized part that takes 175&nbsp;ms clears it. That 2&times; is transformative, because it crosses the boundary from off-board to real-time on-board (illustrative). Contrast a workload where the specialized part takes 6.2&nbsp;s against the same 200&nbsp;ms deadline: the same 2&times; is real but not yet commercially sufficient, because nothing crossed a boundary.</p>
+    <p>The boundaries worth crossing are concrete: control-loop latency; thermal envelope; battery power; memory capacity; memory bandwidth; physical cooling; bill of materials; the ability to operate offline; and model quality achievable at a fixed power. Substrate does not optimize benchmark throughput for its own sake. It tries to move the frontier of what intelligence can physically reside onboard an autonomous machine.</p>
+
+    <h2>5. The evidence so far, stated plainly</h2>
+    <p>We built a simulator and made it reproduce measured Blackwell silicon to within 0.7&ndash;4.6&#8202;% on latency before letting it predict anything <span class="prov prov-m">[M]</span>. Under that calibration, architecture specialization at the same power buys roughly 2&ndash;3&times; useful work per watt <span class="prov prov-s">[S]</span>.</p>
+    <p><strong>Hardware specialization alone does not close the current gap.</strong> On a DreamZero-class 14&nbsp;B model, the design finishes a chunk in about 6.2&nbsp;s where a same-power Thor takes about 13.0&nbsp;s <span class="prov prov-s">[S]</span> &mdash; a genuine 2.1&times; win, and roughly 31&times; short of a 200&nbsp;ms deadline. We feature that number rather than bury it, because it is informative: running this model onboard under today&rsquo;s assumptions requires some combination of architecture efficiency, model efficiency, temporal reuse, and algorithmic reduction.</p>
+    <p>We are deliberately careful here. Those factors do not automatically multiply into a single clean number, because their gains can overlap. <strong>We do not currently know whether sufficient combined gains exist. Determining that is one of the central technical questions of the program.</strong></p>
+
+    <h2>6. &eta; is an architecture-validation metric, not the north star</h2>
+    <p>We keep &eta;, the per-joule efficiency advantage of our datapath over the calibrated baseline:</p>
+    <p class="eq">&eta; = (useful work per joule on the RPU) / (useful work per joule on the baseline)</p>
+    <p>But it is a validation metric, not the measure of success. The program has two gates, and the second dominates.</p>
+    <p><strong>Gate A &mdash; architecture.</strong> Mapped &eta; must clear roughly 2.2 <span class="prov prov-t">[T]</span>. Below that, specialization is not producing enough advantage to justify further hardware work, and we stop.</p>
+    <p><strong>Gate B &mdash; capability.</strong> Can the resulting system run an important physical-AI workload inside a power and latency envelope that the best realistic general-purpose edge platform cannot? If &eta; is 2.5 and nothing important crosses a capability boundary, we do not tape out. If &eta; is 2.5 and an important workload moves from off-board or too-slow to real-time and onboard, then 2.5&times; is an excellent result. This distinction governs the whole program.</p>
+
+    <h2>7. The comparison we hold ourselves to</h2>
+    <p>We do not benchmark against a naive Thor. The standard is the RPU against the best reasonably optimized NVIDIA implementation available at the same time: fused and FlashAttention-class kernels, FP8/FP4 where appropriate, quantization, TensorRT and compilation, batch-one tuning, and whatever model-side optimizations a sophisticated robotics team would actually deploy. The rule that keeps us honest: <strong>if an algorithmic or software optimization works equally well on the GPU, it does not count as an RPU architectural advantage.</strong> Otherwise the company optimizes against a straw man and learns nothing.</p>
+
+    <h2>8. Co-design, without counting hypothetical gains</h2>
+    <p>The durable company is not custom hardware for existing models. It is model, compiler, and architecture co-evolving:</p>
+    <p class="eq">model &harr; compiler &harr; architecture</p>
+    <p>Potential sources of gain include temporal reuse; recurrent or persistent latent state; KV and state compression; reduced precision; structured sparsity; distillation; token reduction; fewer generative iterations; architectures chosen for efficient inference; and sensor-to-action pipelines designed around the hardware. We will not write &ldquo;2.5&times; &times; 3&times; &times; 2&times; = 15&times;&rdquo; into this paper. These are independent research directions whose gains may overlap, and <strong>we will measure their joint effect end-to-end rather than multiply isolated benchmark improvements</strong> <span class="prov prov-t">[T]</span>.</p>
+
+    <h2>9. The strongest case against us</h2>
+    <p>Here is the alternative hypothesis, stated as well as we can state it. <em>General-purpose accelerators improve quickly enough, and robotics models shrink quickly enough, that dedicated physical-AI silicon never reaches an advantage large enough to justify the cost of leaving the incumbent ecosystem.</em></p>
+    <p>The specific things that could make Substrate unnecessary: models shrinking faster than we expect; better quantization; future Thor generations; a shift to state-space or recurrent architectures that are cheaper to serve; aggressive distillation; steadily improving GPU kernels; robotics staying a small compute market; and model architectures changing faster than silicon cycles. Our thesis is falsified if, after Phase 2 below, we cannot find an important workload that crosses a capability boundary on our architecture and not on the best-optimized GPU at the same power. These are the real reasons the company could fail, and we would rather name them than discover them late.</p>
+
+    <h2>10. Why specialization sometimes wins</h2>
+    <p>Specialized processors that succeed usually do more than nudge a benchmark. They either (1) deliver an overwhelming efficiency improvement, (2) cross a hard deployment constraint, or (3) vertically integrate enough of the workload that the chip becomes part of a larger system advantage. We are not betting on category 1 &mdash; we do not claim the first TPU&rsquo;s enormous multiplier. We are betting on 2 and 3: edge robotics creates hard constraints that amplify a comparatively modest efficiency improvement, and model-hardware co-design increases the total system advantage over time.</p>
+
+    <h2>11. The product</h2>
+    <p>Substrate builds the inference computer for intelligent robots, not merely an ASIC. The stack the company grows into:</p>
+    <div class="tbl"><table>
+      <thead><tr><th scope="col">Layer</th><th scope="col">What it is</th></tr></thead>
+      <tbody>
+      <tr><td>Robot models</td><td>the world-action models a customer wants to run</td></tr>
+      <tr><td>Model optimization / co-design</td><td>distillation, reuse, precision, chosen for inference</td></tr>
+      <tr><td>Compiler + runtime</td><td>schedule, memory movement, deadline certificate</td></tr>
+      <tr><td>Physical-AI architecture</td><td>the dataflow and memory hierarchy we specialize</td></tr>
+      <tr><td>RPU silicon</td><td>the part in the head</td></tr>
+      <tr><td>Robot</td><td>the machine it runs in</td></tr>
+      </tbody>
+    </table></div>
+    <p>Owning more than one layer is also what makes the business robust: if one model family disappears, the platform does not.</p>
+
+    <h2>12. A roadmap of progressively expensive falsification</h2>
+    <p>We are not starting a company whose immediate job is to tape out a robot ASIC. We are starting one whose immediate job is to determine whether a robot ASIC deserves to exist. Each phase is a chance to kill the thesis cheaply before the next dollar tier.</p>
+    <div class="tbl"><table>
+      <thead><tr><th scope="col">Phase</th><th scope="col">What it settles</th><th scope="col">Kill criterion</th></tr></thead>
+      <tbody>
+      <tr><td>0 &mdash; Measure</td><td>real workloads and a credible, optimized Thor baseline</td><td>&mdash;</td></tr>
+      <tr><td>1 &mdash; Model</td><td>a validated architectural and energy simulator</td><td>mapped &eta; below threshold</td></tr>
+      <tr><td>2 &mdash; Capability search</td><td>find workloads where the architecture crosses a deployment boundary</td><td>no important workload crosses one</td></tr>
+      <tr><td>3 &mdash; FPGA</td><td>scheduling, utilization, memory, dataflow, compiler, power</td><td>measured &eta; below the modeled claim</td></tr>
+      <tr><td>4 &mdash; Shuttle silicon</td><td>the physical assumptions at our voltage</td><td>silicon below the FPGA projection</td></tr>
+      <tr><td>5 &mdash; Production ASIC</td><td>the product</td><td>only after A, boundary, customer pull, workload stability</td></tr>
+      </tbody>
+    </table></div>
+    <p>Phase 2 is the one most roadmaps skip, and it is the one that decides whether the rest is worth doing.</p>
+
+    <h2>13. The open questions, and who we are looking for</h2>
+    <p>We are not hiring people to build something we have already figured out. We think embodied intelligence demands a new computing architecture, we have early evidence, and many of the fundamental questions are still open. We are assembling a small team to work out what the computer inside the next generation of intelligent machines should be. The questions on the table:</p>
+    <ul>
+      <li>What computation is genuinely stable across physical-AI models?</li>
+      <li>How much temporal redundancy can actually be exploited?</li>
+      <li>How much generality can we delete before we lose the ability to follow the model layer?</li>
+      <li>What must stay programmable?</li>
+      <li>Can model architectures themselves be redesigned around edge inference?</li>
+      <li>Where, concretely, does specialization cross a deployment boundary?</li>
+      <li>What is the real energy cost of moving data versus computing it?</li>
+    </ul>
+    <p>If those read like the problem you want, the instrument, the data, and the open questions are here.</p>
+
+    <p class="readmore"><a href="whitepaper.html">Read the current whitepaper &rarr;</a></p>
+  </article>
+</main>
+
+<footer>
+  <span>Substrate</span>
+  <span class="foot-tag">Inference silicon for embodied AI</span>
+</footer>
+
+</body>
+</html>
