@@ -54,6 +54,18 @@ accumulator again). Corrected E2M1-with-adder-tree arithmetic is **0.0038–0.00
 implying Thor at 6–9% and eta 2.2–3.3× at f_ours = 20% — reinforcing the central estimate
 from a route that previously threatened it.
 
+**External review notice (2026-08-10).** A 20-finding adversarial review was accepted in
+full (triage: `review-audit.md`). Three caveats now attach to the numbers above until the
+P0 fixes land: (a) the launch-vs-mature spread rests on a compiler derate modeled as an
+exact 1/c energy penalty — the all-power-utilization-independent corner — so **the 2.0/2.9
+split is less secure than the point values suggest**; (b) the implied-f consistency guard
+mixes accounting boundaries and is downgraded to a diagnostic; (c) **Thor's 2070 TFLOPS FP4
+is the SPARSE rating** and our contract forbids sparsity — the dense peak is 7.96 TFLOP/W,
+which our launch scenario's assumed Thor-achieved (9.0) exceeds. Confirmed against two
+secondary sources; headline recomputation is deliberately held for NVIDIA's primary dense
+figure because the change is favourable to us. Sensitivity if confirmed: launch ~2.9-4.0×,
+mature ~4.3-5.9×.
+
 Three findings from this program constrain everything above, and all three are measured on
 real silicon by us:
 

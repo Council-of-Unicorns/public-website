@@ -332,3 +332,47 @@ as prose; it is now unrepresentable at the one site that bypassed the converter.
 Sweep: grepped all pJ/B literals in scripts/ and docs/ for values under 8 used as DRAM
 byte energy — no other instance.
 
+---
+
+## 2026-08-10 — external adversarial review of SIM_REVIEW_HANDOFF (20 findings)
+
+The strongest external pass to date. Every finding triaged; none dropped. Verification of
+the two number-moving claims done by us against primaries before acceptance (L10).
+
+### Triage
+
+| # | Finding | Bucket | Disposition |
+|---|---|---|---|
+| 1 | `f_ours` boundary ambiguous (numerator includes tree; denominator says "multipliers") | **ACCEPT P0** | Root cause of the implied-f pathology we had flagged. Interim: boundary caveat + guard downgrade (done). Full fix: ledger rebuild (below) |
+| 2 | Compiler extraction as exact 1/c energy penalty assumes zero gating | **ACCEPT P0** | Correct: 1/c is the all-power-utilization-independent corner. The 2.04-vs-2.96 gap is less secure than stated; needs P(u) affine activity model. Until then the staging spread carries this caveat wherever quoted |
+| 3 | S≈η 1.5% deviation vs DRAM 18-37% apparently inconsistent | **ACCEPT P0, diagnosed** | Both internally true but in DIFFERENT accountings: calibrated-GPU-anchored (byte fraction ~1%) vs first-principles-FP4 (DRAM 18-37%). Two accountings coexist across published artifacts; must be unified into one canonical equation with printed deviation |
+| 4 | Anchors power-capped ⇒ E≈600·t ⇒ latency/energy not independent; 4 constraints vs 4 params | **ACCEPT P1** | Verified: all four anchors at 596.6-600.0 W. Fit quality ≠ validation. Split calibration/validation dirs; add Jacobian conditioning report |
+| 5 | bw_util=1.0 refuted yet active in predictions | **ACCEPT P0 (policy)** | Footer now states the policy caveat; the fit/prior/prediction split is the real fix |
+| 6 | Arithmetic energy needs a structured sub-term ledger | **ACCEPT P1** | Folds into the ledger rebuild; the 0.0031 "ceiling" value relabeled optimistic extrapolation |
+| 7 | Implied-f guard uses incompatible boundaries; untrustworthy as rejection | **ACCEPT P0 — DONE** | Guards downgraded to boundary-caveated DIAGNOSTIC text in the explorer this commit |
+| 8 | Thor 2070 TFLOPS is the SPARSE rating; workload contract forbids sparsity | **ACCEPT P0 — VERIFIED, OPEN** | Confirmed vs two secondary sources: dense FP4 = 1035 ⇒ dense peak 7.96 TFLOP/W. Our launch default (Thor achieved 9.0) EXCEEDS the dense peak — impossible on the contracted workload. Dense-peak pin added to the explorer. Headline recomputation deliberately HELD until NVIDIA primary confirms dense FP4 (sensitivity: launch ~2.0→~2.9-4.0, mature ~2.9→~4.3-5.9 — favourable, therefore held to the higher standard) |
+| 9 | CFG KV sharing needs semantic proof (branch-dependent K/V cannot be shared) | **ACCEPT P0 audit — FOUNDER INPUT NEEDED [F]** | Code assumes context-KV is a once-encoded cache shared across branches (valid iff the fork encodes context once). If invalid, KV doubles to 15.5 GB/step and the 5 Hz bandwidth margin goes negative. Blocked on fork behaviour confirmation |
+| 10 | 4.9× scheduled-vs-ideal traffic gap unexplained term-by-term | ACCEPT P1 | Cause-code ledger per byte above lower bound |
+| 11 | Fleet NoC/clock/SRAM costs absent from geometry optimum | ACCEPT (= Phase 4.5, already roadmapped) | Geometry outputs relabeled "compute-array utilization optimum ignoring fleet interconnect" |
+| 12 | Global overlap 0.9 hides the pipeline | ACCEPT P1 | Derive overlap from a small pipeline model; compare to 0.9 |
+| 13 | Stage-cost fractions hard-coded in latency | ACCEPT P1 | Move to versioned workload spec |
+| 14 | 20k MC cannot establish 1e-4 (95% UCB ≈ 1.5e-4 at zero misses) | **ACCEPT P0 (honesty) / P2 (estimator)** | Footer caveat added now; INSUFFICIENT-RESOLUTION verdict + rare-event estimator to follow |
+| 15 | "Ceiling"/"downside" are scenarios, not bounds | **ACCEPT P0 — DONE** | Renamed launch/mature/optimistic/conservative design points across explorer + tests |
+| 16 | Joint uncertainty absent | ACCEPT P2 | Probabilistic + bounded-robust modes |
+| 17 | High-level factors can double-count; derive f from the ledger | ACCEPT (ledger) | The strongest argument for the rebuild |
+| 18-19 | Static power as fixed TDP fraction; power/runtime fixed point | ACCEPT P2 | Physically explicit E(t) + feasibility solve |
+| 20 | One canonical workload IR | ACCEPT (ledger) | With Sim-B independence preserved: B implements the spec, never imports A's counts |
+
+**Rejected outright: nothing.** Partial pushback recorded on #2 (in a fully power-capped
+regime a compiler derate that manifests as extra traffic/recompute IS an energy penalty;
+the reviewer's point stands for the idle-bubble component) and #3 (each accounting is
+internally consistent; the defect is their unreconciled coexistence).
+
+### The two decisions deliberately NOT taken this pass
+
+1. **Headline numbers not yet recomputed under dense-Thor semantics (#8)** despite the
+   change being favourable — L12 discipline: a correction that raises our numbers gets a
+   primary source (NVIDIA's own dense FP4 figure), not two secondary ones.
+2. **The ledger rebuild (#1/#2/#3/#17/#20) not started inline** — it is a redesign of the
+   simulator's core accounting and gets its own planned phase, not a same-day patch.
+
