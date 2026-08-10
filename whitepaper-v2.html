@@ -31,7 +31,7 @@
     <span>Substrate</span>
   </a>
   <nav aria-label="Sections">
-    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html" aria-current="page">Whitepaper</a><a href="chip.html">Chip</a><a href="feasibility.html">Feasibility</a><a href="index.html#about">About</a>
+    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="whitepaper.html">Whitepaper</a><a href="chip.html">Chip</a><a href="feasibility.html">Feasibility</a><a href="index.html#about">About</a>
   </nav>
 </header>
 <main id="main" tabindex="-1" class="doc">
@@ -69,7 +69,7 @@
 
     <h2>5. The evidence so far, stated plainly</h2>
     <p>We built a simulator and made it reproduce measured Blackwell silicon to within 0.7&ndash;4.6&#8202;% on latency before letting it predict anything <span class="prov prov-m">[M]</span>. Under that calibration, architecture specialization at the same power buys roughly 2&ndash;3&times; useful work per watt <span class="prov prov-s">[S]</span>.</p>
-    <p><strong>Hardware specialization alone does not close the current gap.</strong> On a DreamZero-class 14&nbsp;B model, the design finishes a chunk in about 6.2&nbsp;s where a same-power Thor takes about 13.0&nbsp;s <span class="prov prov-s">[S]</span> &mdash; a genuine 2.1&times; win, and roughly 31&times; short of a 200&nbsp;ms deadline. We feature that number rather than bury it, because it is informative: running this model onboard under today&rsquo;s assumptions requires some combination of architecture efficiency, model efficiency, temporal reuse, and algorithmic reduction.</p>
+    <p><strong>Hardware specialization alone does not close the current gap.</strong> On a DreamZero-class 14&nbsp;B model, the design finishes a chunk in about 6.2&nbsp;s where a same-power Thor takes about 13.25&nbsp;s <span class="prov prov-s">[S]</span> &mdash; a genuine 2.13&times; win, and roughly 31&times; short of a 200&nbsp;ms deadline. We feature that number rather than bury it, because it is informative: running this model onboard under today&rsquo;s assumptions requires some combination of architecture efficiency, model efficiency, temporal reuse, and algorithmic reduction.</p>
     <p>We are deliberately careful here. Those factors do not automatically multiply into a single clean number, because their gains can overlap. <strong>We do not currently know whether sufficient combined gains exist. Determining that is one of the central technical questions of the program.</strong></p>
 
     <h2>6. &eta; is an architecture-validation metric, not the north star</h2>
