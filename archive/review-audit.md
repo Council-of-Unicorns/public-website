@@ -376,3 +376,36 @@ internally consistent; the defect is their unreconciled coexistence).
 2. **The ledger rebuild (#1/#2/#3/#17/#20) not started inline** — it is a redesign of the
    simulator's core accounting and gets its own planned phase, not a same-day patch.
 
+### 2026-08-10 (2) — review fixes #2/#3/#4/#5/#14 landed
+
+All five implemented test-first (12 new tests in `tests/test_review_fixes.py`); the two
+most load-bearing verified by mutation (a do-nothing prediction policy and a
+certify-anything UCB both kill their tests).
+
+- **#2** `rpu/extraction.py`: the 1/u compiler penalty is now the g = 1 corner of an
+  explicit gating model. Consequence recorded: **the published launch figure is the FLOOR
+  of a band** — 2.88 (no gating) to 4.19 (perfect gating) — to the extent the derate is
+  utilization rather than energy overhead. Point estimate stays at the conservative end.
+- **#3** `rpu/eta.py`: the canonical Amdahl-in-energy equation with a
+  `SpeedupReconciliation` readout (eta-only vs full-ledger vs deviation), pinned on the
+  reviewer's exact synthetic cases.
+- **#4** `fixtures/validation/` with a `.validation` sentinel the loader REFUSES —
+  fitting on held-out data is now mechanically impossible. And `identifiability()`:
+  numerical Jacobian SVD at the fit point. **Measured result: singular values
+  4.995 / 2.437 / 0.0207 / 0.000113, condition number 4.4e4 — the fit is effectively
+  rank 2**, which is the reviewer's power-cap degeneracy argument made quantitative. The
+  qualitative UNIDENTIFIED flag was, if anything, an understatement.
+- **#5** `prediction_util()`: explicit fit/prediction split. The pinned bw_util = 1.0
+  stays as the fit result; predictions get the measured 0.816 upper bound. e_byte keeps
+  its fitted value with the policy reason stated (pinned at the conservative-direction
+  bound, no independent measurement yet). Downstream consumers not yet switched — that
+  flip moves golden artifacts and is a deliberate follow-up.
+- **#14** `LatencyResult.miss_rate_ucb95` / `.resolves(target)`: rule-of-three at zero
+  misses, normal approximation otherwise. 20,000 zero-miss draws now mechanically CANNOT
+  certify 1e-4 (UCB 1.5e-4); 40,000 can.
+
+Remaining from the review: the ledger rebuild (#1/#17/#20), overlap pipeline (#12), stage
+spec (#13), traffic cause codes (#10), fleet pricing (#11 = Phase 4.5), joint uncertainty
+(#16), static/fixed-point power (#18/#19), typed PeakThroughput (#8 infrastructure —
+semantics corrected, type system pending).
+
