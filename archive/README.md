@@ -1,7 +1,7 @@
 # Archive — RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-07 at etched commit 97d25b5 (coherence polish: staged numbers lead the summary, correction-layer reading guide, die/module terminology at the power-parity identities; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-10 at etched commit c75f5d0 (coherence polish: staged numbers lead the summary, correction-layer reading guide, die/module terminology at the power-parity identities; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
 
 ## Canonical documents
 
