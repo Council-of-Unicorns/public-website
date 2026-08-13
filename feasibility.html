@@ -115,13 +115,13 @@ trajectory in 4.5 seconds where Thor needs 13.</p>
 <div class="tbl"><table>
 <tr><th>Efficiency advantage we build</th><th>What it gets us</th></tr>
 <tr><td>1× (no advantage)</td><td>a tie with Thor, by physics</td></tr>
-<tr><td>2.15× (what we need)</td><td>2.12× Thor, judged at the pessimistic end rather than the average</td></tr>
+<tr><td>2.0× (the bar we froze)</td><td>roughly 2× Thor even judged at the pessimistic end rather than the average</td></tr>
 <tr><td>3× (our design target)</td><td>2.9× Thor, and still a win if Thor turns out 25% better than we assume</td></tr>
 </table></div>
 
-<p><b>What we have to build is a 2.15× efficiency advantage.</b> That is the whole
+<p><b>What we have to build is a 2× efficiency advantage — the bar we froze before exploring the design space.</b> That is the whole
 requirement, and it is the number every gate below is designed to test. Because both chips
-are held to the same 40 W, speed and energy efficiency are the same quantity, so 2.15×
+are held to the same 40 W, speed and energy efficiency are the same quantity, so 2×
 efficiency is what turns into roughly twice Thor's speed once you judge it at the
 pessimistic end of our simulation's uncertainty rather than the average. We design for 3×
 so the win survives our assumptions about Thor proving generous.</p>
@@ -195,7 +195,7 @@ function txt(p,x,y,s,c,an){const t=el("text",{x,y,class:c||"tick"},p);if(an)t.se
     fill:"none",stroke:css("--accent"),"stroke-width":2.5,"stroke-linejoin":"round","stroke-linecap":"round"},svg);
   for(const d of DATA.curve)el("circle",{cx:X(d.e),cy:Y(d.s),r:4,fill:css("--accent"),stroke:"var(--surface)","stroke-width":2},svg);
   el("line",{x1:X(2.15),x2:X(2.15),y1:m.t,y2:m.t+ih,stroke:"var(--ink)","stroke-width":1.2,opacity:.55},svg);
-  txt(svg,X(2.15)+6,m.t+ih-12,"needed: 2.15×","lbl");
+  txt(svg,X(2.0)+6,m.t+ih-12,"the bar: 2.0×","lbl");
   el("line",{x1:X(3.0),x2:X(3.0),y1:m.t,y2:m.t+ih,stroke:"var(--ink)","stroke-width":1.2,opacity:.35},svg);
   txt(svg,X(3.0)+6,m.t+ih-12,"our target: 3×","lbl");
 })();

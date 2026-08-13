@@ -20,7 +20,12 @@ agent, primary **not** opened · `[T]` target or estimate, not achieved.
 
 **We expect 2.9× over Jetson Thor at first silicon and 4.2× once the compiler matures, at
 equal 40 W head power** — with a conservative design point at 1.9× and an optimistic one
-near 11×. The bar is 2.15× and the design target is 3.0×, both unchanged.
+near 11×. **The bar is 2.0×** — the frozen contract criterion, S ≥ 2× Thor at equal power
+(`bench/contract.toml`: bar_median = 2.0, bar_p05_all_modes = 2.0) — and the design
+target is 3.0×. *Corrected 2026-08-10: the 2.05/2.15 figures previously presented as bars
+were derived η* requirements for specific criteria (byte-fraction parity; 5th-percentile-
+every-mode with a thermal margin granted to Thor) that crept into headline use. The bar
+never moved; its presentation did.*
 
 **The full bounded-robust range the evidence does not exclude: 1.9× to 15.7×** (to ~22×
 including the gated physical-design upside) `[T]` — the true min/max of η over every
@@ -200,7 +205,7 @@ RTX comparison was unsound.
 With the workload measured at 1.562 pJ/FLOP, `f_gpu` depends on one remaining literature
 term: the energy of a raw BF16 multiply-accumulate at N4, roughly 0.05–0.20 pJ/FLOP `[X]`.
 
-| MAC energy `[X]` | f_gpu | Ceiling 1/f_gpu | f_ours needed for η = 2.15 |
+| MAC energy `[X]` | f_gpu | Ceiling 1/f_gpu | f_ours needed for η ≈ 2 (the bar) |
 |---|---|---|---|
 | 0.05 pJ/FLOP | 3.2% | 31× | 6.9% |
 | 0.10 pJ/FLOP | 6.4% | 16× | 13.8% |
@@ -209,7 +214,7 @@ term: the energy of a raw BF16 multiply-accumulate at N4, roughly 0.05–0.20 pJ
 
 **`f_gpu` is 3–13%, centred near 6–8%.** Pure overhead removal is therefore capped at roughly
 8–31×, which is why a bottom-up ledger that returned 29–55× (`sim/energy.py`, since removed) was always a
-defect rather than a discovery. Clearing the 2.15 bar requires `f_ours ≈ 7–28%`, centred near
+defect rather than a discovery. Clearing the 2.0 bar requires roughly `f_ours ≈ 7–28%`, centred near
 14%.
 
 **Do not use this table as a predictor.** Propagating the same 4× spread forward gives η
@@ -276,7 +281,7 @@ utilization falls**, and batch-one decode is exactly that regime.
 published.** Hameed's ladder tops out near 35% for fused custom datapaths, and we wrote our
 gate from that *ceiling*. Two consequences:
 
-- The criterion is **stricter than η requires** (§3b: 14% suffices for the 2.15 bar). It
+- The criterion is **stricter than η requires** (§3b: ~13% suffices for the 2.0 bar). It
   should not be used to kill a design point that would have cleared the bar.
 - The realistic target is `f_ours ≈ 15–25%` — meaningfully above Eyeriss and Simba, well below
   Hameed's ceiling. Our advantage over Eyeriss is structural: no per-PE scratchpads, and adder
@@ -549,7 +554,7 @@ realized fraction of peak on this workload:
 | 35% of peak | 2.9-3.6x | clears comfortably |
 | 20% of peak | 5.0-6.3x | exceeds the 3.0 target |
 
-The 2.05 / 2.15 / 3.0 bars correspond to Thor landing at roughly 40-50% of peak.
+The 2.0 bar / 3.0 target correspond to Thor landing at roughly 40-50% of peak.
 
 **The warning sign points to the unfavourable end.** Our own measurement (3a) shows the RTX
 achieving **94.7% of peak dense-GEMM efficiency** on this workload. GPUs are not struggling

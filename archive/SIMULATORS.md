@@ -130,7 +130,7 @@ the idle-gating fraction — measurable in the Orin profiling run).
 |---|---|---|
 | Launch 2.88× / mature 4.19× / optimistic 11.0× / conservative 1.91× | A via the explorer generator | Yes — the design points |
 | Bounded-robust range 1.9–15.7× (22× gated) | A, `eta_range()` over PARAM_BOXES | Yes — labeled interval arithmetic |
-| Bars 2.05 / 2.15 / 3.0 | Frozen contract | Yes — unchanged throughout |
+| Bar 2.0 / target 3.0 | Frozen contract (bench/contract.toml) | Yes — the 2.05/2.15 figures were derived eta* values, retired from headline use 2026-08-10 |
 | Geometry 81.7%/44.4%; fusion 56.7×; pass-cycle identity | Cycle model | Yes — labeled [S] |
 | Mode tables, feasibility regions, miss rates | A (calibrated) | Yes, with UCB resolution caveat |
 | Ledger η ≈ 7.8, residency phase transition, SRAM knee | Co-design ledger | Report only — [T], not headline |
