@@ -409,3 +409,28 @@ spec (#13), traffic cause codes (#10), fleet pricing (#11 = Phase 4.5), joint un
 (#16), static/fixed-point power (#18/#19), typed PeakThroughput (#8 infrastructure —
 semantics corrected, type system pending).
 
+---
+
+## 2026-08-10 (3) — co-design investigation (model x SRAM x software brief)
+
+New parallel instrument `rpu/codesign.py` + generated report
+`docs/generated/CODESIGN_STUDY.md`. Production paths untouched (tested); no public claim
+changed; all coefficients [T].
+
+Findings: model size DOMINATES (the only knob reaching absolute 5 Hz in-ledger; full
+weight residency is a real phase transition at <=1B models with ~1 GB SRAM, zeroing weight
+DRAM traffic and external bandwidth). SRAM is a WEAK knob at the frozen 14B (<4% energy
+swing across 32 MB-1 GB; 90 MB sits at the computed knee — now derived, was assumed).
+Software: ADD BUT DERIVE — and the mechanistic ledger disagrees with the production 1/c
+model by ~2.7x on the same baseline, the strongest quantitative argument yet for review
+#2's rebuild. f_datapath derived from the ledger lands at ~24% at the baseline, inside
+the assumed 15-25%.
+
+Integrity: 9 tests, all named to the wrong implementation they reject; mutation-verified
+on the residency threshold (size-only fit logic fails the capacity+lifetime test) and the
+software rule (a blanket 1/u divisor fails the strictly-between test). Two of my own
+defects caught during the build: idle energy initially mislabeled into the NoC category
+(violating one-joule-one-category), and report prose asserting an under-provisioning
+penalty the model did not yet implement — the penalty was implemented rather than the
+prose kept.
+
