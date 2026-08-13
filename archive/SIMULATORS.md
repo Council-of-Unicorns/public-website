@@ -98,9 +98,9 @@ reconciliation: the scheduled cycle model moves **~4.9×** the fused analytical 
 open review item #10). Merging the models would turn corroboration into tautology; the
 seam tests are what make the split an asset.
 
-## 4. The co-design ledger (`rpu/codesign.py`) — the mechanistic prototype
+## 4. The mechanistic ledger (`rpu/ledger.py`) — now part of Simulator A
 
-**Investigation instrument** (2026-08-10), parallel to production, prototyping the
+**Consolidated into A** (2026-08-10; `codesign.py` is its physics-free sweep client), realizing the
 external review's structural demand: **η as an output of an energy ledger, not an input.**
 
 **The ledger:** `E_total = E_arith + E_reg_clock + E_control + E_SRAM + E_NoC + E_idle +
