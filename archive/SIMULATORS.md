@@ -13,13 +13,18 @@ opened · [X*] agent-relayed, primary not opened · [T] estimate/target.
 
 ## 0. The map
 
-There are **three instruments** and one rendering:
+**Consolidated 2026-08-10 to two instruments plus a sweep layer** (see
+`docs/generated/CONSOLIDATION_REPORT.md`): the mechanistic ledger's physics moved into
+`rpu/ledger.py` as part of Simulator A; `rpu/codesign.py` is now a physics-free client.
+The A<->ledger disagreement was decomposed exactly first — 68% overhead accounting, 32%
+software; the software-dominance hypothesis was falsified. The table below reflects the
+consolidated state:
 
 | Instrument | Lives in | Question it answers | Trust level |
 |---|---|---|---|
 | **Simulator A** — analytical roofline, calibrated | `rpu/` | Is the design feasible? Latency, energy, deadline-miss, η vs Thor | Calibrated to 4 measured anchors; predictive validity untested off-card |
 | **Cycle model** — hermetic array/memory simulator | `sim/` | What does a given array geometry and schedule physically do? | Verified against SCALE-Sim + brute force; no energy or power model |
-| **Co-design ledger** — mechanistic energy accounting | `rpu/codesign.py` | Where does every joule go, across model x SRAM x software? | Structure sound, coefficients [T]; investigation only |
+| **Mechanistic ledger path** (inside A) | `rpu/ledger.py` (+ `rpu/codesign.py` sweep client) | Where does every joule go, across model x SRAM x software? | Structure sound, coefficients [T]; informs but does not set published numbers |
 | **The explorer** — generated interactive page | `scripts/explorer_data.py` → `explorer.html` | Renders A-derived design points + the bounded-robust range | Golden-checked at page load; authoritative rendering of the headline numbers |
 
 They deliberately do **not** share code. A and the cycle model agree on FLOPs to 0.7%

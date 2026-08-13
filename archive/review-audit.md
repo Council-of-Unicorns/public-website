@@ -434,3 +434,17 @@ defects caught during the build: idle energy initially mislabeled into the NoC c
 penalty the model did not yet implement — the penalty was implemented rather than the
 prose kept.
 
+### 2026-08-10 (4) — A/ledger consolidation
+
+Hypothesis-first, per the brief: the A<->ledger 2.72x disagreement was decomposed EXACTLY
+(closure tested to 1e-9) before any migration. **Result: overhead accounting 68%, software
+32% — the software-dominance hypothesis is FALSIFIED** and recorded as such in a test
+that fails if the balance flips silently. Consolidation proceeded on the corrected basis:
+physics moved wholesale to rpu/ledger.py (parity vs pre-migration goldens tested to the
+goldens' stored precision), codesign.py reduced to a physics-free client shim,
+scaled_model homed in workload.py, reconcile.py kept as a permanent harness. Perfect-
+gating anti-double-counting test added (halving utilization with g=0 must not double
+energy); closure test mutation-verified (a broken factorization kills it). Cycle model
+untouched; seam tests green. No public number changed; the published design points and
+the ledger's ~7.8 both reproduce, now with their gap named instead of open.
+
