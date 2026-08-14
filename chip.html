@@ -326,6 +326,10 @@ const DATA = {
   "passed": true,
   "basis": "measured RTX PRO 6000 Blackwell anchors (BF16 proxy), P6 gate green",
   "compute_util": 0.8048052237822275,
+  "unidentified_parameters": [
+   "e_byte_hbm_pj",
+   "bw_util"
+  ],
   "e_flop_fp16_pj": 1.4258498609781867
  },
  "workload": {
@@ -355,7 +359,7 @@ const DATA = {
   "sustained_avg_gbs": 221.588544
  },
  "thor": {
-  "fp4_peak_pf": 2.07,
+  "fp4_peak_pf": 1.035,
   "bw_gbs": 273.0,
   "tdp_w_max": 130.0,
   "tdp_w_head": 40.0
@@ -422,39 +426,39 @@ const DATA = {
    },
    {
     "label": "VAE encode",
-    "ms": 7.130371597516549
+    "ms": 14.240102580633096
    },
    {
     "label": "prefill (KV)",
-    "ms": 28.498277582775916
+    "ms": 28.499198105800915
    },
    {
     "label": "DiT step 1",
-    "ms": 147.63222346200862
+    "ms": 289.82684312433963
    },
    {
     "label": "flow 1",
-    "ms": 2.8645330076466196
+    "ms": 5.70842540089324
    },
    {
     "label": "DiT step 2",
-    "ms": 147.63222346200862
+    "ms": 289.82684312433963
    },
    {
     "label": "flow 2",
-    "ms": 2.8645330076466196
+    "ms": 5.70842540089324
    },
    {
     "label": "DiT step 3",
-    "ms": 147.63222346200862
+    "ms": 289.82684312433963
    },
    {
     "label": "flow 3",
-    "ms": 2.8645330076466196
+    "ms": 5.70842540089324
    },
    {
     "label": "action head",
-    "ms": 2.8645330076466196
+    "ms": 5.70842540089324
    },
    {
     "label": "emit",
@@ -481,8 +485,8 @@ const DATA = {
    "eta": 1.0,
    "flop_j": 142.26358877478623,
    "byte_j": 2.8375633428479996,
-   "static_j": 1.9617078223401008,
-   "p50_ms": 490.4269555850252
+   "static_j": 3.743288746314299,
+   "p50_ms": 935.8221865785747
   }
  },
  "ops": [
@@ -716,8 +720,8 @@ const DATA = {
   ]
  },
  "eta_star": {
-  "thor_head_40w": 2.0159765700018397,
-  "thor_max_130w": 6.796229842976572
+  "thor_head_40w": 2.0159778594970703,
+  "thor_max_130w": 6.79624080657959
  }
 };
 
