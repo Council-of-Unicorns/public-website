@@ -1,7 +1,12 @@
 # Archive — RPU program documents
 
 Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-10 at etched commit c75f5d0 (coherence polish: staged numbers lead the summary, correction-layer reading guide, die/module terminology at the power-parity identities; headline eta bars unchanged at 2.05 bare / 2.15 solid / 3.0 target).
+https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-15 at etched
+commit d5924ce+ (the frozen bar is S ≥ 2× at power parity — 2.05/2.15 are derived η*
+requirements, retired from headline use 2026-08-10; dense-FP4 Thor semantics throughout,
+design points 2.9× first silicon / 4.2× mature inside a bounded-robust 1.9–15.7×; the
+2026-08-13 external review's ledger physics fixes and the two-instrument consolidation,
+see SIMULATORS.md).
 
 ## Canonical documents
 

@@ -34,7 +34,7 @@ at a deadline, not tokens per dollar:
    near-threshold literature supplies a measured technique menu (split Vdd domains, 8T
    SRAM + assist, Razor-class adaptive margin ≈47% energy recovery, splittable arrays) —
    see CHIP_SPEC §6b. Disposition: **phase-1b test-structure tile on the gate-4 shuttle;
-   never counted in the η bars (2.05 bare / 2.15 solid); pure upside if proven.** Data: fixtures/dvfs_sweep.json.
+   never counted toward the frozen 2.0 bar or its derived η* requirements; pure upside if proven.** Data: fixtures/dvfs_sweep.json.
 2. **Stretch-to-deadline static timing.** The 200 ms control period is a resource: size
    the pipeline so one chunk completes just inside it (~170 ms) at minimum viable
    voltage. Race-to-idle wastes V². Only legal because the schedule is etched (Phase 3

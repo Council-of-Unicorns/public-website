@@ -15,17 +15,20 @@ opened · [X*] agent-relayed, primary not opened · [T] estimate/target.
 
 **Consolidated 2026-08-10 to two instruments plus a sweep layer** (see
 `docs/generated/CONSOLIDATION_REPORT.md`): the mechanistic ledger's physics moved into
-`rpu/ledger.py` as part of Simulator A; `rpu/codesign.py` is now a physics-free client.
-The A<->ledger disagreement was decomposed exactly first — 68% overhead accounting, 32%
-software; the software-dominance hypothesis was falsified. The table below reflects the
+`rpu/ledger.py` as part of Simulator A. The A<->ledger disagreement was decomposed
+exactly first — 68% overhead accounting, 32% software; the software-dominance hypothesis
+was falsified. Completed 2026-08-13: the `rpu/codesign.py` compatibility shim is retired
+(clients import `rpu.ledger` / `rpu.workload` directly), and the published scalar
+identity has its own single home in `rpu/design_points.py`. The table below reflects the
 consolidated state:
 
 | Instrument | Lives in | Question it answers | Trust level |
 |---|---|---|---|
 | **Simulator A** — analytical roofline, calibrated | `rpu/` | Is the design feasible? Latency, energy, deadline-miss, η vs Thor | Calibrated to 4 measured anchors; predictive validity untested off-card |
 | **Cycle model** — hermetic array/memory simulator | `sim/` | What does a given array geometry and schedule physically do? | Verified against SCALE-Sim + brute force; no energy or power model |
-| **Mechanistic ledger path** (inside A) | `rpu/ledger.py` (+ `rpu/codesign.py` sweep client) | Where does every joule go, across model x SRAM x software? | Structure sound, coefficients [T]; informs but does not set published numbers |
-| **The explorer** — generated interactive page | `scripts/explorer_data.py` → `explorer.html` | Renders A-derived design points + the bounded-robust range | Golden-checked at page load; authoritative rendering of the headline numbers |
+| **Mechanistic ledger path** (inside A) | `rpu/ledger.py` | Where does every joule go, across model x SRAM x software? | Structure sound, coefficients [T]; informs but does not set published numbers |
+| **Published identity** (inside A) | `rpu/design_points.py` | The four-factor scalar accounting behind every published design point and the bounded-robust range | The headline source until the ledger is promoted (below) |
+| **The explorer** — generated interactive page | `scripts/explorer_data.py` → `explorer.html` | Renders `design_points` + the bounded-robust range | Golden-checked at page load; authoritative rendering of the headline numbers |
 
 They deliberately do **not** share code. A and the cycle model agree on FLOPs to 0.7%
 without any common implementation — that independence is the repo's strongest validation
@@ -56,8 +59,9 @@ so latency and energy are nearly one observation each: the Jacobian at the fit p
 singular values **4.995 / 2.437 / 0.021 / 0.00011 — the 4-parameter fit is effectively
 rank 2** [S]. Two coefficients are pinned at bounds and printed UNIDENTIFIED; an
 independent measurement (81.6% achieved bandwidth [M]) refutes one of them, and
-`prediction_util()` applies the measured bound to predictions by explicit policy while
-preserving the fit result. Held-out validation lives in `fixtures/validation/`, which
+`prediction_util()` states the prediction policy (measured bound over pinned artifact)
+without altering the fit — the calibrated pipeline itself still reports the fit and
+adopts the policy at the next re-fit, when goldens are re-pinned. Held-out validation lives in `fixtures/validation/`, which
 the calibration loader **mechanically refuses** to fit on. A sealed Orin prediction
 (59.1 ms / 2.68 J, `docs/PREDICTIONS.md`) awaits the board.
 
@@ -100,7 +104,7 @@ seam tests are what make the split an asset.
 
 ## 4. The mechanistic ledger (`rpu/ledger.py`) — now part of Simulator A
 
-**Consolidated into A** (2026-08-10; `codesign.py` is its physics-free sweep client), realizing the
+**Consolidated into A** (2026-08-10; the `codesign.py` shim retired 2026-08-13), realizing the
 external review's structural demand: **η as an output of an energy ledger, not an input.**
 
 **The ledger:** `E_total = E_arith + E_reg_clock + E_control + E_SRAM + E_NoC + E_idle +
@@ -110,13 +114,18 @@ E_DRAM + E_static` — every joule in exactly one category (tested to 1e-12).
 (utilization → time and gated idle energy; fusion quality → spill traffic; DMA overlap →
 hiding) — never a divisor. Residency is a four-state taxonomy (external / package /
 partial / full) decided by capacity + lifetime, with an under-provisioning spill penalty
-and a [T]-gated package-memory tier that lowers pJ/B but never deletes bytes.
+and a [T]-gated package-memory tier that lowers pJ/B and charges time at a finite tier
+bandwidth — it never deletes bytes. Physics corrected 2026-08-13 (external review, 10
+findings): the residency planner now imports the workload's full L-layer KV footprint
+(the local re-derivation dropped the layer factor and marked a ~1.3 GB cache resident in
+1 GB), the DMA-overlap time formula respects both channel floors, and SRAM-resident KV
+no longer pays stream-through buffering.
 
 **What it found** (`docs/generated/CODESIGN_STUDY.md`, all [T]-coefficient): model size
 dominates every objective, with a real **full-weight-residency phase transition at ≤1B
 models + ~1 GB SRAM** (weight DRAM traffic → 0); SRAM is a **weak knob at the frozen
-14B** (<4% energy swing across 32 MB–1 GB; 90 MB sits at the computed knee — derived,
-was assumed); and it disagrees with A's software accounting by **~2.7×** on the same
+14B** (<4% energy swing across 32 MB–1 GB; the computed knee is ~96 MB, adjacent to the
+chosen 90 MB); and it disagrees with A's software accounting by **~2.7×** on the same
 baseline — the strongest argument for the ledger rebuild, and the reason neither number
 quotes against the other until a measurement pins the gating factor.
 
@@ -138,7 +147,7 @@ the idle-gating fraction — measurable in the Orin profiling run).
 ## 6. Operating it
 
 ```
-bash scripts/check.sh                      # the whole gate: ruff, mypy, 143+74 tests, guards
+bash scripts/check.sh                      # the whole gate: ruff, mypy, pytest, guards
 bazel test //...                           # hermetic cycle-model suite alone
 PYTHONPATH=. .venv/bin/python scripts/explorer_data.py   # regenerate the explorer page
 PYTHONPATH=. .venv/bin/python scripts/codesign_study.py  # regenerate the co-design report
@@ -158,3 +167,17 @@ Thor's side of every published ratio, prices the compiler gating factor that sep
 A's 2.88 from the ledger's 7.8, and lands as the first entry in the fit-refused
 validation directory. Every analytical route to sharpening the numbers has been run,
 twice, plus an external review; the instruments are now waiting on physics.
+
+## 8. The promotion plan (standing, decided 2026-08-13)
+
+The architecture is converged in advance so that promoting the ledger to the published
+accounting is **one edit, not a refactor**: the ledger is the only mechanistic physics
+(shim retired), the scalar identity has one home (`rpu/design_points.py`), and
+`rpu/reconcile.py` is the permanent bridge that names their disagreement. The switch —
+re-deriving the published design points from `evaluate()` instead of `eval_point()` —
+is **gated on the Orin measurement** pricing the idle-gating factor `g`, because the
+ledger's coefficients are [T] and publishing them as headline before a measurement
+arbitrates the 68% overhead share would trade a calibrated instrument for an
+uncalibrated one. When the gate opens: swap the design-point source, re-pin the explorer
+goldens, retire the reconciliation harness, and record the change here and in
+`review-audit.md`.

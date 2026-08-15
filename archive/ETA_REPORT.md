@@ -542,7 +542,7 @@ down. The same bet expressed against published Thor specs needs only a benchmark
 
 | | TFLOP/W |
 |---|---|
-| Thor, **peak**, FP4, from spec (2070 TFLOPS / 130 W) `[X]` | **15.9** |
+| Thor, **peak**, FP4, from spec (2070 TFLOPS / 130 W; SPARSE rating — dense, the only peak usable on this contract, is 1035 = 7.96, per the 2026-08-10 correction) `[X]` | **15.9** |
 | Our chip, **sustained**, at f_ours = 20-25% and 0.0125 pJ/FLOP FP4 arithmetic `[T]` | **16-20** |
 
 **We are claiming to sustain what Thor can only peak at.** Everything then turns on Thor's
@@ -671,7 +671,11 @@ no assumptions with 7 (lesson L5).
 **One identity does the work.** `eta = Thor pJ/FLOP / our pJ/FLOP`, and `our pJ/FLOP =
 arithmetic / f_ours`. Thor's peak is a hard published number — 2070 TFLOPS / 130 W =
 **0.0628 pJ/FLOP** `[X]` — so the same arithmetic primitive that sets our floor *also* fixes
-Thor's own overhead fraction. It is the hinge, not a free parameter:
+Thor's own overhead fraction. It is the hinge, not a free parameter (*dated layer:
+written pre-2026-08-10; the 2070 figure is the SPARSE rating — under the dense-semantics
+correction at the head of this report the usable peak is 1035 = 0.1256 pJ/FLOP, which
+halves every "implies Thor's f" entry below; the current identity lives in
+`rpu/design_points.py` and the explorer*):
 
 | FP4 MAC cost | Implies Thor's f | eta at f_ours = 20 % | Ceiling at f_ours = 35 % |
 |---|---|---|---|

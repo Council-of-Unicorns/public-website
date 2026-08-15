@@ -65,6 +65,16 @@ review found `test_dma_overlap_is_opt_in` asserting `total == compute` on a
 compute-dominant shape, which blessed an overlap implementation that deleted the memory
 term outright.
 
+**Recurrence (2026-08-13, review #4) — the rule needed strengthening.** The
+reconciliation closure test asserted `residual == 1.0` and `shares sum to 1.0` — both
+algebraic identities of the factorization's *definition*, true for any model, any bug,
+any coefficients (the module docstring even said "exactly, by construction"). The rule
+below failed to prevent it because "break the code and watch it fail" was read as
+breaking the *arithmetic* (which the identity does catch) rather than the *meaning*.
+Strengthened: an assertion derivable from the definitions of the quantities it compares
+is an identity, not a test — pin observed VALUES (with a stated re-pin procedure) or
+compare against an independently computed quantity.
+
 **Rule.** After writing a test, break the code deliberately and confirm the test fails.
 For any test asserting a ratio or an equality between two paths, pick inputs where the
 correct and incorrect implementations give *different* answers, and say in the docstring
@@ -228,12 +238,25 @@ models silently disagreed about the same draw's traffic whenever weights fit SRA
 caught it because every current row streams (7 GB against 90 MB) — the divergence sat
 exactly in the region the fixtures never visit.
 
+**Recurrence (2026-08-13, review #1/#6) — same class, two new forms.** (a) The ledger's
+residency planner re-derived the per-step KV footprint locally as `2*n_ctx*d` where the
+workload's own accounting says `2*n_ctx*d*L` — the dropped layer factor marked a ~1.3 GB
+cache SRAM-resident inside 1 GB and inflated the co-design study's best point from
+~10.4x to 12.3x. Exactly the L14 signature: a re-derivation drifting precisely in the
+region (small models, large SRAM) no fixture exercised. (b) Constants are rules too:
+Thor's achieved efficiency, the launch accounting, and the measured 0.816 bandwidth
+bound were each typed in two modules; and the whole published-number identity
+(`eval_point`) lived in `scripts/` rather than `rpu/`. Fixed by creating
+`rpu/design_points.py` as the single home and importing everywhere else.
+
 **Rule.** Any decision about physical behaviour — residency, roofline regime, precision
 pricing, CFG reuse — is computed in exactly one function, and every model that needs it
-calls that function. A module that re-states the decision inline is a defect even while
-its output is numerically identical, because the models can only drift apart silently,
-and they will drift first in the region no fixture exercises. Sweep: S9 in
-[`review-audit.md`](review-audit.md).
+calls that function; a load-bearing *constant* is the degenerate case and gets one home
+the same way. Derived quantities (footprints, traffic) are imported from the module that
+owns them, never re-derived locally. A module that re-states the decision inline is a
+defect even while its output is numerically identical, because the models can only drift
+apart silently, and they will drift first in the region no fixture exercises. Sweeps:
+S9, S17 in [`review-audit.md`](review-audit.md).
 
 ## L15 — a test that cannot distinguish the fix from the bug is decoration
 

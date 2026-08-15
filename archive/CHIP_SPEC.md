@@ -13,11 +13,14 @@ arithmetic is corrected where the instrument refutes it (§3).
 - **Form factor:** fanless robot head, **40 W chip power at the neck-path ceiling — power
   parity with Thor-in-head** (2026-07-29; the TDP ratio cancels, S = η exactly).
 - **Success metric — SOLID beat at power parity (revised 2026-07-29, §A8a):** **S ≥ 2×
-  vs Thor-in-head at the 5th percentile, in EVERY mode including Deadline** → requires
-  **η ≥ 2.15**; the **design target is η = 3** (solid even if Thor gets a 25%
-  thermal-budget margin, 50 W → η ≥ 2.80). The bare bar (median S ≥ 2, best mode) is
-  η ≥ 2.05 and is not a success claim (it leaves Deadline mode at 1.91× median). The
-  solid bar sits mid-band in the architecture-only evidence (1.6–3.2×) and the target at
+  vs Thor-in-head at the 5th percentile, in EVERY mode including Deadline**, and median
+  S ≥ 2 — **both frozen at 2.0 in bench/contract.toml; the bar is on S, not on η**
+  (clarified 2026-08-10: the derived figures below had crept into use as if they were
+  bars). In the current model the p05-every-mode criterion derives **η* ≈ 2.15** and the
+  median criterion **η* ≈ 2.05** (which alone is not a success claim — it leaves
+  Deadline mode at 1.91× median); the **design target is η = 3** (solid even if Thor
+  gets a 25% thermal-budget margin, 50 W → η ≥ 2.80). The derived solid
+  requirement sits mid-band in the architecture-only evidence (1.6–3.2×) and the target at
   its top, so the stacked levers (realized-utilization edge — the TPU 80%-vs-37%
   latency-bound datum, uncredited in the fair headline — Ledger-B realization gains,
   sub-Vmin §6b) are margin, not load-bearing. The solid bar also now coincides with the
@@ -104,7 +107,7 @@ ladder, and the gate-1 anchor requirement: [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWI
 **Quality is the flagship mode** — the headline numbers quote it — and the solid
 criterion still requires every mode to clear 2×. (40 W parity, 2026-07-29.)
 
-| Mode | Schedule | Chunk @ η=2.15 | @ η=3 | vs Thor-in-head (η=2.15/3) | 200 ms deadline |
+| Mode | Schedule | Chunk @ η*=2.15 (derived solid criterion) | @ η=3 (target) | vs Thor-in-head (η*=2.15/3) | 200 ms deadline |
 |---|---|---|---|---|---|
 | **Quality (flagship)** | 3-step CFG, N_new=3120 | 6.21 s | 4.47 s | **2.13× / 2.97×** | misses |
 | **Balanced** | 2-step CFG, N_new=3120 | 4.14 s | 2.98 s | 2.13× / 2.97× | misses |
@@ -117,8 +120,9 @@ absolute energies. Relative speedups are s-insensitive and improved slightly.)*
 Implications the silicon must honor: (a) the schedule sequencer is a small **microcode ROM**,
 not a hardwired 3-step FSM — all three modes on one chip; (b) the control stack replans at
 chunk rate, so Quality mode at ~0.5–1 Hz replan remains usable for non-deadline tasks while
-Deadline mode serves the 5 Hz loop; (c) the SOLID success metric (p05 ≥ 2× in every
-mode) requires η ≥ 2.15, with η = 3 as the margin design target — the absolute 5 Hz goal
+Deadline mode serves the 5 Hz loop; (c) the SOLID success metric (p05 S ≥ 2× in every
+mode; the frozen bar) derives η* ≈ 2.15 in the current model, with η = 3 as the margin
+design target — the absolute 5 Hz goal
 remains the separate stretch that motivates step-distillation quality work in parallel.
 
 ## 6. Compute datapath
@@ -246,7 +250,8 @@ cache hierarchy removed entirely. All of it shows up as f_ours in η = f_ours / 
 none of it is a separate multiplier.
 
 The honest position: a well-executed TPU-class design with a better attention datapath
-lands somewhere in the published 1.6-3.2x band, and our solid bar of 2.15 sits inside it.
+lands somewhere in the published 1.6-3.2x band, and the derived solid-criterion η* of
+2.15 (the frozen bar itself is S ≥ 2) sits inside it.
 We need the upper half of that band, not the band plus a bonus.
 
 ## 6a. Design principles adopted from Hameed et al., ISCA 2010 ("magic instructions")
@@ -306,8 +311,9 @@ provides a concrete technique menu with measured gains:
 | Canary/monitor circuits + per-tile AVS | track droop and aging without global guardband | standard practice |
 | Splittable/segmented MAC arrays | contain voltage droop blast radius; Etched's own named mechanism | vendor-claimed (A0) |
 
-**Status: NOT counted in the η bars (2.05 bare / 2.15 solid).** The headline bet remains
-architecture-only. Gate: a test-structure tile on the gate-4 shuttle, not before.
+**Status: NOT counted toward the frozen 2.0 bar or its derived η* requirements.** The
+headline bet remains architecture-only. Gate: a test-structure tile on the gate-4
+shuttle, not before.
 
 **Sizing corrected 2026-08-04 — the honest number is ~1.5×, not ~2.5×, and it is logic-only.**
 The canonical 10× (Dreslinski 2010) rests on two 130 nm sensor chips that measured 6.6× and

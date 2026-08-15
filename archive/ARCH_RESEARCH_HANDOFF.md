@@ -24,7 +24,7 @@ scheduled into known idle windows.
 The score is **η = energy multiplier vs NVIDIA Jetson Thor at equal 40 W head power**.
 Current estimate: **2.0× at first silicon, 2.9× mature** (compiler extraction 0.55 vs
 0.80 on the same silicon), ceiling 6.7×, defensible downside 1.6×. Success bars:
-2.05 / 2.15 / 3.0. Your job: find what raises these **without touching the model**.
+2.0 (frozen) / target 3.0. Your job: find what raises these **without touching the model**.
 
 ## 2. The workload and regime (fixed — treat as physics)
 

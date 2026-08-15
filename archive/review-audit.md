@@ -448,3 +448,68 @@ energy); closure test mutation-verified (a broken factorization kills it). Cycle
 untouched; seam tests green. No public number changed; the published design points and
 the ledger's ~7.8 both reproduce, now with their gap named instead of open.
 
+
+## 2026-08-13 — third full review (post-consolidation code, adversarial agent + sweeps)
+
+One adversarial review agent over the post-consolidation surface (ledger, reconcile,
+design points, latency UCB, tests, docs) plus mechanical sweeps (artifact-regeneration
+drift, physics-outside-rpu, zero-caller symbols). 10 agent findings, all verified against
+source before action (L10); 2 sweep findings. Every finding triaged; none dropped.
+
+### Triage
+
+| # | Finding | Bucket | Action |
+|---|---|---|---|
+| 1 | CRITICAL: residency planner's KV footprint dropped the layer factor (2·n_ctx·d, not ·L); ~1.3 GB cache marked resident in 1 GB; study best point inflated 10.4→12.3x | fix | planner now imports `forward_per_step(p).kv_bytes` (L14); test pins the 1B/1 GB corner external; study regenerated |
+| 2 | overlap-time formula under-charges at full overlap (below t_mem) and double-charges exposed time | fix | `overlapped_time_s` = max(compute, hidden) + exposed; unit-tested at both broken limits |
+| 3 | miss-rate UCB normal approximation anti-conservative at k=1–5 (certified 2e-4 at k=1 where exact bound is 2.37e-4) | fix | exact Poisson-tail inversion for k>=1 (rule-of-three kept at k=0); tests at k=1, monotonicity, large-k agreement |
+| 4 | closure test is an algebraic tautology (residual ≡ 1 by construction) | fix | L4 strengthened (recurrence); test now pins ratio/factor values with stated re-pin procedure |
+| 5 | SOFTWARE_PRESETS transient registration leaks for any non-"ideal" name | fix | `evaluate` accepts `SoftwarePreset` instances; mutation pattern deleted everywhere; no-mutation test |
+| 6 | Thor-achieved, launch accounting, 0.816 bound each typed twice | fix | single homes: `rpu/design_points.py` (new), `calibrate.BW_UTIL_MEASURED_UPPER` imported by ledger |
+| 7 | test_explorer preset-band docstring still quoted pre-dense-Thor bands | fix | docstring matches assertions |
+| 8 | SRAM-resident KV still charged 2x stream-through buffering | fix | resident KV reads SRAM once per use; exact-accounting test |
+| 9 | package tier had infinite bandwidth (bytes in no time term), contradicting SIMULATORS.md | fix | `memory_time_s` with finite `PACKAGE_BW_BYTES_S` [T]; doc updated to match |
+| 10 | SIMULATORS.md called 90 MB "the computed knee"; the sweep computes 96 MB | fix | doc says knee ~96 MB, adjacent to the chosen 90 |
+| S | sweep: `eval_point` (the published-number identity) lived in scripts/, not rpu/ | fix | moved to `rpu/design_points.py`; explorer generator is a renderer |
+| S | sweep: `prediction_util` / `eta_band_over_gating` have zero production callers | defer | deferral note at point of use; adoption re-pins goldens, waits for the Orin re-fit |
+
+Consequences: ledger goldens regenerated (`fixtures/crosscheck/ledger_golden.json`, with
+a `_provenance` key naming the physics change; the pre-migration file's parity purpose was
+fulfilled and it is retired). The 14B baseline barely moved (power-cap-bound): ratio
+2.7183, shares 67.7/32.3, ledger eta 7.82 — the documented 2.72/68/32/7.8 all survive as
+rounded. The co-design study's Experiment 5 headline corrects 12.3x → 10.4x, and its KV
+narrative is now computed from the sweep instead of asserted. No published design-point
+number moved.
+
+### S17. Re-derived quantity / twice-typed constant sweep (L14 recurrence signature)
+
+Swept `rpu/` and `scripts/` for physical constants or derived quantities defined in more
+than one module: found the four instances in findings #1/#6 (KV footprint, Thor achieved,
+launch accounting, 0.816) — all fixed as above. Remaining known duplication is deliberate
+and guarded: A vs the cycle model share no code by design (the seam tests are the guard),
+and the explorer JS restates `eval_point` under a load-time golden check.
+
+### 2026-08-13 (2) — chip-consolidation verification + architectural convergence
+
+Prompted verification ("do we have a consolidated idea of the chip") swept every defining
+parameter (peak, power, SRAM, memory system, array geometry, bar, terminology) across
+CHIP_SPEC / CHIP_LAYOUT / system-design / ETA_REPORT / SIMULATORS / code. One real
+S17-class recurrence found: **`rpu/hardware.py`'s Thor row still carried the sparse
+2.07 PF rating three days after the dense-semantics decision** — the correction had been
+applied to the explorer/design points but not to this sibling row, which feeds A's
+latency/roofline stage times, the chipviz page, and the placeholder Thor anchor. Fixed to
+1.035 PF dense; the self-declared placeholder anchor (`fixtures/anchors/thor_point.json`,
+authoritative=false, values = the model's own output by design) and the golden-path file
+regenerated with dated provenance; `test_required_eta` repaired (a 30 W clone of
+dense-peak Thor shares the baseline's compute floor, so eta* = inf — correct behavior,
+wrong synthetic premise; the DUT now carries the RPU-class peak). Website `chip.html`
+payload regenerated in the same session (thor / stages / energy / eta_star sections).
+Dated inline flags added at ETA_REPORT 7e's pre-correction sparse-identity layer and the
+15.9 TFLOP/W table row; system-design row table now states dense.
+
+Architectural convergence executed (user-directed): `rpu/codesign.py` shim retired
+(clients import `rpu.ledger` / `rpu.workload` directly); SIMULATORS.md §8 records the
+standing promotion plan — the ledger becomes the published accounting via ONE edit
+(swap the design-point source, re-pin goldens, retire reconcile), gated on the Orin
+measurement pricing the idle-gating factor. The headline switch is deliberately NOT
+taken now: ledger coefficients are [T].

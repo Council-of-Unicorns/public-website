@@ -94,7 +94,7 @@ Each hardware row is `{peak FLOPS per precision, HBM BW, HBM capacity, SRAM capa
 
 | Row | FP4 peak | Mem BW | Capacity | Power | Role |
 |---|---|---|---|---|---|
-| Jetson Thor | 2.07 PF | 273 GB/s LPDDR5X | 128 GB | 40–130 W | incumbent to beat |
+| Jetson Thor | 1.035 PF dense (2.07 sparse rating; contract forbids sparsity) | 273 GB/s LPDDR5X | 128 GB | 40–130 W | incumbent to beat |
 | B200 | ~9 PF (dense FP4) | ~8 TB/s HBM3e | 192 GB | ~1000 W | calibration + "what you're replacing" |
 | **RPU-14** | swept | swept (HBM) | ~16–32 GB | 40 W (= Thor-in-head) | design under test |
 

@@ -28,7 +28,11 @@ inside the published 1.6–3.2× TPUv4-versus-A100 band; the design target is η
 η factors into a single ratio, f_ours / f_gpu, the share of energy each design delivers to
 its multipliers: the arithmetic term is ~1 because Blackwell has native FP4, so precision
 advantage is already inside the baseline. Attention consumes ~62 % of dynamic energy, so
-matrix-multiply specialization alone caps the speedup at 1.59× [S]. We present the RPU design point (4 PF dense FP4, LPDDR5X conveyor,
+matrix-multiply specialization alone caps the speedup at 1.59× [S]. Under dense-FP4
+Thor semantics (2026-08-10; NVIDIA's 2070 TFLOPS is the sparse rating, unusable on this
+no-sparsity contract, so Thor's usable peak is 1035 TFLOPS) the current design points are
+**2.9× at first silicon and 4.2× with a mature compiler**, inside a bounded-robust range
+of 1.9–15.7× [S over T inputs]. We present the RPU design point (4 PF dense FP4, LPDDR5X conveyor,
 40 W), the workload co-design levers that attack the absolute 5 Hz goal, and a roadmap in
 which a kill test gates every funding tier.
 
@@ -117,7 +121,8 @@ discipline is the working method, and Section 12 states it as policy.
 Monte Carlo over token count, step compression, and the precision prior gives
 η\* = 2.02 for median S = 2 in the flagship Quality mode against Thor held to the 40 W
 neck ceiling; the closed form 2 × 40/40 = 2 checks it [S]. The success criterion is the
-SOLID beat: 5th-percentile S ≥ 2 in every mode (η ≥ 2.15), with a design target of η = 3
+SOLID beat: 5th-percentile S ≥ 2 in every mode — the frozen bar is on S; in the current
+model it derives η* ≈ 2.15 — with a design target of η = 3
 that holds even if Thor's in-head budget proves 25 % better than our thermal estimate
 (50 W → η ≥ 2.80) [S]. The solid bar sits mid-band in the TPUv4 evidence and the target
 at its top, so the stacked levers (realized-utilization edge, workload-shaping
@@ -189,7 +194,7 @@ A head-resident inference engine sized to the shapes above [T unless tagged]:
   Supporting a JEPA-family workload costs 1.8 % DreamZero-path perf/W at this design
   point; both families stream 7 GB weights, so no memory tier separates them [S].
 
-Modes at the solid bar η = 2.15 against Thor-in-head [S]: **Quality (3-step CFG), the
+Modes at the derived solid-criterion η* = 2.15 against Thor-in-head [S]: **Quality (3-step CFG), the
 flagship: 6.21 s vs 13.25 s, S = 2.13**; Balanced (2-step) 4.14 s vs 8.83 s, S = 2.13;
 Deadline (1-step distilled, N = 1560) 0.54 s vs 1.13 s, S = 2.09. Every mode clears 2× at
 the solid bar; at the η = 3 target Quality reaches 2.97×. No mode meets an absolute
@@ -414,8 +419,9 @@ Every problem below is open, carries load, and comes with instrumentation that m
    usual advantage and nobody has published this comparison for chunk diffusion.
 3. **The Tier-2 energy ledger.** Build the Accelergy-class tile model and produce our
    Hameed-Table-3: per-component mJ/chunk. Kill criterion: mapped η < 2.2 or FU fraction
-   < 35 % ends the project before tapeout money; the 2.2 line sits just above the 2.15
-   success bar, so the kill test and the success test have nearly merged.
+   < 35 % ends the project before tapeout money; the 2.2 line sits just above the
+   derived 2.15 solid-criterion η*, so the kill test and the success test have nearly
+   merged.
 4. **The memory-bound anchor.** Ingest real B200/WAN profiling, identify bw_util (the realized
    bandwidth-utilization coefficient), place
    the crossover, and set the MACs-versus-channels ratio.
@@ -481,8 +487,9 @@ digital, bit-exact, and *more* statically schedulable than 2D — and a shipped 
 cannot re-stack itself. **Two kill questions gate it, both answerable at a desk:** the
 thermal envelope of DRAM stacked on compute in a fanless head, and 7 GB of hybrid-bonded
 capacity against a custom-DRAM supply chain. If both survive, the research-target ladder
-reads: interface-only ~1.25× (mature 2.9× → ~3.6×); with the vertical pipeline, ~1.5×
-(→ ~4.4×) [T].
+reads: interface-only ~1.25× (mature 4.2× → ~5.2×); with the vertical pipeline, ~1.5×
+(→ ~6.3×) [T; restated 2026-08-15 on the dense-Thor mature point — the earlier 2.9×
+base was the pre-dense value].
 
 **What these extensions cost, and what they lock in.** The near-term items are
 transformer-general: the memory interface moves bytes it never interprets, and banking
