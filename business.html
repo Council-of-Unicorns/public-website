@@ -4,11 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Substrate — Business</title>
-<meta name="description" content="The business roadmap: phases, gates, and kill tests from today to first-generation RPU silicon." />
+<meta name="description" content="The plan: what we build in what order, what each stage has to produce, and what would make us stop." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta property="og:title" content="Substrate — Business" />
-<meta property="og:description" content="The business roadmap: phases, gates, and kill tests from today to first-generation RPU silicon." />
+<meta property="og:description" content="The plan: what we build in what order, what each stage has to produce, and what would make us stop." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,64 +36,63 @@
 <main id="main" tabindex="-1" class="doc">
   <article>
     <p class="label">Business</p>
-    <h1>The roadmap,<br />gate by gate</h1>
+    <h1>The plan</h1>
 
-  <p class="doc-lede">Substrate builds the RPU: an inference coprocessor module and compiler stack that let robots run substantially more onboard model inside a fixed 20&ndash;40&nbsp;W envelope than general-purpose edge GPUs. The <a href="pitch.html">pitch</a> says why and the <a href="whitepaper.html">whitepaper</a> says how; this page is the plan &mdash; what happens in what order, what each phase must produce, and what kills the project at each gate. The working expectation is 3&ndash;4&times; useful inference per watt versus Jetson Thor (2.9&times; at first silicon, 4.2&times; with the mature compiler); the frozen minimum bar is 2&times;, the design target 3&times;, and the all-adverse floor 1.9&times; &mdash; the <a href="simulation.html">simulation page</a> carries the numbers.</p>
+  <p class="doc-lede">Substrate builds the RPU &mdash; the Robot Processing Unit: an inference coprocessor and compiler stack that let a robot run a far more capable model on the same 20&ndash;40 watts than a general-purpose edge GPU can. The <a href="pitch.html">pitch</a> explains why this company should exist and the <a href="whitepaper.html">whitepaper</a> explains how the chip works. This page is the plan: what we do in what order, what each stage has to produce, and what would make us stop.</p>
 
-  <h2>How the plan is run</h2>
+  <p>The numbers the plan is built on: we currently expect <strong>3&ndash;4&times; more useful inference per watt than Jetson Thor</strong> &mdash; 2.9&times; at first silicon, 4.2&times; once the compiler matures. The bar we froze before exploring the design space is 2&times;, the design target is 3&times;, and if every uncertain input goes against us the model reads 1.9&times;. The <a href="simulation.html">simulation page</a> carries all of it.</p>
 
-  <ul>
-    <li><strong>Staged spend, kill tests first.</strong> Every phase ends in a gate that can end the project cheaply. Silicon money moves only after every pre-silicon gate passes.</li>
-    <li><strong>Design partners before tapeout.</strong> Two to three frontier robotics teams &mdash; humanoids, manipulation, warehouse, heavy machinery, surgical &mdash; providing real workloads and a conditional commitment: &ldquo;hit this latency at these watts, support these operators, and we will integrate.&rdquo;</li>
-    <li><strong>Coprocessor first.</strong> The robot keeps its SoC for cameras, ROS, networking, safety, and control; the RPU takes the model. Customers try us without leaving NVIDIA or Qualcomm. The deliverable is a pipeline &mdash; PyTorch/JAX in, compiled RPU schedule out &mdash; with unsupported work partitioned back to the GPU or CPU.</li>
-    <li><strong>Generality is a tested property.</strong> Every gate is scored across model families &mdash; a DreamZero-class world-action model, a &pi;&#8320;/GR00T-class VLA, a latent/recurrent world model &mdash; not just the flagship workload.</li>
-  </ul>
+  <h2>How we work</h2>
 
-  <h2>Already banked</h2>
+  <p>We spend in stages, and every stage ends with a test that can end the project cheaply. Money for silicon moves only after everything before it has passed. Before tapeout we want two or three design partners &mdash; frontier robotics teams in humanoids, manipulation, warehouse automation, heavy machinery, or surgical robotics &mdash; who give us real workloads and tell us plainly: hit this latency at these watts, support these operators, and we will integrate it.</p>
 
-  <p>The plan starts from evidence, not a blank page: a performance simulator calibrated to measured Blackwell silicon (0.5&ndash;3.9 percent latency, 0.8&ndash;2.5 percent energy); an independent cycle-level model agreeing to 0.7 percent with no shared code; measured negative results (frequency scaling buys nothing; FP8 delivered 1.77&times;, not the marketed 2&times;); the comparison corrected to Thor&rsquo;s dense-compute rating; and a sealed, falsifiable prediction for the first cross-architecture benchmark, registered before touching the hardware.</p>
+  <p>We ship a coprocessor first, not a Jetson replacement. The robot keeps its existing SoC for cameras, ROS, networking, safety, and control; the RPU takes the model. That means a customer can try us without walking away from their NVIDIA or Qualcomm investment. The experience we owe them: a PyTorch or JAX model goes in, a compiled RPU schedule comes out, and anything we do not support keeps running where it already runs.</p>
 
-  <h2>Phase 0 &mdash; now to 6 months</h2>
+  <p>And we do not commit to a model architecture. World-action models are young; the architecture the industry converges on probably does not exist yet, and a chip hardwired to today&rsquo;s would be obsolete before it shipped. What we are building instead is the flywheel: a calibrated simulator, an independent cycle model, an energy ledger, and a compiler that together turn any new model into a scored design point in days. Every checkpoint is tested across model families &mdash; a DreamZero-class world-action model, a &pi;&#8320;/GR00T-class vision-language-action model, a latent world model &mdash; and the same machinery will co-design the silicon with whatever architecture wins. The chip is a product of the flywheel; the flywheel is the company.</p>
 
-  <ul>
-    <li><strong>Recruit</strong> the two hires that gate everything downstream: an exceptional ASIC/accelerator architect and a compiler/performance architect.</li>
-    <li><strong>Customer discovery</strong> toward the 2&ndash;3 design partners, anchored on the qualifying statement: <em>&ldquo;the larger model is much better, but Thor cannot run it onboard at the frequency and power we need.&rdquo;</em></li>
-    <li><strong>Measure</strong>: run the sealed Orin benchmark against its registered prediction, then real Thor hardware at 40&nbsp;W on frozen workloads &mdash; replacing estimates with measurements on both sides of every published ratio.</li>
-    <li><strong>Physical tile</strong>: synthesize the exact arithmetic tile and add measured SRAM, network-on-chip, and clock energy.</li>
-    <li><strong>FPGA v0</strong>: the scaled RPU on reprogrammable hardware.</li>
-  </ul>
+  <h2>Where we are today</h2>
 
-  <p><strong>Gate:</strong> the mapped advantage from the physical tile must clear 2.2&times; &mdash; a line set just above the success bar, so the kill test and the success test nearly coincide. Below it, we stop.</p>
+  <p>This plan does not start from a blank page. We have a performance simulator calibrated against measured Blackwell silicon to within 0.5&ndash;3.9 percent on latency and 0.8&ndash;2.5 percent on energy, and an independent cycle-level model that agrees with it to 0.7 percent while sharing no code. We have published our own negative results: slowing the clock saves nothing on modern GPUs, and halving precision delivered 1.77&times; where marketing says 2&times;. We corrected our comparison to Thor&rsquo;s dense-compute rating &mdash; the only one our workload is allowed to use. And the next decisive measurement is already sealed: we registered a prediction for the Jetson Orin benchmark before touching the hardware, so our first cross-architecture test can prove us wrong.</p>
 
-  <h2>Phase 1 &mdash; 6 to 12 months</h2>
+  <h2>The next six months</h2>
+
+  <p>The first three months are about people: recruit the founding team &mdash; an exceptional ASIC/accelerator architect and a compiler/performance architect, as cofounders &mdash; and bring on advisors who have actually built in this industry, both robotics and silicon. Those people gate everything downstream. Customer discovery runs in parallel, looking for the teams for whom this sentence is already true: <em>&ldquo;the larger model is much better, but Thor cannot run it onboard at the frequency and power we need.&rdquo;</em></p>
+
+  <p>The rest of the six months is measurement and first hardware evidence:</p>
 
   <ul>
-    <li><strong>Validate the memory system and compiler</strong> on the FPGA: SRAM behavior, NoC, DMA scheduling, and predicted-versus-real activity counts.</li>
-    <li><strong>Multi-model sweep</strong>: all three model families across model size, token count, context length, planning depth, and software efficiency.</li>
-    <li><strong>RPU v1 architecture</strong> frozen, with partner workloads compiled end to end and latency/power predicted before deployment.</li>
+    <li>Run the sealed Orin benchmark against its registered prediction, then put real Thor hardware on the bench at 40 watts with frozen workloads &mdash; so both sides of every published ratio are measured, not estimated.</li>
+    <li>Physically synthesize the exact arithmetic tile and add measured SRAM, network-on-chip, and clock energy.</li>
+    <li>Get a scaled RPU running on an FPGA.</li>
   </ul>
 
-  <p><strong>Gate (~12 months): the pre-tapeout go/no-go.</strong> Proceed only if physically grounded modeling still predicts a compelling advantage across plausible future model architectures &mdash; not just the one we started from &mdash; and the design partners&rsquo; conditional commitments still stand against the measured numbers.</p>
+  <p>We stop here unless the synthesized tile shows at least a 2.2&times; advantage &mdash; a line we set just above the success bar, so the test that could kill the project and the test that proves it are nearly the same test.</p>
 
-  <h2>Phase 2 &mdash; to roughly 2 years</h2>
+  <h2>Six to twelve months</h2>
 
-  <p>Tapeout, with a strong team and funding raised against the pre-silicon evidence. The compiler keeps maturing against the FPGA and partner models while the silicon is in flight &mdash; software maturity is where most of the multiplier growth lives, and it needs no physics to break our way.</p>
+  <p>Validate the parts a spreadsheet cannot: SRAM behavior, the network-on-chip, DMA scheduling, and whether the compiler&rsquo;s predicted activity matches what the FPGA actually does. Sweep all three model families across model size, tokens, context length, planning depth, and software quality. Then freeze an RPU v1 architecture &mdash; chosen by that machinery against the model families of the moment, not by attachment to any one of them &mdash; with partner workloads compiling end to end and latency and power predicted before anything is deployed.</p>
 
-  <h2>Phase 3 &mdash; roughly 3 years</h2>
+  <p>At roughly the one-year mark comes the decision that matters most: go or no-go on tapeout. We proceed only if physically grounded modeling still shows a compelling advantage across the model architectures that plausibly come next &mdash; not just the one we started from &mdash; and our design partners&rsquo; commitments still stand against measured numbers.</p>
 
-  <p>A credible first-generation product at the 2.9&times;-class design point: bring-up, the first partner integrations as coprocessor modules, and the profiling data that drives the compiler from its launch extraction toward maturity.</p>
+  <h2>The second year</h2>
 
-  <h2>Phase 4 &mdash; 3 to 4 years</h2>
+  <p>Tapeout, with a team and funding raised on the pre-silicon evidence. While the silicon is in flight, the compiler keeps maturing against the FPGA and partner models &mdash; most of the multiplier&rsquo;s growth lives in software, and that work needs no physics to break our way.</p>
 
-  <p>The mature compiler plus second-generation silicon, toward the 4&times;-class point &mdash; and, if the demand question below keeps resolving in favor of onboard compute, the platform position: the hardware abstraction and optimization layer for physical-AI inference.</p>
+  <h2>Year three</h2>
 
-  <h2>The two standing questions every gate watches</h2>
+  <p>A credible first-generation product at the 2.9&times;-class design point: bring-up, the first partner integrations as coprocessor modules, and the profiling data that pushes the compiler from its launch quality toward maturity.</p>
 
-  <p><strong>Demand.</strong> Does additional onboard inference compute keep translating into robot capability? If frontier models shrink until Thor has abundant headroom, the opportunity weakens substantially. Current trajectory &mdash; robot-pretraining scaling laws, growing context, test-time compute arriving in robotics &mdash; points the other way, but this is re-asked at every gate, not assumed.</p>
+  <h2>Years three to four</h2>
 
-  <p><strong>Supply.</strong> Can the RPU deliver its 3&ndash;4&times;? The instrument says 2.9&ndash;4.2&times; with a 1.9&times; all-adverse floor; if physical validation drags the real answer toward ~1.3&times;, integration risk overwhelms the benefit and the go/no-go says no.</p>
+  <p>The mature compiler and second-generation silicon, toward the 4&times;-class point. If demand for onboard compute keeps growing the way it has, this is where the platform ambition becomes real: the optimization layer that physical-AI models get deployed through.</p>
 
-    <p class="readmore"><a href="simulation.html">The numbers behind the gates &rarr;</a><a href="pitch.html">Why this company &rarr;</a></p>
+  <h2>The two questions we keep asking</h2>
+
+  <p><strong>Does more onboard compute still buy more capable robots?</strong> If frontier models shrink until Thor has headroom to spare, this opportunity weakens substantially. Everything in the current trajectory &mdash; scaling laws emerging in robot pretraining, growing context windows, test-time compute arriving in robotics &mdash; points the other way. But we re-ask this at every stage instead of assuming it.</p>
+
+  <p><strong>Can the RPU really deliver 3&ndash;4&times;?</strong> The instrument says 2.9&ndash;4.2&times; today, with a floor of 1.9&times; if everything breaks against us. If physical validation drags the real answer down toward 1.3&times;, the integration cost outweighs the benefit and the one-year decision says stop. That is exactly what it is there for.</p>
+
+    <p class="readmore"><a href="simulation.html">The numbers behind the plan &rarr;</a><a href="pitch.html">Why this company &rarr;</a></p>
   </article>
 </main>
 

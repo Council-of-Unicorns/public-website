@@ -265,7 +265,7 @@ svg .die-lbl { fill: var(--ink) !important; }
   <header>
     <p class="eyebrow">The chip</p>
     <h1>Etching a world model into silicon</h1>
-    <p class="sub">To achieve human-like reaction latencies, world action models must produce actions every <b>200&nbsp;ms</b> inside a <b>40&nbsp;W</b> robot head. This page walks through the phase-1 concept: what is on the die, how it runs the transformer with <b>no instructions at all</b>, and how much faster that makes it than a Jetson Thor. Every number comes from the simulator calibrated against measured Blackwell silicon. The die drawings are illustrative; the numbers are not.</p>
+    <p class="sub">To achieve human-like reaction latencies, world action models must produce actions every <b>200&nbsp;ms</b> inside a <b>40&nbsp;W</b> robot head. This page walks through the phase-1 concept: what is on the die, how it runs the transformer with <b>no instructions at all</b>, and how much faster that makes it than a Jetson Thor. Every number comes from the simulator calibrated against measured Blackwell silicon, scored on a frozen benchmark workload: a DreamZero-class 14-billion-parameter world model. That workload is the yardstick, not a bet on the long-term architecture &mdash; the same instrument sweeps model size and scores other model families through identical accounting, and the design specializes in what stays stable across them: dense batch-1 tensor work, streamed weights, persistent context. The die drawings are illustrative; the numbers are not.</p>
     <div class="chips" id="chips"></div>
   </header>
 
@@ -363,8 +363,10 @@ svg .die-lbl { fill: var(--ink) !important; }
     the deciding factor is not how many operations per second a chip can advertise. A job
     that costs 100 joules takes at least 100 joules divided by 40 watts, two and a half
     seconds, no matter how fast the chip claims to be. Both chips hit this wall in our
-    simulations, and it makes the comparison exact: with the same watts and the same job,
-    speed is energy efficiency. We call the ratio the efficiency advantage.</p>
+    simulations, and it makes the comparison nearly exact: with the same watts and the
+    same job, speed is energy efficiency, up to a small memory-energy term the charts
+    carry honestly &mdash; it is why the curve below reads 2.95&times; rather than a clean
+    3&times; at our target. We call the ratio the efficiency advantage.</p>
 
     <h3>The result</h3>
 
@@ -382,7 +384,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     <tr><th>Efficiency advantage we build</th><th>What it gets us</th></tr>
     <tr><td>1&times; (no advantage)</td><td>a tie with Thor, by physics</td></tr>
     <tr><td>2.0&times; (the bar we froze)</td><td>roughly 2&times; Thor even judged at the pessimistic end rather than the average</td></tr>
-    <tr><td>3&times; (our design target)</td><td>2.9&times; Thor, and still a win if Thor turns out 25% better than we assume</td></tr>
+    <tr><td>3&times; (our design target)</td><td>a 2.95&times; Thor median in the Monte-Carlo, and still a win if Thor turns out 25% better than we assume</td></tr>
     </table></div>
 
     <p><b>What we have to build is a 2&times; efficiency advantage &mdash; the bar we froze before exploring the design space.</b> That is the whole
@@ -1251,7 +1253,11 @@ const FLOW = (() => {
 </script>
 <script>
 (function feasChart(){
-const FEAS = {"curve": [{"e": 1.0, "s": 1.0, "lo": 1.0, "hi": 1.0}, {"e": 1.5, "s": 1.494, "lo": 1.492, "hi": 1.496}, {"e": 2.0, "s": 1.985, "lo": 1.979, "hi": 1.988}, {"e": 2.5, "s": 2.471, "lo": 2.46, "hi": 2.478}, {"e": 3.0, "s": 2.954, "lo": 2.937, "hi": 2.965}, {"e": 3.5, "s": 3.434, "lo": 3.408, "hi": 3.449}, {"e": 4.0, "s": 3.91, "lo": 3.875, "hi": 3.93}]};
+// Single source: the same instrument payload the chip section renders (was a
+// separately generated near-duplicate curve differing in the third decimal).
+const FEAS = {"curve": DATA.speedup.thor_head_40w
+  .filter((r) => r.eta <= 4.0)
+  .map((r) => ({e: r.eta, s: r.p50, lo: r.ci_low, hi: r.ci_high}))};
 const NS="http://www.w3.org/2000/svg";
 const fcss=(n)=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 function fel(t,a,p){const e=document.createElementNS(NS,t);for(const[k,v]of Object.entries(a))e.setAttribute(k,v);p.appendChild(e);return e;}
