@@ -177,19 +177,20 @@
   desk before spending anything: whether stacked memory survives the temperatures of a fanless head,
   whether the capacity we need exists outside custom supply agreements, and whether hybrid bonds
   hold up to the vibration and thermal cycling of a machine that moves.</p>
-  <p>We call this level <b>the horizon: 3D DRAM</b> &mdash; the ceiling bounds today&rsquo;s design
-  space; the horizon is what expanding it could make the next ceiling. The full model lives in
-  hybrid-bonded DRAM stacked on the compute die: each weight read drops from roughly 40 to
-  8 picojoules per byte over short, wide vertical connections, with 8&ndash;16&nbsp;GB of stacked
-  DRAM over 100&ndash;200&nbsp;MB of distributed SRAM and each memory bank feeding its own compute
-  cluster, so weights never cross a central interface. Our energy ledger prices the cheaper reads
-  at about 1.16&times; whole-system today; the full bank-local redesign targets 1.3&ndash;2&times;,
-  an estimate. Because any overlap with the ceiling&rsquo;s own overhead assumptions can only shrink
-  the result, the product is a rigorous upper bound: the horizon envelope reads roughly
-  20&ndash;31&times; for the 3D-DRAM redesign and 29&ndash;44&times; compounded with the gated
-  circuit techniques &mdash; bounds the recomputation cannot exceed, not predictions. The horizon
-  becomes the published ceiling only when the ledger recomputes it over the modeled expanded
-  space; model&ndash;hardware co-design lies beyond even that, deliberately unnumbered.</p>
+  <p>We call this level <b>the next ceiling, pending: 3D DRAM</b> &mdash; the current ceiling
+  bounds today&rsquo;s design space; this one is in escrow until the instrument can recompute the
+  expanded space. The full model lives in hybrid-bonded DRAM stacked on the compute die: each
+  weight read drops from roughly 40 to 8 picojoules per byte over short, wide vertical
+  connections, with 8&ndash;16&nbsp;GB of stacked DRAM over 100&ndash;200&nbsp;MB of distributed
+  SRAM and each memory bank feeding its own compute cluster, so weights never cross a central
+  interface. Our energy ledger prices the cheaper reads at about 1.16&times; whole-system today;
+  the full bank-local redesign targets 1.3&ndash;2&times;, an estimate. Because any overlap with
+  the ceiling&rsquo;s own overhead assumptions can only shrink the result, the product is a
+  rigorous upper bound: an envelope of roughly 20&ndash;31&times; for the 3D-DRAM redesign and
+  29&ndash;44&times; compounded with the gated circuit techniques &mdash; bounds the recomputation
+  cannot exceed, not predictions. Beyond it sits <b>the horizon: model&ndash;hardware
+  co-design</b> &mdash; the model changing because the silicon changes with it &mdash;
+  deliberately unnumbered, and not capped by the hardware-only envelope above.</p>
   <p>On what these extensions would lock in: the near ones commit us to nothing about the model.
   Three-dimensional stacking deepens a commitment we have already made &mdash; the attention
   operation chain shared by every standard transformer, including both model families we serve.

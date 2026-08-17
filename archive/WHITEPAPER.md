@@ -492,19 +492,20 @@ reads: interface-only ~1.25× (mature 4.2× → ~5.2×); with the vertical pipel
 (→ ~6.3×) [T; restated 2026-08-15 on the dense-Thor mature point — the earlier 2.9×
 base was the pre-dense value].
 
-**The horizon: 3D DRAM** (2026-08-17, ETA_REPORT 7g-bis — the level beyond the
-ceiling). The full model resident in hybrid-bonded DRAM stacked on the compute die:
-each weight read drops from ~40 to ~8 pJ/B over short, wide vertical connections, with
-8–16 GB of stacked DRAM over 100–200 MB of distributed SRAM and each bank feeding its
-own compute cluster (`DRAM bank → local SRAM → compute cluster`), so weights never
-cross one central PHY/controller/NoC. The ledger prices the cheaper reads at
-**×1.16–1.17 whole-system** today [S over T coefficients]; the full bank-local redesign
-targets ~1.3–2× [T]. Because any overlap with f_ours only shrinks the recomputed
-result, the product is a rigorous upper-bound envelope: **~20–31× for the 3D-DRAM
-redesign, ~29–44× compounded with the gated circuit techniques** — bounds the
-recomputation cannot exceed, not predictions. The horizon becomes the published ceiling
-only when the ledger recomputes it over the modeled expanded space; model–hardware
-co-design lies beyond even that, deliberately unnumbered.
+**The next ceiling, pending: 3D DRAM** (2026-08-17, ETA_REPORT 7g-bis). The full model
+resident in hybrid-bonded DRAM stacked on the compute die: each weight read drops from
+~40 to ~8 pJ/B over short, wide vertical connections, with 8–16 GB of stacked DRAM over
+100–200 MB of distributed SRAM and each bank feeding its own compute cluster
+(`DRAM bank → local SRAM → compute cluster`), so weights never cross one central
+PHY/controller/NoC. The ledger prices the cheaper reads at **×1.16–1.17 whole-system**
+today [S over T coefficients]; the full bank-local redesign targets ~1.3–2× [T].
+Because any overlap with f_ours only shrinks the recomputed result, the product is a
+rigorous upper-bound envelope: **~20–31× for the 3D-DRAM redesign, ~29–44× compounded
+with the gated circuit techniques** — bounds the recomputation cannot exceed, not
+predictions. It becomes the published ceiling only when the ledger recomputes the
+expanded design space. **The horizon — model–hardware co-design — lies beyond it**:
+the model changing because the silicon changes with it, deliberately unnumbered and not
+capped by the hardware-only envelope above.
 
 **What these extensions cost, and what they lock in.** The near-term items are
 transformer-general: the memory interface moves bytes it never interprets, and banking
