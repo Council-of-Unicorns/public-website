@@ -32,7 +32,8 @@ matrix-multiply specialization alone caps the speedup at 1.59× [S]. Under dense
 Thor semantics (2026-08-10; NVIDIA's 2070 TFLOPS is the sparse rating, unusable on this
 no-sparsity contract, so Thor's usable peak is 1035 TFLOPS) the current design points are
 **2.9× at first silicon and 4.2× with a mature compiler**, inside a bounded-robust range
-of 1.9–15.7× [S over T inputs]. We present the RPU design point (4 PF dense FP4, LPDDR5X conveyor,
+of 1.9–15.7× (22× including gated physical-design upside) [S over T inputs] — the
+ceiling is the program's stated north star, pursued but never underwritten. We present the RPU design point (4 PF dense FP4, LPDDR5X conveyor,
 40 W), the workload co-design levers that attack the absolute 5 Hz goal, and a roadmap in
 which a kill test gates every funding tier.
 
