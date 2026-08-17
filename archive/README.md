@@ -1,7 +1,7 @@
 # Archive — RPU program documents
 
-Snapshot of the etched repo's documentation (source of truth:
-https://github.com/Council-of-Unicorns/etched, `docs/`). Refreshed 2026-08-15 at etched
+Snapshot of the substrate repo's documentation (source of truth:
+https://github.com/Council-of-Unicorns/substrate — formerly `etched`, renamed 2026-08-17; `docs/`). Refreshed 2026-08-15 at
 commit d5924ce+ (the frozen bar is S ≥ 2× at power parity — 2.05/2.15 are derived η*
 requirements, retired from headline use 2026-08-10; dense-FP4 Thor semantics throughout,
 design points 2.9× first silicon / 4.2× mature inside a bounded-robust 1.9–15.7×; the
