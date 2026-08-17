@@ -872,9 +872,54 @@ of hybrid-bonded DRAM is a 2027-class custom-DRAM roadmap item, against the comm
 LPDDR that is a quiet strength of the current design.
 
 **Research-target ladder** [T, not headline]: interface-only, thermal-permitting ~1.25x
-(mature 2.9 -> ~3.6x); vertical-pipeline wins surviving our energy breakdown ~1.5x
-(-> ~4.4x). The evaluation vehicle is Phase 4.5's interconnect model, which prices a
-vertical tier stack as naturally as a 2D NoC; ATLAS [X*] is the external cross-check.
+(mature 2.9 -> ~3.6x; *dated layer — on the dense-semantics mature point 4.2 the same
+ladder reads ~5.2/~6.3, see WHITEPAPER*); vertical-pipeline wins surviving our energy
+breakdown ~1.5x (-> ~4.4x). The evaluation vehicle is Phase 4.5's interconnect model,
+which prices a vertical tier stack as naturally as a 2D NoC; ATLAS [X*] is the external
+cross-check.
+
+### 7g-bis. The locality architecture, stated as a concept and priced mechanistically (2026-08-17)
+
+The 3D direction reduced to its load-bearing idea:
+
+> **resident dense memory + distributed SRAM + bank-local compute + static tensor
+> scheduling** — minimize the physical distance every important bit travels, because
+> once low-precision arithmetic is cheap, data movement is where the remaining energy
+> lives.
+
+Concretely: keep the whole model resident near compute (7 GB of W4 weights for the 14B
+reference), but **not in SRAM** — 7 GB of SRAM is area- and leakage-prohibitive. The
+plausible hierarchy is **8–16 GB of stacked/3D DRAM + 100–200 MB of distributed SRAM**,
+hybrid-bonded above or adjacent to compute with short, wide connections, organized
+bank-locally — `DRAM bank_i -> local SRAM_i -> compute cluster_i` — instead of funneling
+everything through one PHY/controller/NoC. SRAM holds only the hot set (activation
+tiles, immediate KV, producer–consumer buffers); the dense tier holds the multi-GB
+persistent state. The advantage is NOT that weights stop being read; each read becomes
+cheaper and wider.
+
+**What the ledger prices today** [S over T coefficients]: the package tier
+(8 pJ/B, 1.6 TB/s, residency by capacity+lifetime) captures the repricing-and-bandwidth
+part of this and evaluates it at **×1.16–1.17 whole-system** at the frozen 14B
+(external/90 MB → package/150 MB, v1 and near-ideal software alike — DRAM falls
+1.77 → 0.35 J of a ~11–14 J chunk). That is the mechanistically-modeled floor of the
+idea, at the low edge of the research hypothesis below because the bank-local deletions
+are not yet modeled.
+
+**Research bands beyond the modeled part** [T, gated on the two 7g kill questions]:
+3D memory alone ~1.2–1.5× whole-system (central ~1.3×) once bank-local PHY/controller
+deletions are counted; a full locality redesign (3D + bank-local compute + reduced
+SRAM/NoC staging) ~1.3–1.8×, with ~2× as the aggressive research target.
+
+**The accounting rule (binding):** these factors are never multiplied into the scalar
+ceiling — the scalar identity's f_ours may already implicitly credit overlapping
+overhead reductions, and multiplying would double-count (exactly the S15/7e class of
+error). The route into the ceiling is mechanistic: the ledger models DRAM, SRAM, NoC,
+clock, control and static explicitly; Phase 4.5 adds the bank-local/NoC mechanics; and
+the expanded-space hardware ceiling is then simply the best configuration over the
+enlarged design space, recomputed — not a product of headline factors. Model–hardware
+co-design (changing the model because the silicon changes with it) remains a further
+horizon beyond even that, and is qualitatively different from changing the memory
+system.
 
 **Monitored, not pursued:** analog gain-cell attention (violates bit-exactness; targets
 decode-reuse regime) [X*]; photonics (sub-4-bit effective precision, conversion

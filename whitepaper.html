@@ -177,6 +177,20 @@
   desk before spending anything: whether stacked memory survives the temperatures of a fanless head,
   whether the capacity we need exists outside custom supply agreements, and whether hybrid bonds
   hold up to the vibration and thermal cycling of a machine that moves.</p>
+  <p>The stripped-down concept behind that extension: resident dense memory, distributed SRAM,
+  bank-local compute, and static tensor scheduling &mdash; minimize the physical distance every
+  important bit travels, because once low-precision arithmetic is cheap, data movement is where the
+  remaining energy lives. Not seven gigabytes of SRAM, which area and leakage rule out, but roughly
+  8&ndash;16&nbsp;GB of stacked memory over 100&ndash;200&nbsp;MB of distributed SRAM, each memory
+  bank feeding its own compute cluster so weights never funnel through one central interface. The
+  weights are still read every step; each read simply becomes far cheaper and wider. Our energy
+  ledger already prices the part of this it can model &mdash; the cheaper, wider reads &mdash; at
+  about 1.16&times; whole-system on the frozen workload; the research bands beyond it are roughly
+  1.2&ndash;1.5&times; for stacked memory alone and up to ~2&times; for a full locality redesign,
+  all estimates. One rule is binding: none of these factors is ever multiplied into the published
+  ceiling, because the ceiling&rsquo;s own assumptions may already credit some of the same overhead.
+  They enter only by recomputation through the ledger, after which the ceiling is simply the best
+  configuration over the enlarged design space.</p>
   <p>On what these extensions would lock in: the near ones commit us to nothing about the model.
   Three-dimensional stacking deepens a commitment we have already made &mdash; the attention
   operation chain shared by every standard transformer, including both model families we serve.
