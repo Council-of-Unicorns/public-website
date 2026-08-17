@@ -916,10 +916,27 @@ overhead reductions, and multiplying would double-count (exactly the S15/7e clas
 error). The route into the ceiling is mechanistic: the ledger models DRAM, SRAM, NoC,
 clock, control and static explicitly; Phase 4.5 adds the bank-local/NoC mechanics; and
 the expanded-space hardware ceiling is then simply the best configuration over the
-enlarged design space, recomputed — not a product of headline factors. Model–hardware
-co-design (changing the model because the silicon changes with it) remains a further
-horizon beyond even that, and is qualitatively different from changing the memory
-system.
+enlarged design space, recomputed — not a product of headline factors.
+
+**The horizon — the level beyond the ceiling (named 2026-08-17).** Ladder vocabulary,
+binding across all documents: *positions in the current design space* — floor 1.9×,
+bar 2.0×, target 3.0×, first silicon 2.9×, mature 4.2×, ceiling 15.7× (22× with gated
+circuit techniques; the north star) — and *directions beyond it*: the **horizon**, what
+expanding the design space could make the next ceiling. The horizon enters the
+published ceiling only by mechanistic recomputation (rule above), but it may carry an
+**upper-bound envelope**, which is rigorous by construction: any overlap between the
+locality factor and f_ours only *shrinks* the recomputed result, so the product bounds
+it from above. The arithmetic, stated once:
+
+| Horizon rung | Construction | Envelope [T, upper bound] |
+|---|---|---|
+| 3D-DRAM locality redesign | ceiling 15.7 × locality band 1.3–2.0 | **~20–31×** |
+| + gated low-voltage circuits | × 1.4 (D6, test-silicon-gated) | **~29–44×** |
+| Model–hardware co-design | model changes because the silicon changes with it | deliberately unnumbered — quality equivalence across model changes is exactly what the co-design study flags UNSUPPORTED |
+
+Central research point ~29× (15.7 × 1.3 × 1.4). These envelopes are ceilings-on-the-
+ceiling, not predictions: the recomputed value will land at or below them, and becomes
+the published ceiling only when the ledger computes it over the modeled expanded space.
 
 **Monitored, not pursued:** analog gain-cell attention (violates bit-exactness; targets
 decode-reuse regime) [X*]; photonics (sub-4-bit effective precision, conversion
