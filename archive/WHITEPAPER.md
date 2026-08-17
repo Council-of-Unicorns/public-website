@@ -492,21 +492,19 @@ reads: interface-only ~1.25× (mature 4.2× → ~5.2×); with the vertical pipel
 (→ ~6.3×) [T; restated 2026-08-15 on the dense-Thor mature point — the earlier 2.9×
 base was the pre-dense value].
 
-The concept, stripped to its load-bearing idea (2026-08-17, ETA_REPORT 7g-bis):
-**resident dense memory + distributed SRAM + bank-local compute + static tensor
-scheduling** — minimize the distance every important bit travels, because once
-low-precision arithmetic is cheap, data movement is where the remaining energy lives.
-Not 7 GB of SRAM (area- and leakage-prohibitive): the plausible hierarchy is 8–16 GB of
-stacked/3D DRAM plus 100–200 MB of distributed SRAM, organized bank-locally
+The concept, in a phrase, is **3D DRAM** (2026-08-17, ETA_REPORT 7g-bis): the full model
+resident in hybrid-bonded memory stacked on the compute die. Weights are still read
+every step — each read just drops from ~40 to ~8 pJ/B over short, wide vertical
+connections. Not 7 GB of SRAM (area- and leakage-prohibitive): 8–16 GB of stacked DRAM
+over 100–200 MB of distributed SRAM, each bank feeding its own compute cluster
 (`DRAM bank → local SRAM → compute cluster`) so weights never funnel through one
-PHY/controller/NoC; SRAM holds only the hot working set. Reads do not disappear — each
-becomes cheaper and wider. Our energy ledger already prices the repricing-and-bandwidth
-part mechanistically at **×1.16–1.17 whole-system** at the frozen 14B [S over T
-coefficients]; the research bands beyond it are ~1.2–1.5× for 3D alone (central ~1.3×)
-and ~1.3–1.8× for a full locality redesign, ~2× aggressive [T]. Binding rule: these are
-never multiplied into the scalar ceiling — f_ours may already credit overlapping
-overhead — they enter only by mechanistic recomputation through the ledger, after which
-the hardware ceiling is the best configuration over the expanded design space.
+PHY/controller/NoC. The ledger prices the cheaper reads at **×1.16–1.17 whole-system**
+at the frozen 14B [S over T coefficients]; reorganizing the chip bank-locally around the
+stack is worth ~1.2–1.5× for the memory alone (central ~1.3×) and up to ~2× for the full
+redesign [T]. Binding rule: never multiplied into the scalar ceiling — f_ours may
+already credit overlapping overhead — it enters only by mechanistic recomputation
+through the ledger, after which the hardware ceiling is the best configuration over the
+expanded design space.
 
 **What these extensions cost, and what they lock in.** The near-term items are
 transformer-general: the memory interface moves bytes it never interprets, and banking

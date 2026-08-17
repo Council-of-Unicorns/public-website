@@ -376,10 +376,11 @@ svg .die-lbl { fill: var(--ink) !important; }
     matures</b>, inside a bounded range of 1.9 to 15.7&times; &mdash; 22&times; if gated
     low-voltage circuit techniques prove out &mdash; that spans every input the evidence
     does not exclude. The top of that range is the north star; the bar is what we promise. Beyond the range
-    sits a memory-locality lever &mdash; the whole model resident in stacked memory directly above
-    the compute &mdash; which our energy ledger prices at about 1.16&times; as modeled today, with
-    roughly 2&times; the aggressive research target for a full locality redesign; it enters the
-    ceiling only through mechanistic recomputation, never by multiplying factors together. In its highest-quality planning mode, at our design target, the chip
+    sits the 3D-DRAM lever: the full model held in hybrid-bonded memory stacked on the compute
+    die, cutting each weight read from roughly 40 to 8 picojoules per byte &mdash; worth about
+    1.16&times; whole-system as our energy ledger models it today, and up to ~2&times; if the chip
+    is reorganized bank-locally around the stack. It enters the ceiling only by recomputation,
+    never by multiplication. In its highest-quality planning mode, at our design target, the chip
     finishes a two-second imagined trajectory in 4.5 seconds where Thor needs 13.</p>
 
     <div class="chart-box"><svg id="bet" viewBox="0 0 880 380" role="img"

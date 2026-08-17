@@ -878,7 +878,7 @@ breakdown ~1.5x (-> ~4.4x). The evaluation vehicle is Phase 4.5's interconnect m
 which prices a vertical tier stack as naturally as a 2D NoC; ATLAS [X*] is the external
 cross-check.
 
-### 7g-bis. The locality architecture, stated as a concept and priced mechanistically (2026-08-17)
+### 7g-bis. The 3D-DRAM lever — the locality architecture, priced mechanistically (2026-08-17)
 
 The 3D direction reduced to its load-bearing idea:
 
