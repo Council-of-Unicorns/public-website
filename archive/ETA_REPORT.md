@@ -941,7 +941,7 @@ exceed, not predictions.
 changes with it — memory organized around the model's reuse patterns (3D-DRAM
 bank-locality is the first, pre-convergence move of exactly this kind), communication
 following its actual graph, precision and programmability only where the model needs
-them. Deliberately unnumbered, and NOT capped by the envelope above, which is
+them. Deliberately undefined, and NOT capped by the envelope above, which is
 hardware-only: quality equivalence across model changes is exactly what the co-design
 study flags UNSUPPORTED, so the horizon carries no number until that changes. It is
 open-ended by design — it re-forms as models move and resolves only at convergence.

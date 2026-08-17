@@ -504,7 +504,7 @@ rigorous upper-bound envelope: **~20–31× for the 3D-DRAM redesign, ~29–44×
 with the gated circuit techniques** — bounds the recomputation cannot exceed, not
 predictions. It becomes the published ceiling only when the ledger recomputes the
 expanded design space. **The horizon — model–hardware co-design — lies beyond it**:
-the model changing because the silicon changes with it, deliberately unnumbered and not
+the model changing because the silicon changes with it, deliberately undefined and not
 capped by the hardware-only envelope above.
 
 **What these extensions cost, and what they lock in.** The near-term items are
