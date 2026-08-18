@@ -7,7 +7,7 @@ attribution is automatic (the ledger separates the rungs), gates are inherited r
 than invented, and completeness is checkable: a project with no rung, or a rung with no
 project, is visible instantly. One structural exception found and fixed on the union
 check: the deadline-miss-rate GUARANTEE is the success metric's other half and unlocks
-no multiplier — it carries its own row and project (P-D). Checked complete against the
+no multiplier — it carries its own row and project (deterministic schedule & safety). Checked complete against the
 union of WHITEPAPER,
 ETA_REPORT 7g/7g-bis, PERF_LEVERS, CHIP_ROADMAP, and the three studies (CIM, radical,
 fixed-weight) on 2026-08-17.
@@ -38,13 +38,13 @@ guarantee, not a multiplier, and gets its own row:
 - **Compiler program** — extraction 0.55 → 0.80; the largest committed multiplier; gated by FPGA + partner-workload profiling.
 - **Streaming block schedule** — whole-block schedule, intermediates die at their consumer (fusion result 56.7× exists; explicit schedule doesn't).
 - **SRAM banking + interconnect** — tensor-aware banking, placement, bit-mm metric; = Phase 4.5, the model's stated blind spot; could be negative.
-- **Weight-dataflow comparison** — stationary vs streamed vs broadcast on exact shapes (= CHIP_ROADMAP gate 1); sets the bar P5/P5′ must beat.
+- **Weight-dataflow comparison** — stationary vs streamed vs broadcast on exact shapes (= CHIP_ROADMAP gate 1); sets the bar the static-substrate candidates must beat.
 - **Sub-threshold-voltage tile** — sub-V_min domains, droop scheduling; measured adverse on stock silicon; unlocked only by the test tile; never counted in bars.
 - **Memory widening + compression** — 512-bit-class interface, weight-stream compression 62–83%, LPDDR6, PIM-for-KV (~1.1–1.4×).
 - **3D integration** — hybrid-bonded stacked DRAM (8–16 GB over 100–200 MB SRAM; ledger-priced ×1.16 today; bank-local 1.3–2× [T]) AND vertical register-to-register operator pipelining across stacked compute tiers (3D-Flow-class, ~1.5× [X*, 7g]); thermal + supply kill questions open, shared by both halves.
 - **Static-substrate decision (CIM vs hardening)** — weight-resident CIM vs FixedWeight hardening, rivals for one slot; screened 1.19× / 1.28× over B1; ≥2× on the complete linear layer or the slot stays digital.
-- **Dynamic-attention engine** — substrate-agnostic g_A, the load-bearing term in every study; screened 1.20× (CIM variant); success implies P4.
-- **Hybrid transformer tile** — recombination of P5/P5′ + P6 winners; screened 1.48× central, Gen-3 band 6.0–9.7×; reopens on I1 macros.
+- **Dynamic-attention engine** — substrate-agnostic g_A, the load-bearing term in every study; screened 1.20× (CIM variant); success implies the memory program (every pivot-grade corner is memory-bound).
+- **Hybrid transformer tile** — recombination of the static-substrate and attention-engine winners; screened 1.48× central, Gen-3 band 6.0–9.7×; reopens on the macro measurements.
 - **Workload levers** — Ledger B (certified reuse floors, tile attention, token merging, distillation); fenced: robot-measured quality only.
 - **Deterministic schedule & safety** — the guarantee project (= Phase 3): CFG hardware sharing, rolling-KV window, deterministic timing, miss-rate certification (Tier-3 + DRAM sim), thermal co-design, the flow-ODE/CEM update engine. Unlocks deployability, not a multiplier — which is why a rung-only map missed it (union check, 2026-08-17).
 
@@ -62,7 +62,7 @@ guarantee, not a multiplier, and gets its own row:
    saving while the relative increment survives on the leaner total (tested,
    `tests/test_radical.py`).
 6. **Workload levers are fenced**: quality-equivalence across model changes is UNSUPPORTED by the
-   instrument; nothing from P-W enters a hardware ratio.
+   instrument; nothing from the workload levers enters a hardware ratio.
 
 ## What "done" looks like
 
