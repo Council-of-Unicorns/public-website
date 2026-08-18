@@ -513,3 +513,109 @@ standing promotion plan — the ledger becomes the published accounting via ONE 
 (swap the design-point source, re-pin goldens, retire reconcile), gated on the Orin
 measurement pricing the idle-gating factor. The headline switch is deliberately NOT
 taken now: ledger coefficients are [T].
+
+## 2026-08-17 (2) — CIM pivot evaluation (adversarial brief)
+
+Full evaluation of the dual-mode digital SRAM-CIM transformer tile against B1 (the
+existing digital RPU tile — NOT Thor), per the 34-section brief: same workload,
+contract, node, external memory, 40 W. New instrument: `rpu/cim.py` (block-level
+ledger, mutually exclusive categories, bundle-level [T] gain factors so peripheral
+logic cannot hide, explicit weight/K-V write energies, capacity knee, memory-crossover
+logic) + `scripts/cim_study.py` -> `docs/generated/CIM_STUDY.md` + 10 integrity tests
+(no-free-lunch at unity parameters; Amdahl cap on linear-only; DRAM identical across
+configs; ideal-CIM strands efficiency behind the memory roof; write monotonicity).
+
+**Verdict: CONTINUE DIGITAL RPU, KEEP CIM AS GEN-2.** Central R_pivot = 1.48; the 2x
+pivot threshold is reached only at (g_static>=3, g_dynamic>=3) — unsupported by
+same-node evidence (the 9.43x literature anchor is vs a BF16/INT8 TPU baseline,
+reproduced structurally by de-specializing our baseline) and already memory-bound at
+the contract interface. Class ceiling R_E 4.53 but R_T only 1.95 at 40 W (2.3x
+stranded). Writes and capacity are NOT the killers (good amortization at this
+workload's reuse); the modest bundle gains vs an already-specialized FP4/FP8 path are.
+The 7g prior (1.05-1.2x, rank last) directionally confirmed, slightly pessimistic;
+superseded in place with a pointer. Re-open trigger: the phase-0 synthesized-tile
+program pricing g_static at evidence grade.
+
+### 2026-08-17 (3) — external no-context review of the public pages: one real fossil, one artifact
+
+An outside reviewer (no simulator access) challenged the ceiling using the whitepaper's
+energy split. Triage: (a) **REAL DEFECT** — whitepaper.html §5 still said "under 1% is
+moving bytes": a fossil of the F1 pJ/bit-for-pJ/byte unit error (44.3 GB x the old
+5 pJ/B = 0.6% of the launch accounting — arithmetic dates it exactly), contradicting
+§9b's corrected 20-33%. The reviewer's inference chain (3D memory buys ~1.01x; delete
+the 20-44x envelope) was VALID LOGIC FROM THE STALE PREMISE — S14 class: a superseded
+input surviving where the correction did not reach. Fixed with a dated inline
+correction crediting the reviewer; the split is now labeled an ARITHMETIC-energy
+split with byte movement as its own system category. (b) **ARTIFACT** — the reviewer
+"saw" the explorer's SELF-CHECK FAILED banner: the failure text was static HTML hidden
+by CSS, so text-fetching readers see it as if fired. Verified the rendered page passes
+(headless, payload match); template fixed so the message is injected only on actual
+failure. (c) **CONVERGENT** — the reviewer's independent CIM Amdahl arithmetic
+(1.36-1.98x hybrid) matches rpu/cim.py's grid within rounding, with no access to it.
+
+### 2026-08-17 (4) — external close-read of the CIM study: one real defect, two adoptions
+
+(a) **REAL DEFECT (prose contradicts own table, L4-adjacent):** the study's verdict and
+grid-reading prose said "2x requires BOTH bundles >=3x" while its own grid shows
+(5,2)=2.00 and (2,5)=2.20. Corrected in the generator with a dated note; strategic
+consequence made explicit — a single-path breakthrough (especially ~5x dynamic-attention
+CIM) remains a live pivot route and must not be prematurely killed. ETA_REPORT 7g row
+fixed to match. (b) **ADOPTED:** the reviewer's periphery checklist (wordline/bitline,
+peripherals, address/control, local clocks, write drivers, sense, accumulation trees,
+I/O registers, inter-macro routing) is now the phase-0 measurement contract in the
+study, with re-run decision thresholds; the study is explicitly labeled a SCREENING
+study. (c) **CONVERGENT:** their reading of the mechanism (CIM wins by folding the
+5.47 J reg/clock burden, not by cheaper arithmetic; bundles themselves rise 4.52->6.01 J)
+is the study's own structural story, now stated with those numbers in answer 3; their
+"CIM + much better edge memory" combination is the roofline-mover framing already in
+7g-bis.
+
+## 2026-08-17 (5) — radical world-model ASIC study (adversarial brief, layered on CIM)
+
+New instrument: `rpu/radical.py` + `scripts/radical_study.py` -> RADICAL_STUDY.md, with
+10 integrity tests (unity reproduces B1; area gate fires; hardening-alone loses;
+phys-factor cannot scale static; memory roof strands speed). Headline structure: the
+AREA GATE decides the question — logic-density hardening of 14B params needs ~12 reticle
+dies (INFEASIBLE, and its leakage makes hardening-alone a net LOSS, R=0.97), while
+ROM-recall hardening (2 dies) is feasible but caps g_hard ~2. Feasible frontier:
+2.55x over B1 = ~7.4x Thor central [T]; ~9x optimistic-defensible; 10x only via
+(g_A>=5 with optimistic hardening) or the gated low-voltage stack — rejected as a
+roadmap claim per the brief's own standard. Ceiling C3 confirms 10x exists in the
+budget. **Verdict: INCLUDE AS LONG-TERM STRETCH (~7–9x), no 10x claim; Gen-1 unchanged;
+the phase-0 program gains a third macro (mask-programmed ROM weight bank) so one
+synthesis run prices the CIM, radical-attention and hardening questions together.**
+One near-miss caught pre-ship: the sweep-reading prose initially overstated the 10x
+threshold geometry against its own table — the exact defect class of audit entry (4).
+
+### 2026-08-17 (6) — FixedWeight (Taalas-style) study + Gen-3 roadmap incorporation
+
+The FixedWeightTile brief evaluated through the existing radical instrument (the
+shared-product mechanism — 16 products/activation amortized over fanout, ROM-selected —
+is a hardening variant justifying g_hard~3 at ~16 transistors/param, 4 dies feasible).
+**DECISION: INCLUDE as post-convergence Gen-3 tier; no published multiplier.** FW-alone
+Amdahl-capped (1.3x); FW + best attention + 3D: central 2.8x/B1 = ~8x Thor anchored
+(range 6.0–9.7) [T]. Overlaps quantified by recomputation: FW supersedes static CIM in
+the lane (deletes weight memory besides the delivery bundle); 3D's absolute weight-side
+saving disappears under hardening while the relative KV increment survives (x1.18 on
+the leaner total) — tested. Anti-multiplication check explicit in the study. Gen-3 tier
+written into CHIP_ROADMAP (trigger conditions, mechanism, kill criteria, three-macro
+phase-0 pricing); ETA_REPORT 7g-bis and SIMULATORS updated. Full ladder re-verified
+from instruments this session: 2.88/4.19/1.91/10.99 points, 1.91–15.7/22 range, expectations (median over defensible ranges) 4.4/6.4, CIM 1.48, radical frontier 7.4, FW 6.0–8.1–9.7, wall 35–47.
+
+## 2026-08-18 — ladder finalization (structure, names, numbers, per-level statistics)
+
+The ladder converged through user-driven iteration to its final form: four buildable
+levels (first silicon / mature compiler / optimized / codesign) x (likely range 90% |
+ceiling | what unlocks it), with the FP4 physics wall (~35-47x) as codesign's ceiling
+and per-level corner bounds in the ceiling column (9.1; 15.7/22 north star; <=20-44).
+Decisions recorded: north star dissolved as a row (resolution work, not unlock work —
+its measurement bullets folded into first silicon, the sub-V_min tile into mature);
+frontier/horizon renamed optimized/codesign; codesign numbered (~12x central, 7-19x
+= optimized x 1.2-2x co-design residual [T], superseding the looser 15-25x estimate);
+likely ranges replaced corner bounds as the headline statistic (same evidence, tighter
+statistic; priors labeled: uniform + independence); likely_range() homed in
+rpu/design_points.py with pinned tests (L1/L3); ceiling-name collisions resolved
+site-wide (15.7 = bound/north star; "ceiling" reserved for the wall); deadline
+guarantee removed from the table, retained as a Technical Roadmap section. All numbers
+re-verified from instruments this date; archive parity confirmed; live pages verified
+serving the final form.
