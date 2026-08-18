@@ -16,20 +16,74 @@ Rule inherited from the studies: projects are **separate simulator branches eval
 by one ledger** — never one architecture that accumulates every idea, and never
 multiplied multipliers. Combined architectures are recomputed (S15/§22 discipline).
 
-| Level | Multiplier vs Thor | What unlocks it | The work required |
-|---|---|---|---|
-| **First silicon** | 2.9× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler | • instrument the ledger with per-tensor lifetimes, bytes×distance, and an energy Sankey<br>• bench a real Thor at 40 W on frozen workloads, predictions registered first<br>• synthesize the FP4 tile, a CIM macro, and a ROM weight-bank macro on one node; extract post-layout energy<br>• characterize the critical blocks against the PDK<br>• run a scaled RPU on FPGA; validate predicted vs real activity counts<br>• schedule the full transformer block as one streaming computation, intermediates freed at their consumer<br>• bank SRAM by tensor class with producer→consumer placement; compare interconnect topologies by bit-mm<br>• compare weight-stationary vs streamed vs broadcast dataflows on the exact shapes (MACs per fetched weight byte) |
-| **Mature compiler** | 4.2× | same silicon; compiler extraction 0.55 → 0.80 | • profile partner workloads on the FPGA; close predicted-vs-realized schedule gaps<br>• fuse the operator tail (norms, RoPE, activations, residuals)<br>• deepen DMA overlap toward full hiding<br>• gate idle clocks in schedule bubbles |
-| **North star** | 15.7× / 22× gated | every uncertain input resolving favorably; the 22× adds sub-V_min operation | • measure FP4 arithmetic energy at the target node (datasheet + synthesized tile)<br>• derive the datapath fraction from the itemized post-PDK ledger<br>• bench Thor's achieved fraction of its dense peak<br>• fabricate the sub-V_min test-structure tile; measure error rates and recovered energy |
-| **Frontier** | ≤ 20–44× | memory rebuilt around the model, plus the compute substrate that converts it into speed | • widen the interface to 512-bit class; implement lossless weight-stream compression with one-weight-per-clock decode<br>• desk-study 3D thermals (refresh vs temperature, fanless head) and the custom-DRAM supply chain<br>• hybrid-bond stacked DRAM with per-bank compute clusters (bank → local SRAM → cluster)<br>• pipeline operators vertically across stacked tiers, register to register<br>• design the QK→softmax→PV engine: writable-CIM and spatial-fabric candidates on the same block ledger<br>• measure complete-linear-layer energy of the CIM and ROM/shared-product macros against the best systolic implementation<br>• recombine the winning substrates into one dual-mode tile; rerun the full-system ledger |
-| **Horizon** | undefined | the model designed together with the silicon | • certify quality floors for cross-chunk reuse, sliding-tile attention, and token merging on robot evaluations<br>• co-train model variants shaped to the memory hierarchy; measure quality on robots, never proxies |
+| Level | Multiplier vs Thor | What unlocks it |
+|---|---|---|
+| **First silicon** | 2.9× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
+| **Mature compiler** | 4.2× | same silicon; compiler extraction 0.55 → 0.80 |
+| **North star** | 15.7× / 22× gated | every uncertain input resolving favorably; the 22× adds sub-V_min operation |
+| **Frontier** | ≤ 20–44× | memory rebuilt around the model, plus the compute substrate that converts it into speed |
+| **Horizon** | undefined | the model designed together with the silicon |
+| **Deadline guarantee** | miss-rate < 10⁻⁴ (not a multiplier — the success metric's other half) | the schedule etch |
 
-The ladder is the multiplier half of the success metric. The other half is a
-guarantee, not a multiplier, and gets its own row:
+## The work required, per level
 
-| Deliverable | Target | What unlocks it | The work required |
-|---|---|---|---|
-| **Deadline guarantee** | miss-rate < 10⁻⁴ | the schedule etch | • implement CFG pair-sharing and the rolling-KV shift-register window in hardware<br>• close deterministic timing end-to-end; certify the miss rate with cycle-approximate + DRAM simulation<br>• co-design the thermals; ship a reference thermal design with the part<br>• implement the microcode mode sequencer and the flow-ODE/CEM update engine |
+### First silicon (2.9×)
+
+- Instrument the ledger with per-tensor lifetimes, bytes×distance, and an energy Sankey.
+- Bench a real Thor at 40 W on the frozen workloads, predictions registered first.
+- Synthesize the FP4 tile, a CIM macro, and a ROM weight-bank macro on one node; extract
+  post-layout energy.
+- Characterize the critical blocks against the PDK.
+- Run a scaled RPU on FPGA; validate predicted vs real activity counts.
+- Schedule the full transformer block as one streaming computation, intermediates freed
+  at their consumer.
+- Bank SRAM by tensor class with producer→consumer placement; compare interconnect
+  topologies by bit-mm.
+- Compare weight-stationary vs streamed vs broadcast dataflows on the exact shapes
+  (MACs per fetched weight byte).
+
+### Mature compiler (4.2×)
+
+- Profile partner workloads on the FPGA; close predicted-vs-realized schedule gaps.
+- Fuse the operator tail (norms, RoPE, activations, residuals).
+- Deepen DMA overlap toward full hiding.
+- Gate idle clocks in schedule bubbles.
+
+### North star (15.7× / 22× gated)
+
+- Measure FP4 arithmetic energy at the target node (datasheet + synthesized tile).
+- Derive the datapath fraction from the itemized post-PDK ledger.
+- Bench Thor's achieved fraction of its dense peak.
+- Fabricate the sub-V_min test-structure tile; measure error rates and recovered energy.
+
+### Frontier (≤ 20–44×)
+
+- Widen the interface to 512-bit class; implement lossless weight-stream compression
+  with one-weight-per-clock decode.
+- Desk-study 3D thermals (refresh vs temperature, fanless head) and the custom-DRAM
+  supply chain.
+- Hybrid-bond stacked DRAM with per-bank compute clusters (bank → local SRAM → cluster).
+- Pipeline operators vertically across stacked tiers, register to register.
+- Design the QK→softmax→PV engine: writable-CIM and spatial-fabric candidates, scored
+  on the same block ledger.
+- Measure complete-linear-layer energy of the CIM and ROM/shared-product macros against
+  the best systolic implementation.
+- Recombine the winning substrates into one dual-mode tile; rerun the full-system ledger.
+
+### Horizon (undefined)
+
+- Certify quality floors for cross-chunk reuse, sliding-tile attention, and token
+  merging on robot evaluations.
+- Co-train model variants shaped to the memory hierarchy; measure quality on robots,
+  never proxies.
+
+### Deadline guarantee (miss-rate < 10⁻⁴)
+
+- Implement CFG pair-sharing and the rolling-KV shift-register window in hardware.
+- Close deterministic timing end-to-end; certify the miss rate with cycle-approximate
+  + DRAM simulation.
+- Co-design the thermals; ship a reference thermal design with the part.
+- Implement the microcode mode sequencer and the flow-ODE/CEM update engine.
 
 ## Status and gates, per work item
 
