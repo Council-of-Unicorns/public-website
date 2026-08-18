@@ -44,7 +44,7 @@ The ladder, with each number's standing:
 | First silicon | 2.9× | 2.7–6.7× [S] | zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler (0.55 extraction) |
 | Mature compiler | 4.2× | 3.9–9.7× [S] | same silicon; compiler extraction 0.55 → 0.80 via scheduling, tail fusion, DMA overlap, idle gating |
 | Frontier | ~8× [T] | 6.0–9.7×; ≤ 20–44× bound [T] | model resident in hybrid-bonded stacked DRAM (reads ~40 → ~8 pJ/B); 8–16 GB over 100–200 MB distributed SRAM; bank-local compute deleting the central PHY/controller; moves the memory roofline |
-| Horizon: model–silicon co-design | undefined | — | the model designed with the silicon: memory shaped to its reuse, operators as pipelines, precision only where needed |
+| Horizon: model–silicon co-design | ~12× [T] | 7–19× [T]; ≤ ~45× wall | the model designed with the silicon: memory shaped to its reuse, operators as pipelines, precision only where needed |
 
 ## 1. Robot control converged on a workload that has no chip
 
@@ -518,8 +518,9 @@ rigorous upper-bound envelope: **~20–31× for the 3D-DRAM redesign, ~29–44×
 with the gated circuit techniques** — bounds the recomputation cannot exceed, not
 predictions. It becomes the published ceiling only when the ledger recomputes the
 expanded design space. **The horizon — model–hardware co-design — lies beyond it**:
-the model changing because the silicon changes with it, deliberately undefined and not
-capped by the hardware-only envelope above.
+the model changing because the silicon changes with it — planning band 7–19×, central
+~12× [T] (frontier × a 1.2–2× co-design residual), capped near the ~45× FP4 wall;
+beyond that a ratio is a model-capability claim, measured on robots.
 
 **What these extensions cost, and what they lock in.** The near-term items are
 transformer-general: the memory interface moves bytes it never interprets, and banking

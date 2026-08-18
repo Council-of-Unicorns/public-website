@@ -967,7 +967,8 @@ the ceiling (evidence bound) and the envelope (bound on the recomputation).
 changes with it — memory organized around the model's reuse patterns (3D-DRAM
 bank-locality is the first, pre-convergence move of exactly this kind), communication
 following its actual graph, precision and programmability only where the model needs
-them. Deliberately undefined, and NOT capped by the envelope above, which is
+them. Planning band 7–19×, central ~12× [T] (frontier × a 1.2–2× co-design residual,
+recorded 2026-08-18; capped near the ~45× FP4 wall), and NOT capped by the envelope above, which is
 hardware-only: quality equivalence across model changes is exactly what the co-design
 study flags UNSUPPORTED, so the horizon carries no number until that changes. It is
 open-ended by design — it re-forms as models move and resolves only at convergence.

@@ -63,7 +63,7 @@
     <tr><td>First silicon</td><td>2.9&times;</td><td>2.7&ndash;6.7&times; <span class="prov prov-s">[S]</span></td><td>zero-instruction static schedule; FP4 systolic linear path + FP8 attention engine; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler (0.55 extraction)</td></tr>
     <tr><td>Mature compiler</td><td>4.2&times;</td><td>3.9&ndash;9.7&times; <span class="prov prov-s">[S]</span></td><td>same silicon; compiler extraction 0.55 &rarr; 0.80 via scheduling, tail fusion, DMA overlap, idle gating</td></tr>
     <tr><td>Frontier</td><td>~8&times; <span class="prov prov-t">[T]</span></td><td>6.0&ndash;9.7&times;; &le;&nbsp;20&ndash;44&times; bound <span class="prov prov-t">[T]</span></td><td>model resident in hybrid-bonded stacked DRAM (reads ~40 &rarr; ~8 pJ/B); 8&ndash;16&nbsp;GB over 100&ndash;200&nbsp;MB distributed SRAM; bank-local compute deleting the central PHY/controller; moves the memory roofline</td></tr>
-    <tr><td>Horizon: model&ndash;silicon co-design</td><td>undefined</td><td>&mdash;</td><td>the model designed with the silicon: memory shaped to its reuse patterns, repeated operators as dedicated pipelines, precision only where needed</td></tr>
+    <tr><td>Horizon: model&ndash;silicon co-design</td><td>~12&times; <span class="prov prov-t">[T]</span></td><td>7&ndash;19&times;; capped near the ~45&times; physics wall <span class="prov prov-t">[T]</span></td><td>the model designed with the silicon: memory shaped to its reuse patterns, repeated operators as dedicated pipelines, precision only where needed</td></tr>
     </tbody>
   </table></div>
   <p>The long-term opportunity is larger. Once the model architecture stabilizes, the distinction between model design and chip design begins to disappear. We can co-design the network and the accelerator together: fixing dataflows, specializing memory movement, fusing repeated operations, eliminating unnecessary precision and programmability, and ultimately etching the structure of the neural network into the hardware itself. The result would not merely be a faster processor running a world model. It would be an ASIC whose architecture is the world model &mdash; an accelerator that a general-purpose platform cannot economically match.</p>
@@ -205,7 +205,7 @@
   29&ndash;44&times; compounded with the gated circuit techniques &mdash; bounds the recomputation
   cannot exceed, not predictions. Beyond it sits <b>the horizon: model&ndash;hardware
   co-design</b> &mdash; the model changing because the silicon changes with it &mdash;
-  deliberately undefined, and not capped by the hardware-only envelope above.</p>
+  planning band 7&ndash;19&times; [T] (the frontier times a 1.2&ndash;2&times; co-design residual), capped near the ~45&times; FP4 wall, and not capped by the hardware-only envelope above.</p>
   <p>On what these extensions would lock in: the near ones commit us to nothing about the model.
   Three-dimensional stacking deepens a commitment we have already made &mdash; the attention
   operation chain shared by every standard transformer, including both model families we serve.
