@@ -41,10 +41,7 @@ The ladder, with each number's standing:
 
 | Level | × vs Thor | Standing |
 |---|---|---|
-| Floor | 1.9× | every uncertainty adverse — published on purpose [S] |
-| Bar | 2× | the frozen promise, p05 in every mode (bench/contract.toml) |
 | First silicon | 2.9× | prediction, deliberately conservative inputs [S] |
-| Design target | 3× | margin goal — survives Thor +25% |
 | Mature compiler | 4.2× | prediction; same silicon, software growth only [S] |
 | Ceiling — north star | 15.7× / 22× gated | evidence bound; 22× unlocks on the low-voltage test tile [S] |
 | Next ceiling, pending: 3D DRAM | ≤ 20–44× | upper bound on a future recomputation, never a forecast [T] |
