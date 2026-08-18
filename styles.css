@@ -580,6 +580,23 @@ footer {
 .wp-sec[open] > summary h2::after { content: "\2212"; }   /* minus, not a hyphen */
 .wp-sec > summary:hover h2 { color: var(--text-0); }
 .wp-sec > summary:focus-visible { outline: 2px solid var(--warm-0); outline-offset: 2px; }
+
+/* Per-section deep-link handle, revealed on hover/focus of the heading. */
+.sec-link {
+  margin-left: var(--s2);
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  color: var(--warm-0);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity .12s steps(2);
+}
+.wp-sec > summary:hover .sec-link,
+.wp-sec > summary:focus-visible .sec-link,
+.sec-link:focus-visible { opacity: 1; }
+.sec-link:hover { color: var(--text-0); }
+/* Offset anchor jumps so the heading clears the sticky-ish top padding. */
+.wp-sec { scroll-margin-top: var(--s5); }
 .wp-sec[open] > summary h2 { margin-bottom: var(--s3); }
 .wp-sec > :not(summary):last-child { margin-bottom: 0; }
 

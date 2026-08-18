@@ -30,7 +30,7 @@
     <span>Substrate</span>
   </a>
   <nav aria-label="Sections">
-    <a href="index.html">Overview</a><a href="pitch.html">Pitch</a><a href="business.html">Business</a><a href="whitepaper.html" aria-current="page">Whitepaper</a><a href="simulation.html">Simulation</a><a href="index.html#about">About</a>
+    <a href="index.html">Overview</a><a href="business.html">Business</a><a href="whitepaper.html" aria-current="page">Whitepaper</a><a href="simulation.html">Simulation</a><a href="index.html#about">About</a>
   </nav>
 </header>
 <main id="main" tabindex="-1" class="doc">
@@ -41,14 +41,15 @@
 
   <p class="prov-note">Source tags: <span class="prov prov-m">[M]</span> measured ourselves &middot; <span class="prov prov-s">[S]</span> computed by our simulator &middot; <span class="prov prov-f">[F]</span> measured in production at a robotics company &middot; <span class="prov prov-x">[X]</span> published elsewhere &middot; <span class="prov prov-t">[T]</span> a target, not yet reached.</p>
 
-  <details class="wp-sec">
-  <summary><h2>Executive summary</h2></summary>
+  <details class="wp-sec" id="executive-summary">
+  <summary><h2>Executive summary<a class="sec-link" href="#executive-summary" aria-label="Link to this section">#</a></h2></summary>
   <p>Humanoid robotics is converging on video-action diffusion transformers that predict several seconds of motion and must replan fast enough to achieve human-like reaction latency. Today&rsquo;s leading models are still too large to run inside a robot head, forcing teams to rely on kilowatt-class datacenter GPUs and continuous network connections. That puts latency, Wi-Fi jitter, and connectivity failures directly inside the robot&rsquo;s control loop <span class="prov prov-f">[F]</span>.</p>
   <p>Our immediate goal is to build a specialized accelerator that runs these workloads at least 2&times; faster than NVIDIA Thor at the same 40-watt power budget, with a design target closer to 3&times; <span class="prov prov-s">[S]</span>. That advantage creates an immediate competitive edge: more compelling robot demos, larger deployable models, lower inference costs, and more of the control loop running locally.</p>
   <p>Full edge inference will require model efficiency and hardware efficiency to improve together. As world models become smaller through distillation, quantization, token reduction, caching, and better architectures, we intend to remain several steps ahead of general-purpose platforms at every stage of that transition. That near-term lead wins deployments and gives us the workload knowledge, software stack, and customer relationships needed for the larger opportunity. When the model architecture finally stabilizes, we will be positioned to co-design the model and chip as a single system &mdash; creating an accelerator that NVIDIA&rsquo;s general-purpose architecture cannot match.</p>
+  <p class="readmore"><a href="pitch.html">Read the pitch &rarr;</a></p>
   </details>
-  <details class="wp-sec">
-  <summary><h2>1. The workload arrived before the chip did</h2></summary>
+  <details class="wp-sec" id="sec-1">
+  <summary><h2>1. The workload arrived before the chip did<a class="sec-link" href="#sec-1" aria-label="Link to this section">#</a></h2></summary>
   <p>Leading humanoid robotics programs are converging on a common architecture: a video-action diffusion transformer predicts a multi-second future trajectory and replans several times per second <span class="prov prov-x">[X: DreamZero]</span>. The resulting trajectory is streamed to the robot and used as a reference by its lower-level control stack. At the model scales and inference rates required for capable general-purpose behavior, these systems still cannot run on the edge. As a result, teams have been forced to build extraordinary infrastructure around remote inference &mdash; including low-latency video transport, datacenter accelerators, trajectory streaming, delay compensation, and local fallback control.</p>
   <p>The critical system-level metric is reaction latency: the elapsed time between capturing an observation and executing the corresponding action. Human visuomotor reaction time is roughly 200 milliseconds, and delays substantially beyond this range are readily perceived as sluggishness or hesitation. For a robot, this &ldquo;glass-to-action&rdquo; latency includes every stage of the pipeline: sensor capture and onboard IPC or bus transfers; transmission of camera frames and proprioceptive state to the datacenter; the model&rsquo;s inference loop; transmission of the generated trajectory back to the robot; and the final onboard processing required before the command reaches the control loop.</p>
   <p>Remote inference introduces more than a fixed delay. Network latency and, more importantly, latency variation can produce irregular motion unless the system employs effective buffering, local stabilization, and delay compensation. Every robot exhibits some tracking error between commanded and realized motion, but remote inference adds a second source of error: each action chunk may be generated from observations and action history that are already stale &mdash; and stale by a different amount on every cycle &mdash; by the time the command is executed.</p>
@@ -56,8 +57,8 @@
   <p>Techniques such as <a href="https://www.pi.website/research/real_time_chunking" target="_blank" rel="noopener">real-time chunking</a> attempt to smooth transitions between successive trajectories through trajectory inpainting or temporal blending, while the downstream controller can damp abrupt changes before they reach the actuators <span class="prov prov-x">[X]</span>. These mechanisms can reduce visible transients, but they cannot reconstruct changes in the world that occurred after the original observations were captured. They also introduce a fundamental tradeoff between smoothness and reactivity: stronger blending, buffering, and damping make motion more stable, but reduce the robot&rsquo;s ability to respond quickly to new information.</p>
   <p>Wireless reliability creates an additional bottleneck. Wi-Fi can exhibit substantial jitter, intermittent packet loss, and abrupt degradation as the robot moves through a building. A system that performs well near an access point may fail when the robot enters a basement, passes through a doorway, or encounters network congestion. During evaluations of Sunday Robotics&rsquo; autonomous ACT-2 policy in real homes, unpredictable Wi-Fi latency and network jitter reportedly emerged as major bottlenecks and failure modes, motivating a shift toward local, edge-compute control <span class="prov prov-x">[X]</span>. The broader lesson is that a robot intended to operate autonomously in unstructured environments cannot treat continuous datacenter connectivity as a dependable part of its control loop.</p>
   </details>
-  <details class="wp-sec" open>
-  <summary><h2>2. Win the transition to edge inference</h2></summary>
+  <details class="wp-sec" open id="sec-2">
+  <summary><h2>2. Win the transition to edge inference<a class="sec-link" href="#sec-2" aria-label="Link to this section">#</a></h2></summary>
   <p>The workload we must serve today is already extreme. Our reference point is the Wan2.1-I2V-14B / DreamZero class of video-action diffusion transformer: roughly 14 billion parameters, 40 layers, 40 attention heads, a hidden width of 5,120, and an FFN width of 13,824. Each latent frame contributes approximately 1,560 tokens, with a rolling two-second context of roughly 18,720 tokens and another 1,560&ndash;3,120 tokens introduced on each update. The system must execute one to three denoising steps, often across a guidance pair, and return a new action trajectory within a 200&nbsp;ms control-cycle budget.</p>
   <p>That workload cannot yet run inside the power, memory, and thermal envelope of a humanoid robot head. Four-bit weights alone occupy approximately 7.0&nbsp;GB, while the FP8 KV window contributes another 7.7&nbsp;GB. Both must be streamed from external memory on every step. The computation is similarly demanding: self-attention accounts for approximately 40.7&#8202;% of the FLOPs, the FFN 30.0&#8202;%, QKV projection 16.7&#8202;%, cross-attention 7.0&#8202;%, and output projection 5.6&#8202;% <span class="prov prov-s">[S]</span>. (These figures were corrected in August 2026: the cross-attention term had charged its key and value projections over the full token chunk rather than the much shorter text sequence. A second, independently written cycle-level model now reproduces the split exactly.) With guidance fan-out, a single step reads approximately 14.8&nbsp;GB of model state before feeding both branches from the same weights.</p>
   <p>The eventual objective is to run this entire control workload locally. Reaching that point requires two trends to converge. First, the models must become dramatically smaller and more efficient through better architectures, distillation, quantization, caching, and reduced-step generation. Second, edge accelerators must continue improving in compute density, memory bandwidth, and energy efficiency &mdash; the continuation of the hardware scaling trend often described as Jensen&rsquo;s law. We believe these curves will meet. Our goal is to build the hardware platform positioned to capture that moment when they do.</p>
@@ -74,8 +75,8 @@
   <p>The long-term opportunity is larger. Once the model architecture stabilizes, the distinction between model design and chip design begins to disappear. We can co-design the network and the accelerator together: fixing dataflows, specializing memory movement, fusing repeated operations, eliminating unnecessary precision and programmability, and ultimately etching the structure of the neural network into the hardware itself. The result would not merely be a faster processor running a world model. It would be an ASIC whose architecture is the world model &mdash; an accelerator that a general-purpose platform cannot economically match.</p>
   <p>That is the destination, not the first product. The immediate task is to build a practical accelerator that stays several steps ahead of Thor while preserving enough architectural flexibility to follow a rapidly evolving model layer. By winning the intermediate stages of the transition, we earn the deployments, workload knowledge, compiler stack, and silicon experience required to build the fully co-designed system when the model architecture is ready.</p>
   </details>
-  <details class="wp-sec" open>
-  <summary><h2>3. At 40 watts, energy sets the clock</h2></summary>
+  <details class="wp-sec" open id="sec-3">
+  <summary><h2>3. At 40 watts, energy sets the clock<a class="sec-link" href="#sec-3" aria-label="Link to this section">#</a></h2></summary>
   <p>A robot head can push roughly 40&nbsp;W out through the neck <span class="prov prov-s">[S]</span>. Chunk time is whichever of four bounds is worst:</p>
   <p class="eq">t = max( t_compute, t_memory, t_comm, E_chunk / (TDP &middot; (1 &minus; f_static)) )</p>
   <p>On Thor and on our design alike, the fourth one wins by an order of magnitude <span class="prov prov-s">[S]</span>. So adding peak FLOPS without reducing joules per FLOP does nothing whatsoever.</p>
@@ -84,8 +85,8 @@
   <p>&eta; is how much less energy our datapath spends per FLOP than the GPU we calibrated against <span class="prov prov-s">[S]</span>. We give our module the same 40&nbsp;W as the Thor module, so the TDP ratio is one and S&nbsp;=&nbsp;&eta; exactly: at &eta;&nbsp;=&nbsp;1 the two modules tie, and every point of efficiency is a point of speed. The whole product question is that one number.</p>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>4. Build the simulator before the silicon</h2></summary>
+  <details class="wp-sec" open id="sec-4">
+  <summary><h2>4. Build the simulator before the silicon<a class="sec-link" href="#sec-4" aria-label="Link to this section">#</a></h2></summary>
   <p>We cannot fabricate the target hardware yet, so our first job is to build the most credible simulation environment possible. The simulator gives us a way to explore architectures, reject weak ideas, and quantify tradeoffs before committing millions of dollars to silicon. But a simulator is only useful if it can reproduce hardware that already exists.</p>
   <p>We began by calibrating it against an RTX PRO 6000 Blackwell workstation. We ran the actual target workload using the same tensor geometries and one-, two-, and three-step denoising configurations assumed elsewhere in this design. For each trajectory chunk, we measured execution time directly and sampled board power through <code>nvidia-smi</code> <span class="prov prov-m">[M]</span>. We then asked the simulator to predict those same runs without access to the measured results.</p>
   <p>Across the tested configurations, the simulator came within 0.5&ndash;3.9&#8202;% on execution time and 0.8&ndash;2.5&#8202;% on energy <span class="prov prov-m">[M]</span>. We are also working with experts in accelerator architecture, physical design, memory systems, compilers, and robotics inference to challenge the simulator&rsquo;s assumptions and validate the ideas derived from it. Their role is not merely to confirm the design, but to identify where simplified models omit real implementation constraints: routing congestion, utilization losses, synchronization overhead, power delivery, thermal limits, memory-controller behavior, and the cost of preserving programmability. The simulator is therefore not a substitute for domain expertise; it is a shared quantitative framework through which those experts can test and refine the architecture.</p>
@@ -95,8 +96,8 @@
     <li><strong>Precision scaling delivers less than ideal arithmetic ratios suggest.</strong> Moving from FP16 to FP8 produced a measured speedup of 1.77&ndash;1.82&times;, rather than the theoretical 2&times;. We therefore model FP16-to-FP4 improvement using a measured prior of 2.6&ndash;3.4&times;, replacing the roughly 10&times; gain assumed in an earlier version of the design. That correction alone increased our absolute energy estimates by approximately threefold.</li>
   </ol>
   </details>
-  <details class="wp-sec" open>
-  <summary><h2>5. Where the multiple comes from</h2></summary>
+  <details class="wp-sec" open id="sec-5">
+  <summary><h2>5. Where the multiple comes from<a class="sec-link" href="#sec-5" aria-label="Link to this section">#</a></h2></summary>
   <p>We pushed the uncertainty through Monte Carlo &mdash; token count, how far the schedule compresses, the precision prior &mdash; and the number that falls out is &eta;*&nbsp;&asymp;&nbsp;2.02 for a median 2&times; against Thor at the same power. The back-of-envelope agrees: 2&nbsp;&times;&nbsp;40/40&nbsp;=&nbsp;2 <span class="prov prov-s">[S]</span>. The bar itself is 2&times;, frozen in a machine-readable contract before design-space exploration; because a median is a coin flip we verify it at the 5th percentile in every mode, which in the current model corresponds to &eta;&nbsp;&ge;&nbsp;2.15, and the target of 3 survives even if we hand Thor 50&nbsp;W <span class="prov prov-s">[S]</span>. Measured against Thor&rsquo;s full 130&nbsp;W bench rating the design lands at 0.66&ndash;0.92&times;. The RPU is a head part, and we would rather say that than quote the flattering comparison <span class="prov prov-s">[S]</span>.</p>
   <p>Is that reachable? TPUv4 got 1.6&ndash;3.2&times; performance per watt over an A100 on the same process node, on measured power <span class="prov prov-x">[X: ISCA 2023]</span>. Our bar sits in the middle of that range and our target at the top of it. Neither asks for anything nobody has built.</p>
   <p>The more useful guidance is older. Hameed and colleagues took a general-purpose chip apart and found only 5.8&nbsp;% of its energy reaching the functional units — the transistors that actually do arithmetic. Fusing custom datapaths pushes that toward 35&nbsp;%, and what closes the remaining processor-to-ASIC gap is custom storage wired directly to those units. Not removing instructions, and not wider SIMD <span class="prov prov-x">[X: ISCA 2010]</span>. Tensor cores already did the fused-matmul part, so our headroom is everything <em>around</em> the multiplier: pipeline and clocking (22&nbsp;% of their ledger), caches (19&nbsp;%), register files (10&nbsp;%), control (10&nbsp;%).</p>
@@ -105,8 +106,8 @@
   <p>The result is a simpler and more testable thesis. There is no separate attention multiplier to add to a control-path advantage. Everything reduces to one ratio: the share of energy each design delivers to its multipliers. The attention datapath is where that share has to be earned, competing against every other decision for the same budget, rather than a bonus on top.</p>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>6. What we would build</h2></summary>
+  <details class="wp-sec" open id="sec-6">
+  <summary><h2>6. What we would build<a class="sec-link" href="#sec-6" aria-label="Link to this section">#</a></h2></summary>
   <p>The <b>RPU</b>: a head-resident inference engine, sized to the shapes above. Targets unless tagged otherwise <span class="prov prov-t">[T]</span>:</p>
   <ul>
     <li>About 1.9&nbsp;M FP4 multiply-accumulate units at ~1.05&nbsp;GHz (4&nbsp;PF dense) in 128&times;128 weight-streaming systolic tiles. The model's widths divide the array exactly: 5120&nbsp;=&nbsp;8&nbsp;&times;&nbsp;640, and 13&nbsp;824&nbsp;=&nbsp;8&nbsp;&times;&nbsp;1728.</li>
@@ -126,8 +127,8 @@
   <p>Cooling the robot itself provides &mdash; cold plates under 3&nbsp;mm are already mainstream in humanoids, and heat pipes can move rejection into a torso radiator &mdash; raises the ceiling for any chip equally, so we score it symmetrically and claim none of it as &eta; <span class="prov prov-s">[S]</span>. What survives asymmetrically: the guardband, the flat power density, and shipping the reference thermal design with the part. Die-embedded microfluidic cooling, which only a chip designer can build in, is the gated option that would make 3D-stacked DRAM thermally survivable <span class="prov prov-x">[X]</span>.</p>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>7. The model has to meet us halfway</h2></summary>
+  <details class="wp-sec" open id="sec-7">
+  <summary><h2>7. The model has to meet us halfway<a class="sec-link" href="#sec-7" aria-label="Link to this section">#</a></h2></summary>
   <p>Better hardware alone will not put today's largest world-action models inside a robot head. The model has to become smaller, faster and easier to execute at the same time. Two different families of lever do that work: the ones the chip exploits at runtime, inside a chunk, and the ones the model team applies at training time, before the weights ever ship. All of these techniques already exist in the literature. The open question is not whether they exist, but how aggressively they can be combined without degrading closed-loop behaviour.</p>
 
   <h3>What the chip exploits at runtime</h3>
@@ -155,8 +156,8 @@
   <p>The chip does not have to carry the whole burden, and neither does the model. Edge inference becomes practical when model efficiency and hardware efficiency meet in the middle. Our immediate objective is to stay ahead of general-purpose hardware while that convergence runs. Our long-term objective is to help decide the architecture it converges on, and then build the silicon around it.</p>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>8. The remaining memory-bandwidth risk</h2></summary>
+  <details class="wp-sec" open id="sec-8">
+  <summary><h2>8. The remaining memory-bandwidth risk<a class="sec-link" href="#sec-8" aria-label="Link to this section">#</a></h2></summary>
   <p>There is one important inconsistency in our current analysis. Profiling shows that WAN-class video models are limited by memory bandwidth on a B200 <span class="prov prov-f">[F]</span>. Our simulator, however, predicts that the same workload would be limited primarily by compute on the proposed accelerator. We think there are three reasons for the difference.</p>
   <p>First, GPUs move much more intermediate data than a fully fused accelerator would. A conventional, unfused attention implementation can write roughly 2.3&nbsp;GB of attention scores per layer &mdash; about 25 times the total data movement assumed by our fused pipeline. On a GPU, whether those intermediate values can be eliminated depends on kernel fusion, compiler behavior, and hardware utilization. On a purpose-built chip, the fused dataflow would be part of the architecture itself <span class="prov prov-s">[S]</span>.</p>
   <p>Second, batch-one inference is particularly inefficient for GPUs. Because the workload processes one control request at a time, there is little opportunity to reuse weights across a batch. The GPU must repeatedly fetch a large model for relatively little computation, which can move the workload from the compute-bound side of the roofline to the bandwidth-bound side.</p>
@@ -167,8 +168,8 @@
   <p>For that reason, the final balance between compute and bandwidth will be set at gate 1, after we have calibrated the simulator against real B200 profiling. The worst case appears manageable: it would require a 512-bit memory interface and lossless weight compression, but not an unproven memory technology or aggressive quantization <span class="prov prov-f">[F]</span>.</p>
   <p>So the unresolved question is not whether a solution exists. We have practical options across the range of bandwidth requirements we currently consider plausible. The remaining uncertainty is which option the real workload actually needs. That is a measurement problem, and obtaining that measurement is one of the main objectives of gate 1.</p>
   </details>
-  <details class="wp-sec" open>
-  <summary><h2>9. What is still unsolved</h2></summary>
+  <details class="wp-sec" open id="sec-9">
+  <summary><h2>9. What is still unsolved<a class="sec-link" href="#sec-9" aria-label="Link to this section">#</a></h2></summary>
   <p>Each of these is open, each one matters, and each comes with a way to tell whether you are making progress.</p>
   <ol>
     <li><strong>The attention energy path.</strong> Design the streamer that makes 62&nbsp;% of dynamic energy cheap: division-free online softmax, fused exponential-multiply, static maximum bounds, and the right split of dataflow across fabric passes. Section 5 is the argument that the thesis fails without this.</li>
@@ -184,8 +185,8 @@
   </ol>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>9b. Future extensions &mdash; and what each would cost us</h2></summary>
+  <details class="wp-sec" open id="sec-9b">
+  <summary><h2>9b. Future extensions &mdash; and what each would cost us<a class="sec-link" href="#sec-9b" aria-label="Link to this section">#</a></h2></summary>
   <p>A research pass in August 2026 mapped what lies beyond the current design. None of it is
   counted in our success bars; each item earns its way in only when demonstrated. The first
   result was a validation: every commercial architecture that deviates from our design point
@@ -234,8 +235,8 @@
   discover it later.</p>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>10. Every funding tier has something that can kill it</h2></summary>
+  <details class="wp-sec" open id="sec-10">
+  <summary><h2>10. Every funding tier has something that can kill it<a class="sec-link" href="#sec-10" aria-label="Link to this section">#</a></h2></summary>
   <div class="tbl"><table>
     <thead><tr><th scope="col">Gate</th><th scope="col">What it settles</th><th scope="col">Cost</th><th scope="col">What kills it</th></tr></thead>
     <tbody>
@@ -249,15 +250,15 @@
   <p>Funding follows the gates rather than the other way round. A $3&ndash;4&nbsp;M pre-seed runs gates 1 through 3 to an FPGA-proven &eta; and a design-partner letter of intent; $8&ndash;15&nbsp;M funds the shuttle; $30&ndash;60&nbsp;M funds production <span class="prov prov-t">[T]</span>. First-year equipment is unglamorous: Thor devkits, Versal-class FPGA boards, cloud GPUs, and a bench that measures power properly.</p>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>11. Why this stays defensible</h2></summary>
+  <details class="wp-sec" open id="sec-11">
+  <summary><h2>11. Why this stays defensible<a class="sec-link" href="#sec-11" aria-label="Link to this section">#</a></h2></summary>
   <p>The socket is the humanoid head. You win it per robot generation, and you defend it with certification — deterministic timing, once it is inside somebody's safety case, is a moat measured in years rather than months.</p>
   <p>It is worth being explicit about why we price the bet on the ratio rather than on absolute real-time. World models are getting smaller quickly &mdash; 2.3&nbsp;B in LaWAM, 1&nbsp;B in Efficient-WAM, 500&nbsp;M in SmolVLA <span class="prov prov-x">[X]</span>. Absolute feasibility arrives eventually on its own, for us and for NVIDIA alike. What does not arrive on its own is energy per FLOP. Measured GPU performance per watt doubles roughly every three to four years, far slower than the headline throughput figure, and inside a fixed 40&nbsp;W head you cannot spend your way past it <span class="prov prov-x">[X]</span>. &eta; comes from deleting generality, and a process node is available to both parties, so the ratio survives what the absolute number does not.</p>
   <p>Each competitor misses one constraint, and it is a different one each time. Thor stays general because CUDA is the product. Datacenter transformer ASICs are 20&times; off in power regime. Edge NPUs are roughly 100&times; too small for a 14&nbsp;B streaming model. The relative bar, 2&times; Thor in-head, rides entirely on &eta;. The absolute 5&nbsp;Hz loop is a joint model-and-silicon program, and we say so in public rather than only in private.</p>
   </details>
 
-  <details class="wp-sec" open>
-  <summary><h2>References</h2></summary>
+  <details class="wp-sec" open id="references">
+  <summary><h2>References<a class="sec-link" href="#references" aria-label="Link to this section">#</a></h2></summary>
   <ol class="refs">
     <li>DreamZero authors, &ldquo;World Action Models are Zero-shot Policies,&rdquo; arXiv:2602.15922, 2026.</li>
     <li>Q. Shen et al., &ldquo;World Action Models: A Survey,&rdquo; arXiv:2606.20781, 2026.</li>
@@ -296,6 +297,33 @@
   <span>Substrate</span>
   <span class="foot-tag">Inference silicon for embodied AI</span>
 </footer>
+
+<script>
+// Deep-linkable sections: open the targeted <details> and scroll it into view.
+(function () {
+  function reveal(hash, smooth) {
+    if (!hash) return;
+    var el = document.getElementById(decodeURIComponent(hash.replace(/^#/, "")));
+    if (!el) return;
+    var sec = el.closest ? el.closest(".wp-sec") : null;
+    if (sec) sec.open = true;
+    el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+  }
+  // Clicking a section's "#" copies the address into the URL without toggling.
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a.sec-link");
+    if (!a) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var hash = a.getAttribute("href");
+    if (history.replaceState) history.replaceState(null, "", hash);
+    else location.hash = hash;
+    reveal(hash, true);
+  });
+  window.addEventListener("hashchange", function () { reveal(location.hash, true); });
+  reveal(location.hash, false);
+})();
+</script>
 
 </body>
 </html>
