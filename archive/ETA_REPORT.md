@@ -852,7 +852,7 @@ blocking is right (Interstellar) [X*].
 | DRAM interface: many slow channels, minimal-reach PHY, row-locality layout | ~1.1-1.4x system (DRAM is 18-37% of chunk energy) | Channel/package architecture unspecified beyond "256-bit LPDDR5X" |
 | SRAM organization for the 90 MB + transpose-capable buffers | 1.0-1.2x | Bank geometry unspecified; T-REX-style buffer is measured [X*] and portable |
 | Fleet interconnect (Phase 4.5) | unknown, could be NEGATIVE | Our own model's blind spot: geometry optimum currently assumes free NoC |
-| Digital CIM tiles | 1.05-1.2x — superseded 2026-08-17 by the full pivot study (`docs/generated/CIM_STUDY.md`): central R = 1.48 vs the digital tile, 2x only at (g>=3, g>=3) which is also memory-bound; verdict CONTINUE DIGITAL, CIM = Gen-2 branch | Hardens 4-bit into silicon — narrows the FP8 policy-path escape hatch. Rank last |
+| Digital CIM tiles | 1.05-1.2x — superseded 2026-08-17 by the full pivot study (`docs/generated/CIM_STUDY.md`): central R = 1.48 vs the digital tile; 2x needs both bundles ~3x OR one ~5x with the other >=2x, all such corners memory-bound; verdict CONTINUE DIGITAL, CIM = Gen-2 branch, re-opened by the phase-0 dual-macro measurement | Hardens 4-bit into silicon — narrows the FP8 policy-path escape hatch. Rank last |
 
 **The 3D direction — the highest-upside unexplored family.** Hybrid-bonded bank-local
 DRAM + vertical register-to-register operator pipelining + digital CIM, treated as ONE
