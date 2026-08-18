@@ -66,7 +66,7 @@ multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for
 | Ceiling, f_ours at Hameed's 35% | 3.5–7× | `[T]` | Requires beating every published DNN ASIC |
 | Downside, defensible pessimism | **1.6×** | `[T]` | f_ours 15 %, Thor at 72 % of peak, v1 compiler. Below the bare bar |
 | Compiler-maturity derate | **0.6–0.8× at launch** | `[T]` | §7f — gives **1.7–2.1× at first silicon**, 2.6–3.0× mature |
-| Future directions (3D DRAM = next ceiling; CIM = Gen-2 branch) | ×1.16 modeled today; envelope ≤20–44×; realistic all-in Gen-2 composition ~10–15× | `[T]`/`[S over T]` | No — §7g-bis; gated on tile/thermal/measurement kill questions (the 3.6–4.4× ladder here was the pre-dense figure, restated 2026-08-17) |
+| Future directions (3D DRAM = the frontier; CIM = Gen-2 branch) | ×1.16 modeled today; envelope ≤20–44×; realistic all-in Gen-2 composition ~10–15× | `[T]`/`[S over T]` | No — §7g-bis; gated on tile/thermal/measurement kill questions (the 3.6–4.4× ladder here was the pre-dense figure, restated 2026-08-17) |
 
 **The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
 §7e shows it fixes our floor *and* Thor's overhead fraction simultaneously, because Thor's
@@ -932,7 +932,7 @@ all documents: *positions in the current design space* — floor 1.9×, bar 2.0�
 3.0×, first silicon 2.9×, mature 4.2×, ceiling 15.7× (22× with gated circuit
 techniques; the north star). Above the ceiling sit two distinct levels:
 
-**The next ceiling, pending: 3D DRAM.** Not a horizon — a ceiling in escrow: it becomes
+**The frontier: 3D DRAM** (renamed from "next ceiling", 2026-08-17). Not a horizon — a ceiling in escrow: it becomes
 THE published ceiling when the ledger recomputes the expanded design space (Phase 4.5
 mechanics plus the rule above). Until then it carries an **upper-bound envelope**,
 rigorous by construction: any overlap between the locality factor and f_ours only

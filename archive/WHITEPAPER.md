@@ -43,8 +43,8 @@ The ladder, with each number's standing:
 |---|---|---|
 | First silicon | 2.9× | prediction, deliberately conservative inputs [S] |
 | Mature compiler | 4.2× | prediction; same silicon, software growth only [S] |
-| Ceiling — north star | 15.7× / 22× gated | evidence bound; 22× unlocks on the low-voltage test tile [S] |
-| Next ceiling, pending: 3D DRAM | ≤ 20–44× | upper bound on a future recomputation, never a forecast [T] |
+| North star | 15.7× / 22× gated | the ceiling of today's design space; 22× unlocks on the low-voltage test tile [S] |
+| Frontier: 3D DRAM | ≤ 20–44× | the expanded design space, in escrow — upper bound on a future recomputation, never a forecast [T] |
 | Horizon: model–silicon co-design | undefined | deliberately no number; measured on robots at convergence |
 
 ## 1. Robot control converged on a workload that has no chip
@@ -502,7 +502,7 @@ reads: interface-only ~1.25× (mature 4.2× → ~5.2×); with the vertical pipel
 (→ ~6.3×) [T; restated 2026-08-15 on the dense-Thor mature point — the earlier 2.9×
 base was the pre-dense value].
 
-**The next ceiling, pending: 3D DRAM** (2026-08-17, ETA_REPORT 7g-bis). The full model
+**The frontier: 3D DRAM** (2026-08-17, ETA_REPORT 7g-bis; renamed from "next ceiling" the same day). The full model
 resident in hybrid-bonded DRAM stacked on the compute die: each weight read drops from
 ~40 to ~8 pJ/B over short, wide vertical connections, with 8–16 GB of stacked DRAM over
 100–200 MB of distributed SRAM and each bank feeding its own compute cluster
