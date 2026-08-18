@@ -1,33 +1,24 @@
 # PROGRAM.md — the research program, one project per ladder rung
 
-**Written 2026-08-17.** The division of every architecture idea in this repo into
-separately attributable projects. Organizing principle: **each project is the unlock of
-exactly one ladder rung, and its success criterion is that rung's multiplier** — so
-attribution is automatic (the ledger separates the rungs), gates are inherited rather
-than invented, and completeness is checkable: a project with no rung, or a rung with no
-project, is visible instantly. One structural exception found and fixed on the union
-check: the deadline-miss-rate GUARANTEE is the success metric's other half and unlocks
-no multiplier — it carries its own row and project (deterministic schedule & safety). Checked complete against the
-union of WHITEPAPER,
-ETA_REPORT 7g/7g-bis, PERF_LEVERS, CHIP_ROADMAP, and the three studies (CIM, radical,
-fixed-weight) on 2026-08-17.
+**Written 2026-08-17.** Every architecture idea in this repo, divided into projects:
+each ladder level lists its multiplier, its honest range, and the work that unlocks it.
+Projects are separate simulator branches evaluated by one ledger; combined
+architectures are recomputed, never multiplied.
 
-Rule inherited from the studies: projects are **separate simulator branches evaluated
-by one ledger** — never one architecture that accumulates every idea, and never
-multiplied multipliers. Combined architectures are recomputed (S15/§22 discipline).
+| Level | Predicted | Honest range | What unlocks it |
+|---|---|---|---|
+| **First silicon** | 2.9× | 1.9–9.1× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
+| **Mature compiler** | 4.2× | 2.8–15.7×; 22× with gated sub-V_min | same silicon; compiler extraction 0.55 → 0.80 |
+| **Frontier** | — | ≤ 20–44× (bound, in escrow) | memory rebuilt around the model, plus the compute substrate that converts it into speed |
+| **Horizon** | undefined | — | the model designed together with the silicon |
+| **Deadline guarantee** | miss-rate < 10⁻⁴ | — | the schedule etch |
 
-| Level | Multiplier vs Thor | What unlocks it |
-|---|---|---|
-| **First silicon** | 2.9× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
-| **Mature compiler** | 4.2× | same silicon; compiler extraction 0.55 → 0.80 |
-| **North star** | 15.7× / 22× gated | every uncertain input resolving favorably; the 22× adds sub-V_min operation |
-| **Frontier** | ≤ 20–44× | memory rebuilt around the model, plus the compute substrate that converts it into speed |
-| **Horizon** | undefined | the model designed together with the silicon |
-| **Deadline guarantee** | miss-rate < 10⁻⁴ (not a multiplier — the success metric's other half) | the schedule etch |
+Ranges are the same identity evaluated at each level's compiler stage with every other
+input swept over its stated interval [S]. The top of the mature range is the north star.
 
 ## Technical Roadmap
 
-### First silicon (2.9×)
+### First silicon (2.9×; range 1.9–9.1×)
 
 - Instrument the ledger with per-tensor lifetimes, bytes×distance, and an energy Sankey.
 - Bench a real Thor at 40 W on the frozen workloads, predictions registered first.
@@ -41,6 +32,8 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
   transpose-capable buffers); compare interconnect topologies by bit-mm.
 - Compare weight-stationary vs streamed vs broadcast dataflows on the exact shapes
   (MACs per fetched weight byte).
+- Capture FP8/FP4 anchors on the local RTX proxy to collapse the precision-scaling prior.
+- Derive the datapath fraction from the itemized post-PDK ledger.
 - Ingest a memory-bound B200/WAN profiling anchor; identify realized bandwidth
   utilization, re-locate the compute/bandwidth crossover, and set the MACs-vs-channels
   provisioning ratio.
@@ -49,25 +42,14 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 - Score every candidate across model families (world-action, VLA, JEPA-class) through
   identical accounting — generality is tested, never assumed.
 
-### Mature compiler (4.2×)
+### Mature compiler (4.2×; range 2.8–15.7×, 22× gated)
 
 - Profile partner workloads on the FPGA; close predicted-vs-realized schedule gaps.
 - Fuse the operator tail (norms, RoPE, activations, residuals).
 - Deepen DMA overlap toward full hiding.
 - Gate idle clocks in schedule bubbles.
-
-### North star (15.7× / 22× gated)
-
-Resolution work, not unlock work: these measurements narrow the four [T] inputs and
-raise the predictions toward the bound, never the bound. Only the sub-V_min tile adds
-a multiplier (×1.4, gated).
-
-- Capture FP8/FP4 anchors on the local RTX proxy to collapse the precision-scaling
-  prior.
-- Measure FP4 arithmetic energy at the target node (datasheet + synthesized tile).
-- Derive the datapath fraction from the itemized post-PDK ledger.
-- Bench Thor's achieved fraction of its dense peak.
-- Fabricate the sub-V_min test-structure tile; measure error rates and recovered energy.
+- Fabricate the sub-V_min test-structure tile; measure error rates and recovered energy
+  (arms the gated ×1.4).
 
 ### Frontier (≤ 20–44×)
 
