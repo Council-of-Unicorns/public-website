@@ -11,7 +11,6 @@ architectures are recomputed, never multiplied.
 | **Mature compiler** | 4.2× | 3.9–9.7× | same silicon; compiler extraction 0.55 → 0.80 |
 | **Frontier** | ~8× [T] | 6.0–9.7× [T]; ≤ 20–44× bound | memory rebuilt around the model, plus the compute substrate that converts it into speed |
 | **Horizon** | undefined | — | the model designed together with the silicon |
-| **Deadline guarantee** | miss-rate < 10⁻⁴ | — | the schedule etch |
 
 Likely = the central 90% of the identity sampled over the stated input intervals at
 each compiler stage [S]. Outer bounds (every input at its corner): 9.1× first silicon;
