@@ -946,6 +946,14 @@ rigorous by construction: any overlap between the locality factor and f_ours onl
 Central research point ~29× (15.7 × 1.3 × 1.4). Bounds the recomputation cannot
 exceed, not predictions.
 
+**Gen-3 refinement (FixedWeightTile, same day):** the shared-product hardening
+mechanism (16 products per activation amortized over fanout, ROM-selected) prices the
+hardened tier at central **~8x Thor anchored (range ~6–9.7)** with 14B params in ~4
+dies [T] — see `docs/generated/FIXEDWEIGHT_STUDY.md` and the Gen-3 section of
+CHIP_ROADMAP. Hardening alone is Amdahl-capped (~1.3x); the tier exists only as
+FW + best dynamic attention + 3D dynamic-state memory, and it supersedes static CIM
+inside the lane while leaving CIM-class mechanisms as attention-engine candidates.
+
 **The realistic all-in composition** [T, dated 2026-08-17, ledger-composed not
 multiplied]: executing everything at central estimates — mature compiler (sampled
 central ~6.4×) + 3D repricing (×1.16) + bank-local locality (central ~1.3×) + the

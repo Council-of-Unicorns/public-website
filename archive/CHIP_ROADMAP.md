@@ -126,3 +126,28 @@ thermal envelope of stacked DRAM; 7 GB capacity/supply chain) are desk research 
 should precede any gate-4 shuttle commitment they might affect. None of this moves the
 bars.
 
+
+## Gen-3 tier — hardened base-model RPU (added 2026-08-17, post-convergence)
+
+**Programmable RPU → architecture-specialized RPU (Gen 2: 3D dynamic-state memory +
+improved compute tile) → hardened base-model RPU (Gen 3).** Entered only after the
+world-model architecture and base weights converge; trigger [T]: base-model update
+interval >= ~12 months, >= ~100k units/yr, >= ~95% of deployment adaptation
+expressible as adapters (W = W_fixed + AB in the programmable region).
+
+Mechanism (FixedWeightTile, `docs/generated/FIXEDWEIGHT_STUDY.md`): a 4-bit weight
+alphabet yields 16 shared products per activation, amortized over ~d fanout and
+selected by ROM/BEOL connectivity — the weight DRAM stream, weight SRAM staging and
+most of the static-path delivery bundle are deleted; accumulation, activation delivery
+and residual clocking remain charged. ~14B params ≈ 4 reticle-class dies at
+~16 transistors/param [T] — the feasible-edge boundary (logic-density full hardening
+is INFEASIBLE, `docs/generated/RADICAL_STUDY.md`). Retains the best dynamic-attention
+engine (the load-bearing term) and 3D memory as the dynamic-state tier.
+
+Modeled result [T, mechanistic, NOT published as a multiplier]: central ~2.8x over the
+B1 tile ≈ 8x-class vs Thor anchored, range ~6–9.7; hardening ALONE is Amdahl-capped
+(~1.3x) — the tier is FW + attention + 3D or nothing. Kill criteria: <1.2x full-system
+at macro-grade coefficients; >~6 dies; base-model churn <12 months; g_hard <1.5 at the
+phase-0 macros. Priced by the same phase-0 three-macro synthesis run (FP4 tile, CIM
+macro, ROM/product-bank macro) that gates the CIM branch — one experiment, three
+architecture decisions.
