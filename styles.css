@@ -558,6 +558,31 @@ footer {
   border-top: var(--hairline) solid var(--ground-2);
 }
 
+/* Collapsible whitepaper sections. The <h2> stays the heading; the whole
+   summary row is the toggle, marked with a pixel +/- on the right. */
+.wp-sec > summary {
+  display: block;
+  cursor: pointer;
+  list-style: none;
+}
+.wp-sec > summary::-webkit-details-marker { display: none; }
+.wp-sec > summary::marker { content: ""; }
+.wp-sec > summary h2 { margin-bottom: 0; }
+.wp-sec > summary h2::after {
+  content: "+";
+  float: right;
+  margin-left: var(--s4);
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  line-height: 1.4;
+  color: var(--warm-0);
+}
+.wp-sec[open] > summary h2::after { content: "\2212"; }   /* minus, not a hyphen */
+.wp-sec > summary:hover h2 { color: var(--text-0); }
+.wp-sec > summary:focus-visible { outline: 2px solid var(--warm-0); outline-offset: 2px; }
+.wp-sec[open] > summary h2 { margin-bottom: var(--s3); }
+.wp-sec > :not(summary):last-child { margin-bottom: 0; }
+
 .doc p { margin: 0 0 var(--s4); max-width: none; color: var(--text-1); }
 
 .doc .doc-lede { color: var(--text-2); font-size: 0.95em; }
