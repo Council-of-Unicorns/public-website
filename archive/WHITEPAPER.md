@@ -41,10 +41,10 @@ The ladder, with each number's standing:
 
 | Level | Likely range (90%) | Ceiling | What unlocks it |
 |---|---|---|---|
-| First silicon | 2.7–6.7× [S] | 9.1× | zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler (0.55 extraction) |
-| Mature compiler | 3.9–9.7× [S] | 15.7×; 22× gated — the north star | same silicon; compiler extraction 0.55 → 0.80 via scheduling, tail fusion, DMA overlap, idle gating |
-| Optimized | 6.0–9.7× [T] | ≤ 20–44× | model resident in hybrid-bonded stacked DRAM (reads ~40 → ~8 pJ/B); bank-local compute; moves the memory roofline |
-| Codesign | 7–19× [T] | ~35–47× — the FP4 physics wall | the model designed with the silicon: memory shaped to its reuse, operators as pipelines, precision only where needed |
+| First silicon | 2.7–6.7× [S] | 9.1× | the etch: zero instructions fetched or kernels launched — the ~1,200 GPU kernel launches per chunk become a schedule wired into silicon; FP4 systolic arrays with tree accumulation plus a dedicated FP8 attention engine; a weight-stream conveyor reading the 14.8 GB working set once per step, the guidance pair sharing one stream; fused attention that never materializes the ~233 MB/head score matrix (56.7× less traffic); v1 compiler at 0.55 extraction |
+| Mature compiler | 3.9–9.7× [S] | 15.7×; 22× gated — the north star | same silicon — the compiler climbs 0.55 → 0.80 extraction: schedules that keep the arrays filled, the operator tail (norms, RoPE, activations) fused, DMA overlap near full hiding, idle bubbles clock-gated; matured against FPGA and partner workloads |
+| Optimized | 6.0–9.7× [T] | ≤ 20–44× | the model held resident in hybrid-bonded 3D DRAM stacked on the compute die — weight reads drop ~40 → ~8 pJ/byte, 8–16 GB stacked over 100–200 MB distributed SRAM, each bank feeding its own compute cluster with no central interface — moving the memory roofline that otherwise caps compute gains near 2×; plus the winning compute substrate: the dynamic-attention engine and the CIM-vs-hardened-weights decision |
+| Codesign | 7–19× [T] | ~35–47× — the FP4 physics wall | the converged model and the silicon designed as one system: base weights hardened into the fabric (a new checkpoint is a mask respin; adapters W = W_fixed + AB carry field updates), memory shaped to the model's actual reuse, repeated operator chains as dedicated pipelines, precision and programmability only where the model needs them |
 
 ## 1. Robot control converged on a workload that has no chip
 

@@ -1,16 +1,16 @@
 # PROGRAM.md — the research program, one project per ladder rung
 
 **Written 2026-08-17.** Every architecture idea in this repo, divided into projects:
-each ladder level lists its multiplier, its honest range, and the work that unlocks it.
+each ladder level lists its likely range, its ceiling, and the work that unlocks it.
 Projects are separate simulator branches evaluated by one ledger; combined
 architectures are recomputed, never multiplied.
 
 | Level | Likely range (90%) | Ceiling | What unlocks it |
 |---|---|---|---|
-| **First silicon** | 2.7–6.7× | 9.1× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
-| **Mature compiler** | 3.9–9.7× | 15.7×; 22× gated — the north star | same silicon; compiler extraction 0.55 → 0.80 |
-| **Optimized** | 6.0–9.7× [T] | ≤ 20–44× | memory rebuilt around the model, plus the compute substrate that converts it into speed |
-| **Codesign** | 7–19× [T] | ~35–47× — the FP4 physics wall | the model designed together with the silicon |
+| **First silicon** | 2.7–6.7× | 9.1× | the etch: zero instructions fetched or kernels launched — the ~1,200 GPU kernel launches per chunk become a schedule wired into silicon; FP4 systolic arrays with tree accumulation plus a dedicated FP8 attention engine; a weight-stream conveyor reading the 14.8 GB working set once per step, the guidance pair sharing one stream; fused attention that never materializes the ~233 MB/head score matrix (56.7× less traffic); v1 compiler at 0.55 extraction |
+| **Mature compiler** | 3.9–9.7× | 15.7×; 22× gated — the north star | same silicon — the compiler climbs 0.55 → 0.80 extraction: schedules that keep the arrays filled, the operator tail (norms, RoPE, activations) fused, DMA overlap near full hiding, idle bubbles clock-gated; matured against FPGA and partner workloads |
+| **Optimized** | 6.0–9.7× [T] | ≤ 20–44× | the model held resident in hybrid-bonded 3D DRAM stacked on the compute die — weight reads drop ~40 → ~8 pJ/byte, 8–16 GB stacked over 100–200 MB distributed SRAM, each bank feeding its own compute cluster with no central interface — moving the memory roofline that otherwise caps compute gains near 2×; plus the winning compute substrate: the dynamic-attention engine and the CIM-vs-hardened-weights decision |
+| **Codesign** | 7–19× [T] | ~35–47× — the FP4 physics wall | the converged model and the silicon designed as one system: base weights hardened into the fabric (a new checkpoint is a mask respin; adapters W = W_fixed + AB carry field updates), memory shaped to the model's actual reuse, repeated operator chains as dedicated pipelines, precision and programmability only where the model needs them |
 
 Likely = the central 90% of the identity sampled over the stated input intervals at
 each compiler stage [S]. Ceilings are corner bounds — every input at its extreme
