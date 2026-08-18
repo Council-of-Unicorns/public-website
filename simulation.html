@@ -388,12 +388,12 @@ svg .die-lbl { fill: var(--ink) !important; }
     finishes a two-second imagined trajectory in 4.5 seconds where Thor needs 13.</p>
 
     <div class="tbl"><table>
-    <tr><th>Level</th><th>Multiplier vs Thor</th><th>What kind of number it is</th></tr>
-    <tr><td>First silicon</td><td>2.9&times;</td><td>prediction &mdash; deliberately conservative inputs</td></tr>
-    <tr><td>Mature compiler</td><td>4.2&times;</td><td>prediction &mdash; same silicon, software growth only</td></tr>
-    <tr><td>North star</td><td>15.7&times; / 22&times; gated</td><td>the ceiling of today&rsquo;s design space &mdash; what the evidence does not exclude; 22&times; unlocks on a named test-silicon experiment</td></tr>
-    <tr><td>Frontier: 3D DRAM</td><td>&le; 20&ndash;44&times;</td><td>the expanded design space, in escrow &mdash; an upper bound on a future recomputation, never a forecast</td></tr>
-    <tr><td>Horizon: model&ndash;silicon co-design</td><td>undefined</td><td>deliberately no number &mdash; measured on robots at convergence</td></tr>
+    <tr><th>Level</th><th>Multiplier vs Thor</th><th>What unlocks it</th></tr>
+    <tr><td>First silicon</td><td>2.9&times;</td><td>the etch: zero instructions fetched, zero kernels launched &mdash; the schedule wired into silicon; FP4 systolic linear path + FP8 attention engine; weight-stream conveyor with the guidance pair sharing one stream; fused attention that never materializes the score matrix; first-generation compiler</td></tr>
+    <tr><td>Mature compiler</td><td>4.2&times;</td><td>same silicon &mdash; compiler extraction 0.55 &rarr; 0.80: better scheduling, fusing the operator tail, deeper DMA overlap, idle clock-gating</td></tr>
+    <tr><td>North star</td><td>15.7&times; / 22&times; gated</td><td>every uncertain input at its favorable end: FP4 arithmetic at its physical floor, datapath fraction at the published ceiling, near-ideal compiler; the 22&times; adds sub-threshold-voltage operation, unlocked only by a test-silicon tile</td></tr>
+    <tr><td>Frontier: 3D DRAM</td><td>&le; 20&ndash;44&times;</td><td>the full model resident in hybrid-bonded memory stacked on the compute die (each weight read ~40 &rarr; ~8 picojoules per byte); each memory bank feeding its own compute cluster, deleting the central interface; moves the memory roofline that otherwise caps all compute gains near 2&times;</td></tr>
+    <tr><td>Horizon: model&ndash;silicon co-design</td><td>undefined</td><td>the model designed together with the silicon: memory shaped to its actual reuse, repeated operators becoming dedicated pipelines, precision and programmability only where the model needs them</td></tr>
     </table></div>
 
     <div class="chart-box"><svg id="bet" viewBox="0 0 880 380" role="img"

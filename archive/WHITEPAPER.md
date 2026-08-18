@@ -39,13 +39,13 @@ which a kill test gates every funding tier.
 
 The ladder, with each number's standing:
 
-| Level | × vs Thor | Standing |
+| Level | × vs Thor | What unlocks it |
 |---|---|---|
-| First silicon | 2.9× | prediction, deliberately conservative inputs [S] |
-| Mature compiler | 4.2× | prediction; same silicon, software growth only [S] |
-| North star | 15.7× / 22× gated | the ceiling of today's design space; 22× unlocks on the low-voltage test tile [S] |
-| Frontier: 3D DRAM | ≤ 20–44× | the expanded design space, in escrow — upper bound on a future recomputation, never a forecast [T] |
-| Horizon: model–silicon co-design | undefined | deliberately no number; measured on robots at convergence |
+| First silicon | 2.9× | zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler (0.55 extraction) [S] |
+| Mature compiler | 4.2× | same silicon; compiler extraction 0.55 → 0.80 via scheduling, tail fusion, DMA overlap, idle gating [S] |
+| North star | 15.7× / 22× gated | every input favorable: FP4 arithmetic at its floor (0.0038 pJ/FLOP), datapath fraction at the 35% ceiling, near-ideal compiler; 22× adds sub-Vmin operation, gated on the test tile [S] |
+| Frontier: 3D DRAM | ≤ 20–44× | model resident in hybrid-bonded stacked DRAM (reads ~40 → ~8 pJ/B); 8–16 GB over 100–200 MB distributed SRAM; bank-local compute deleting the central PHY/controller; moves the memory roofline [T] |
+| Horizon: model–silicon co-design | undefined | the model designed with the silicon: memory shaped to its reuse, operators as pipelines, precision only where needed |
 
 ## 1. Robot control converged on a workload that has no chip
 
