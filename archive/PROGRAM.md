@@ -9,12 +9,13 @@ architectures are recomputed, never multiplied.
 |---|---|---|---|
 | **First silicon** | 2.9× | 2.7–6.7× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
 | **Mature compiler** | 4.2× | 3.9–9.7× | same silicon; compiler extraction 0.55 → 0.80 |
-| **Frontier** | ~8× [T] | 6.0–9.7× [T]; ≤ 20–44× bound | memory rebuilt around the model, plus the compute substrate that converts it into speed |
+| **Frontier** | ~8× [T] | 6.0–9.7× [T] | memory rebuilt around the model, plus the compute substrate that converts it into speed |
 | **Horizon** | ~12× [T] | 7–19× [T]; ≤ ~45× wall | the model designed together with the silicon |
 
 Likely = the central 90% of the identity sampled over the stated input intervals at
 each compiler stage [S]. Outer bounds (every input at its corner): 9.1× first silicon;
-15.7×, 22× gated, mature — the top of the mature bound is the north star. Frontier
+15.7×, 22× gated, mature — the top of the mature bound is the north star; ≤ 20–44×
+frontier (the mature corner × the 1.3–2× locality band, × gated circuits at the top). Frontier
 numbers are mechanistic-study outputs, gated on the phase-0 macro measurements.
 Horizon = frontier × the co-design residual (1.2–2×, the efficiency a model shaped to
 this silicon holds that a GPU cannot copy) [T]; ~45× is the FP4 physics wall — beyond
@@ -55,7 +56,7 @@ it a ratio is a model-capability claim, measured on robots.
 - Fabricate the sub-V_min test-structure tile; measure error rates and recovered energy
   (arms the gated ×1.4).
 
-### Frontier (~8× [T]; likely 6.0–9.7×; bound ≤ 20–44×)
+### Frontier (~8× [T]; likely 6.0–9.7×)
 
 - Widen the interface to 512-bit class; implement lossless weight-stream compression
   with one-weight-per-clock decode; evaluate processing-in-memory for the KV window.
