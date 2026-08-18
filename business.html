@@ -44,11 +44,11 @@
 
   <h2>How we work</h2>
 
-  <p>We spend in stages, and every stage ends with a test that can end the project cheaply. Money for silicon moves only after everything before it has passed. Customers are one of those tests, not a hope: before we commit a design to manufacturing, we require two or three signed letters of intent from design partners &mdash; frontier robotics teams in humanoids, manipulation, warehouse automation, heavy machinery, or surgical robotics &mdash; built on real workloads and plain terms: hit this speed at this power, support these models, and we will integrate it.</p>
+  <p>We spend in stages, and every stage ends with a test that can end the project cheaply. We do not spend tapeout money until the preceding gates have passed. Customers are one of those tests, not a hope: before we commit a design to manufacturing, we require two or three signed letters of intent from design partners &mdash; frontier robotics teams in humanoids, manipulation, warehouse automation, heavy machinery, or surgical robotics &mdash; built on real workloads and plain terms: hit this speed at this power, support these models, and we will integrate it.</p>
 
   <p>We ship a companion chip first, not a replacement for the robot&rsquo;s main computer. The robot keeps its existing processor for cameras, networking, safety, and conventional control; the RPU runs the AI model. So a customer can try us without walking away from their NVIDIA or Qualcomm investment: their model goes into our compiler, comes out running on the RPU, and anything we do not yet support keeps running where it already runs.</p>
 
-  <p>And we do not bet on one model architecture. Robot AI is young &mdash; the architecture the industry finally settles on probably does not exist yet, and a chip hardwired to today&rsquo;s would be obsolete before it shipped. What we are building is the machinery that makes co-design cheap: a calibrated simulator and compiler that can take any new model and tell us, within days, how fast it runs on any candidate chip. Every stage of this plan is tested against three different model families, and the same machinery will shape the silicon around whichever architecture wins. The chip is a product of that flywheel; the flywheel is the company.</p>
+  <p>And we do not bet on one model architecture. Robot AI is young &mdash; the architecture the industry finally settles on probably does not exist yet, and a chip hardwired to today&rsquo;s would be obsolete before it shipped. What we are building is the machinery that makes co-design cheap: a calibrated simulator and compiler that can take any new model and tell us, within days, how fast it runs on any candidate chip. Every stage of this plan is tested against three different model families, and the same machinery will shape the silicon around whichever architecture wins. The chip is a product of that flywheel &mdash; the tooling we use to design every generation, not just the first.</p>
 
   <h2>The five gates</h2>
 
@@ -83,7 +83,7 @@
 
   <p>The first three months are about people: recruit the founding team &mdash; an exceptional chip architect and a compiler architect, as cofounders &mdash; and bring on advisors who have built in this industry, in both robotics and silicon. Those people gate everything downstream. Customer discovery runs in parallel &mdash; we are already in discussions with executives at frontier robotics companies &mdash; finding the teams for whom this sentence is already true, <em>&ldquo;the larger model is much better, but Thor cannot run it onboard at the speed and power we need,&rdquo;</em> and turning those conversations into the signed letters of intent the plan requires.</p>
 
-  <p>The technical work does not start from a blank page. We already have a performance simulator that reproduces our lab measurements of NVIDIA&rsquo;s latest silicon to within a few percent on both speed and energy &mdash; with a second simulator, built independently with no shared code, agreeing to better than one percent &mdash; and a habit of publishing what we get wrong: slowing the clock saves no energy, halving precision delivered 1.77&times; where marketing says 2&times;, and when we found NVIDIA&rsquo;s headline number assumed a feature our workload cannot use, we corrected the comparison and our advantage went up. When we measure, we write down the predicted result first, so every test can prove us wrong. The next six months extend that record to real hardware:</p>
+  <p>We already have a performance simulator that reproduces our lab measurements of NVIDIA&rsquo;s latest silicon to within a few percent on both speed and energy &mdash; with a second simulator, built independently with no shared code, agreeing to better than one percent. Early measurements have already changed our assumptions: slowing the clock saves no energy, halving precision delivered 1.77&times; where marketing says 2&times;, and NVIDIA&rsquo;s headline number assumed a feature our workload cannot use, so the honest comparison is better for us than the marketing one. When we measure, we write down the predicted result first. The next six months extend that record to real hardware:</p>
 
   <ul>
     <li>Buy Jetson Thor hardware and measure it directly at 40 watts on our frozen workloads, with our predictions written down before the first run &mdash; replacing every estimate about the incumbent with a measurement.</li>
@@ -95,13 +95,13 @@
 
   <h2>Six to twelve months</h2>
 
-  <p>Prove the parts a spreadsheet cannot: that the chip&rsquo;s memory system and data movement behave the way the compiler predicts, demonstrated on the FPGA. Sweep all three model families across model size, context length, and software quality. Then freeze a first chip design &mdash; chosen by the machinery against the models of that moment, not by attachment to any one of them &mdash; with partner workloads compiling end to end and speed and power predicted before anything ships.</p>
+  <p>Prove the parts a spreadsheet cannot: that the chip&rsquo;s memory system and data movement behave the way the compiler predicts, demonstrated on the FPGA. Sweep all three model families across model size, context length, and software quality. Then freeze a first chip design &mdash; chosen by the machinery against the models of that moment &mdash; with partner workloads compiling end to end and speed and power predicted before anything ships.</p>
 
   <p>Around the one-year mark we make the biggest call: commit the design to manufacturing, or walk away. By then nothing about that decision is hypothetical &mdash; the advantage is measured rather than modeled, it has been tested across the model families that plausibly come next, and our design partners have seen the numbers.</p>
 
   <h2>The second year</h2>
 
-  <p>The first chip &mdash; 2.9&times; at launch, maturing toward 4&times; in software &mdash; we intend to build for certain. Tapeout &mdash; committing the design to manufacturing &mdash; comes early in the year, with a team and funding raised on the pre-silicon evidence. While the chip is being fabricated the compiler keeps improving against the FPGA and partner models; most of the multiplier&rsquo;s growth lives in software, and that work needs no physics to break our way. By the end of the year: first chips running, first partner integrations as companion modules, and the real-world profiling data that pushes the compiler toward maturity &mdash; a credible first product at the 2.9&times;-class design point.</p>
+  <p>If those gates pass, year two is tapeout: we commit the design to manufacturing early in the year, raise the silicon round against the pre-silicon evidence, and build the team to carry the design through physical implementation and bring-up. While the chip is being fabricated the compiler keeps improving against the FPGA and partner models, where most of the multiplier&rsquo;s growth lives. By the end of the year: first chips running, first partner integrations as companion modules, and the real-world profiling data that pushes the compiler toward maturity &mdash; a first-generation RPU around the 2.9&times; design point, shipped to the initial partners.</p>
 
   <h2>Year two onwards: the real bet</h2>
 
@@ -111,7 +111,7 @@
 
   <h2>The two questions we keep asking</h2>
 
-  <p><strong>Does more onboard compute still buy more capable robots?</strong> If frontier models shrink until Thor has headroom to spare, this opportunity weakens substantially. Everything in the current trajectory &mdash; scaling laws emerging in robot pretraining, growing context windows, test-time reasoning arriving in robotics &mdash; points the other way. But we re-ask this at every stage instead of assuming it.</p>
+  <p><strong>Does more onboard compute still buy more capable robots?</strong> If frontier models shrink until Thor has headroom to spare, this opportunity weakens substantially. Our current bet is that demand for onboard compute keeps increasing: scaling laws emerging in robot pretraining, growing context windows, and test-time reasoning arriving in robotics. But we re-test that assumption at every stage.</p>
 
   <p><strong>Can the RPU really deliver 3&ndash;4&times;?</strong> Our instrument says 2.9&ndash;4.2&times; today, with a floor of 1.9&times; if everything breaks against us. If physical measurement drags the real answer down toward 1.3&times;, the cost of integrating a new chip outweighs the benefit, and the one-year decision says stop. That is exactly what it is for.</p>
 
