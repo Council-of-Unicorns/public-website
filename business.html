@@ -50,6 +50,23 @@
 
   <p>And we do not bet on one model architecture. Robot AI is young &mdash; the architecture the industry finally settles on probably does not exist yet, and a chip hardwired to today&rsquo;s would be obsolete before it shipped. What we are building is the machinery that makes co-design cheap: a calibrated simulator and compiler that can take any new model and tell us, within days, how fast it runs on any candidate chip. Every stage of this plan is tested against three different model families, and the same machinery will shape the silicon around whichever architecture wins. The chip is a product of that flywheel; the flywheel is the company.</p>
 
+  <h2>The five gates</h2>
+
+  <p>Concretely, the staged spending looks like this. Each gate settles one question, and each has a written-down result that ends the project.</p>
+
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Gate</th><th scope="col">What it settles</th><th scope="col">Cost</th><th scope="col">What kills it</th></tr></thead>
+    <tbody>
+    <tr><td>1. Compute-block energy model, dataflow comparison, memory measurement</td><td>the first computed multiplier for our datapath</td><td>~$0, weeks</td><td>under 2.2&times;, or less than 35&#8202;% of energy reaching the arithmetic</td></tr>
+    <tr><td>2. Measure a real Jetson Thor</td><td>the incumbent&rsquo;s real number &mdash; the denominator of every claim on this site</td><td>~$3&nbsp;k, days</td><td>our model misses the measurement badly</td></tr>
+    <tr><td>3. Core datapath on an FPGA</td><td>a measured multiplier, bit-exact against the model</td><td>~$1&ndash;2&nbsp;M, 2&ndash;3 quarters</td><td>measurement below the gate-1 claim</td></tr>
+    <tr><td>4. Test-chip shuttle, including a low-voltage tile</td><td>the multiplier on our own silicon at our own voltage</td><td>low millions, ~1 year</td><td>silicon below the FPGA projection</td></tr>
+    <tr><td>5. Production tapeout</td><td>the product</td><td>$30&ndash;50&nbsp;M</td><td>&mdash; only reached if gates 1&ndash;4 pass</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Funding follows the gates rather than the other way round: a $3&ndash;4&nbsp;M pre-seed runs gates 1 through 3 to an FPGA-proven multiplier and the signed letters of intent; $8&ndash;15&nbsp;M funds the test chip; $30&ndash;60&nbsp;M funds production. First-year equipment is unglamorous: Thor devkits, FPGA boards, cloud GPUs, and a bench that measures power properly.</p>
+
   <h2>How we design the chip</h2>
 
   <p>Our design process follows the five-step algorithm Elon Musk drilled into SpaceX and Tesla (<a href="https://www.inc.com/jeff-haden/elon-musks-algorithm-a-5-step-process-to-dramatically-improve-nearly-everything-is-both-simple-brilliant.html" target="_blank" rel="noopener">his own description here</a>), in order &mdash; because chip design punishes exactly the failure mode the ordering exists to prevent: optimizing, or automating, a thing that should not exist.</p>
