@@ -66,7 +66,7 @@ multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for
 | Ceiling, f_ours at Hameed's 35% | 3.5–7× | `[T]` | Requires beating every published DNN ASIC |
 | Downside, defensible pessimism | **1.6×** | `[T]` | f_ours 15 %, Thor at 72 % of peak, v1 compiler. Below the bare bar |
 | Compiler-maturity derate | **0.6–0.8× at launch** | `[T]` | §7f — gives **1.7–2.1× at first silicon**, 2.6–3.0× mature |
-| Future directions (3D DRAM = the frontier; CIM = Gen-2 branch) | ×1.16 modeled today; envelope ≤20–44×; realistic all-in Gen-2 composition ~10–15× | `[T]`/`[S over T]` | No — §7g-bis; gated on tile/thermal/measurement kill questions (the 3.6–4.4× ladder here was the pre-dense figure, restated 2026-08-17) |
+| Future directions (3D DRAM = the optimized level; CIM = Gen-2 branch) | ×1.16 modeled today; envelope ≤20–44×; realistic all-in Gen-2 composition ~10–15× | `[T]`/`[S over T]` | No — §7g-bis; gated on tile/thermal/measurement kill questions (the 3.6–4.4× ladder here was the pre-dense figure, restated 2026-08-17) |
 
 **The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
 §7e shows it fixes our floor *and* Thor's overhead fraction simultaneously, because Thor's
@@ -932,7 +932,7 @@ all documents: *positions in the current design space* — floor 1.9×, bar 2.0�
 3.0×, first silicon 2.9×, mature 4.2×, ceiling 15.7× (22× with gated circuit
 techniques; the north star). Above the ceiling sit two distinct levels:
 
-**The frontier: 3D DRAM** (renamed from "next ceiling", 2026-08-17). Not a horizon — a ceiling in escrow: it becomes
+**The optimized level: 3D DRAM** (renamed from "frontier" 2026-08-18, from "next ceiling" 2026-08-17). Not a horizon — a ceiling in escrow: it becomes
 THE published ceiling when the ledger recomputes the expanded design space (Phase 4.5
 mechanics plus the rule above). Until then it carries an **upper-bound envelope**,
 rigorous by construction: any overlap between the locality factor and f_ours only
@@ -963,14 +963,14 @@ at **~10–15×**, with the memory move mandatory to realize it as speed (the ~1
 compute-side roofline). This is an expectation composition for planning, distinct from
 the ceiling (evidence bound) and the envelope (bound on the recomputation).
 
-**The horizon: model–hardware co-design.** The model changes because the silicon
+**Codesign (renamed from "horizon", 2026-08-18): model–hardware co-design.** The model changes because the silicon
 changes with it — memory organized around the model's reuse patterns (3D-DRAM
 bank-locality is the first, pre-convergence move of exactly this kind), communication
 following its actual graph, precision and programmability only where the model needs
-them. Planning band 7–19×, central ~12× [T] (frontier × a 1.2–2× co-design residual,
+them. Planning band 7–19×, central ~12× [T] (the optimized level × a 1.2–2× co-design residual,
 recorded 2026-08-18; capped near the ~45× FP4 wall), and NOT capped by the envelope above, which is
 hardware-only: quality equivalence across model changes is exactly what the co-design
-study flags UNSUPPORTED, so the horizon carries no number until that changes. It is
+study flags UNSUPPORTED, so the level carries only the labeled planning band until that changes. It is
 open-ended by design — it re-forms as models move and resolves only at convergence.
 
 **Monitored, not pursued:** analog gain-cell attention (violates bit-exactness; targets
