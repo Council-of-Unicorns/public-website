@@ -10,6 +10,9 @@ see SIMULATORS.md).
 
 ## Canonical documents
 
+- [`PROGRAM.md`](PROGRAM.md) — the research program: one project per ladder rung,
+  with status and gates.
+
 - [`WHITEPAPER.md`](WHITEPAPER.md) — the consolidated technical whitepaper (recruiting-grade;
   solid-beat feasibility, thermal co-design, roadmap).
 - [`system-design.md`](system-design.md) — the simulator's architecture source of truth,
