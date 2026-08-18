@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Substrate — The model meets us halfway</title>
+<meta name="description" content="Model-compression research the RPU depends on: the runtime and training-time levers that shrink world-action models toward the edge." />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<meta name="theme-color" content="#100E18" />
+<meta property="og:title" content="Substrate — The model meets us halfway" />
+<meta property="og:description" content="Model-compression research the RPU depends on: the runtime and training-time levers that shrink world-action models toward the edge." />
+<meta property="og:type" content="website" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav">
+  <a class="wordmark" href="index.html">
+    <svg class="mark" viewBox="0 0 8 8" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
+      <rect x="0" y="0" width="8" height="8" fill="currentColor" opacity=".18"/>
+      <rect x="1" y="1" width="2" height="2" fill="currentColor"/>
+      <rect x="5" y="1" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="1" y="5" width="2" height="2" fill="currentColor" opacity=".55"/>
+      <rect x="5" y="5" width="2" height="2" fill="currentColor"/>
+    </svg>
+    <span>Substrate</span>
+  </a>
+  <nav aria-label="Sections">
+    <a href="index.html">Overview</a><a href="business.html">Business</a><a href="whitepaper.html">Whitepaper</a><a href="simulation.html">Simulation</a><a href="index.html#about">About</a>
+  </nav>
+</header>
+<main id="main" tabindex="-1" class="doc">
+  <article>
+    <p class="label">Companion note &mdash; August 2026</p>
+    <h1>The model has to meet us halfway</h1>
+    <p class="doc-lede">Better hardware alone will not fit today&rsquo;s largest world-action models inside a robot head.</p>
+
+  <p class="prov-note">Source tags: <span class="prov prov-m">[M]</span> measured ourselves &middot; <span class="prov prov-s">[S]</span> computed by our simulator &middot; <span class="prov prov-f">[F]</span> measured in production at a robotics company &middot; <span class="prov prov-x">[X]</span> published elsewhere &middot; <span class="prov prov-t">[T]</span> a target, not yet reached.</p>
+
+  <p>The model has to get smaller, faster, and easier to execute at the same time. Two families of lever do that work: the ones the chip exploits at runtime, inside a control chunk, and the ones the model team applies at training time. All of them already exist in the literature &mdash; the open question is how aggressively they combine without degrading closed-loop behaviour.</p>
+
+  <h2>What the chip exploits at runtime</h2>
+  <p>Checked one at a time against its own literature, each optimization buys a multiplier on chunk energy for the three-step schedule the requirement assumes <span class="prov prov-t">[T]</span>. Cross-chunk reuse leads &mdash; 1.3&ndash;2.0&times; in Quality mode, 1.0&ndash;1.45&times; in Deadline &mdash; because consecutive chunks re-diffuse world state that mostly overlaps, so the overlap is computed once instead of every time (WorldCache reports 2.3&times; at 99.4&nbsp;% quality, Chorus 1.45&times; on 4-step models) <span class="prov prov-x">[X]</span>. Sliding-tile sparse attention holds 1.15&ndash;1.45&times;, token merging 1.1&ndash;1.3&times;, and cheaper attention-normalization arithmetic a percent or two. Per-step feature caching, the one everyone suggests first, buys nothing: it needs many steps to cache across and we run one to three.</p>
+  <p>Composed and discounted for the work they duplicate, the range is roughly <strong>1.7&ndash;3.8&times;</strong> <span class="prov prov-t">[T]</span> &mdash; a ceiling with 2:4 sparsity and FP4 KV switched on, every lever gated on task success, not a figure to plan against. Cross-chunk reuse is what we would build first: the largest single multiplier, and it survives few-step schedules where per-step caching does not. No language-model accelerator has a reason to build it. The catch is that the schedule still reserves the worst-case slot, so reuse saves energy without strengthening the deadline proof &mdash; it only counts toward the deadline if training can guarantee a floor on the overlap, which is what train-time chunking would do <span class="prov prov-f">[F]</span>.</p>
+
+  <h2>The compression toolbox</h2>
+  <p>Here is the training-time toolbox as the field currently holds it, ordered by what each part saves us.</p>
+  <ul>
+    <li><b>Quantization.</b> FP8 and carefully calibrated INT8 run close to lossless; reaching INT4 or FP4 reliably takes quantization-aware training or distillation (QVGen, NVIDIA&rsquo;s NVFP4 work) <span class="prov prov-x">[X]</span>. Our own design already assumes FP8 activations and FP4 linear weights, so it presumes a working QAT recipe <span class="prov prov-s">[S]</span>.</li>
+    <li><b>Fewer denoising steps.</b> The dominant lever for diffusion and flow models: consistency and trajectory distillation, distribution matching (DMD, DMD2), adversarial distillation (LADD) and one-step flow maps compress a long sampling trajectory into one to four steps <span class="prov prov-x">[X]</span>. Our 16&rarr;3 result already banks part of this <span class="prov prov-f">[F]</span>.</li>
+    <li><b>A smaller network.</b> On-policy student distillation trained on states the student actually reaches (ActDistill) beats copying teacher trajectories, because offline-harmless errors compound once the student is in the loop <span class="prov prov-x">[X]</span>. In the action-only setting, students already match their teachers.</li>
+    <li><b>Changing what the model represents.</b> Latent-space and reconstruction-free designs (MuDreamer, DINO-WM), tokenized latents, and stronger token compression attack sequence length directly. Our fork already drops the pixel decoder and predicts in latent space; the token-count reductions land on the two inputs our sensitivity ranking puts on top.</li>
+    <li><b>Architecture.</b> State-space and Mamba-style backbones, linear or masked attention, low-rank factorization and structured pruning each cut the cost of long-horizon prediction. Only structured pruning helps us, because the tiles are fixed in the mask.</li>
+  </ul>
+  <p>Calling a model &ldquo;distilled&rdquo; hides which lever actually moved: a smaller network, fewer sampling steps, or a policy distilled out of the world model. We are in the generative-video family, where token count, network size, and repeated denoising dominate.</p>
+
+  <h2>How the numbers compose</h2>
+  <p>Two things constrain how these gains are used. First, we cannot count the baseline twice: latent-space modelling, the dropped decoder, the three-step schedule and mixed FP8/FP4 are already inside the chip&rsquo;s design-point numbers, so the runtime multipliers sit on top of that baseline rather than beside it. Second, some model choices reach back into the chip &mdash; a state-space or linear-attention backbone would retire much of the attention energy the chip exists to make cheap, and token compression moves the exact parameters the array and memory interface are sized around. The model roadmap is therefore a chip input, fixed at gate 1 before RTL commits to a shape.</p>
+  <p>One hard rule bounds the whole toolbox: the control policy must not depend on aggressive quantization &mdash; no INT2 weights, no FP4 KV, no 2:4 pruning <span class="prov prov-f">[F]</span>. Those stay last resorts, behind everything bit-exact and structural.</p>
+
+  <h2>Headroom, and the long game</h2>
+  <p>All of this is public, so none of it is a moat and all of it is available to Thor as well. Two asymmetries survive. The chip realises the runtime levers at a cost a GPU cannot match. And on the training side, the action-only setting is close to saturated, while joint video-action distillation stays open &mdash; the two streams carry different signal-to-noise schedules, and one consistency objective serves neither well. Per-modality treatment is the current frontier, and it is our model-side bet.</p>
+  <p>The roadmap assumes progress on both fronts and depends on a breakthrough in neither. In the near term we design for the workload that exists and exploit what is already available, so the first product stands on its own. As the model architecture stabilises, the line between model optimization and chip optimization becomes artificial and full co-design opens up: representation, numerical formats, dataflow, memory hierarchy and silicon chosen together.</p>
+
+  <p class="readmore"><a href="whitepaper.html#sec-8">Back to the whitepaper &rarr;</a></p>
+  </article>
+</main>
+
+<footer>
+  <span>Substrate</span>
+  <span class="foot-tag">Inference silicon for embodied AI</span>
+</footer>
+
+</body>
+</html>
