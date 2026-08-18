@@ -5,20 +5,21 @@ each ladder level lists its multiplier, its honest range, and the work that unlo
 Projects are separate simulator branches evaluated by one ledger; combined
 architectures are recomputed, never multiplied.
 
-| Level | Predicted | Honest range | What unlocks it |
+| Level | Predicted | Likely range (90%) | What unlocks it |
 |---|---|---|---|
-| **First silicon** | 2.9× | 1.9–9.1× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
-| **Mature compiler** | 4.2× | 2.8–15.7×; 22× with gated sub-V_min | same silicon; compiler extraction 0.55 → 0.80 |
+| **First silicon** | 2.9× | 2.7–6.7× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
+| **Mature compiler** | 4.2× | 3.9–9.7× | same silicon; compiler extraction 0.55 → 0.80 |
 | **Frontier** | — | ≤ 20–44× (bound, in escrow) | memory rebuilt around the model, plus the compute substrate that converts it into speed |
 | **Horizon** | undefined | — | the model designed together with the silicon |
 | **Deadline guarantee** | miss-rate < 10⁻⁴ | — | the schedule etch |
 
-Ranges are the same identity evaluated at each level's compiler stage with every other
-input swept over its stated interval [S]. The top of the mature range is the north star.
+Likely = the central 90% of the identity sampled over the stated input intervals at
+each compiler stage [S]. Outer bounds (every input at its corner): 9.1× first silicon;
+15.7×, 22× gated, mature — the top of the mature bound is the north star.
 
 ## Technical Roadmap
 
-### First silicon (2.9×; range 1.9–9.1×)
+### First silicon (2.9×; likely 2.7–6.7×)
 
 - Instrument the ledger with per-tensor lifetimes, bytes×distance, and an energy Sankey.
 - Bench a real Thor at 40 W on the frozen workloads, predictions registered first.
@@ -42,7 +43,7 @@ input swept over its stated interval [S]. The top of the mature range is the nor
 - Score every candidate across model families (world-action, VLA, JEPA-class) through
   identical accounting — generality is tested, never assumed.
 
-### Mature compiler (4.2×; range 2.8–15.7×, 22× gated)
+### Mature compiler (4.2×; likely 3.9–9.7×)
 
 - Profile partner workloads on the FPGA; close predicted-vs-realized schedule gaps.
 - Fuse the operator tail (norms, RoPE, activations, residuals).
