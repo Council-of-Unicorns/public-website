@@ -955,8 +955,8 @@ FW + best dynamic attention + 3D dynamic-state memory, and it supersedes static 
 inside the lane while leaving CIM-class mechanisms as attention-engine candidates.
 
 **The realistic all-in composition** [T, dated 2026-08-17, ledger-composed not
-multiplied]: executing everything at central estimates — mature compiler (sampled
-central ~6.4×) + 3D repricing (×1.16) + bank-local locality (central ~1.3×) + the
+multiplied]: executing everything at central estimates — mature compiler (expectation
+~6.4×: the median of the identity over every input's defensible range, uniform draws) + 3D repricing (×1.16) + bank-local locality (central ~1.3×) + the
 CIM-informed tile if the phase-0 measurement validates its bundles (~×1.4, overlap
 deducted) + gated circuits if the test tile proves (×1.4) — lands a Generation-2 part
 at **~10–15×**, with the memory move mandatory to realize it as speed (the ~1.95×
