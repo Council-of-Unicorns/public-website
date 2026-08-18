@@ -1,6 +1,6 @@
 # The η Report — the energy case for the RPU, and the design it forces
 
-**Status:** living synthesis; begun 2026-08-04, current through 2026-08-07 (§7g future
+**Status:** living synthesis; begun 2026-08-04, current through 2026-08-17 (§7g future
 directions added 2026-08-06). Supersedes no document; consolidates the argument otherwise
 spread across [`CHIP_SPEC.md`](CHIP_SPEC.md) §6, [`PERF_LEVERS.md`](PERF_LEVERS.md) Ledgers
 A–D6, [`MEMORY_BANDWIDTH.md`](MEMORY_BANDWIDTH.md) and the measured fixtures.
@@ -66,7 +66,7 @@ multiply, using none of §7's inputs. That is the cross-check lesson L5 asks for
 | Ceiling, f_ours at Hameed's 35% | 3.5–7× | `[T]` | Requires beating every published DNN ASIC |
 | Downside, defensible pessimism | **1.6×** | `[T]` | f_ours 15 %, Thor at 72 % of peak, v1 compiler. Below the bare bar |
 | Compiler-maturity derate | **0.6–0.8× at launch** | `[T]` | §7f — gives **1.7–2.1× at first silicon**, 2.6–3.0× mature |
-| Future directions (memory interface; 3D) | ladder to 3.6–4.4× | `[T]`/`[X]` | No — §7g; gated on spec work and three kill questions |
+| Future directions (3D DRAM = next ceiling; CIM = Gen-2 branch) | ×1.16 modeled today; envelope ≤20–44×; realistic all-in Gen-2 composition ~10–15× | `[T]`/`[S over T]` | No — §7g-bis; gated on tile/thermal/measurement kill questions (the 3.6–4.4× ladder here was the pre-dense figure, restated 2026-08-17) |
 
 **The hinge is one number: the energy of an FP4 multiply-accumulate at the target node.**
 §7e shows it fixes our floor *and* Thor's overhead fraction simultaneously, because Thor's
@@ -945,6 +945,15 @@ rigorous by construction: any overlap between the locality factor and f_ours onl
 
 Central research point ~29× (15.7 × 1.3 × 1.4). Bounds the recomputation cannot
 exceed, not predictions.
+
+**The realistic all-in composition** [T, dated 2026-08-17, ledger-composed not
+multiplied]: executing everything at central estimates — mature compiler (sampled
+central ~6.4×) + 3D repricing (×1.16) + bank-local locality (central ~1.3×) + the
+CIM-informed tile if the phase-0 measurement validates its bundles (~×1.4, overlap
+deducted) + gated circuits if the test tile proves (×1.4) — lands a Generation-2 part
+at **~10–15×**, with the memory move mandatory to realize it as speed (the ~1.95×
+compute-side roofline). This is an expectation composition for planning, distinct from
+the ceiling (evidence bound) and the envelope (bound on the recomputation).
 
 **The horizon: model–hardware co-design.** The model changes because the silicon
 changes with it — memory organized around the model's reuse patterns (3D-DRAM

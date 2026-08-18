@@ -29,6 +29,7 @@ consolidated state:
 | **Mechanistic ledger path** (inside A) | `rpu/ledger.py` | Where does every joule go, across model x SRAM x software? | Structure sound, coefficients [T]; informs but does not set published numbers |
 | **Published identity** (inside A) | `rpu/design_points.py` | The four-factor scalar accounting behind every published design point and the bounded-robust range | The headline source until the ledger is promoted (below) |
 | **The explorer** — generated interactive page | `scripts/explorer_data.py` → `explorer.html` | Renders `design_points` + the bounded-robust range | Golden-checked at page load; authoritative rendering of the headline numbers |
+| **CIM pivot evaluator** (added 2026-08-17) | `rpu/cim.py` → `scripts/cim_study.py` → `docs/generated/CIM_STUDY.md` | Should the compute substrate pivot to SRAM-CIM? Block-level dual-tile ledger, bundle-gain sweeps, memory crossover | [T] sweep coefficients; verdict CONTINUE DIGITAL (central R = 1.48); re-opens on the phase-0 tile measurement |
 
 They deliberately do **not** share code. A and the cycle model agree on FLOPs to 0.7%
 without any common implementation — that independence is the repo's strongest validation
