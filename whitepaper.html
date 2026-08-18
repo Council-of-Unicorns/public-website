@@ -251,13 +251,6 @@
   <p>Funding follows the gates rather than the other way round. A $3&ndash;4&nbsp;M pre-seed runs gates 1 through 3 to an FPGA-proven &eta; and a design-partner letter of intent; $8&ndash;15&nbsp;M funds the shuttle; $30&ndash;60&nbsp;M funds production <span class="prov prov-t">[T]</span>. First-year equipment is unglamorous: Thor devkits, Versal-class FPGA boards, cloud GPUs, and a bench that measures power properly.</p>
   </details>
 
-  <details class="wp-sec" id="sec-11">
-  <summary><h2>11. Why this stays defensible<a class="sec-link" href="#sec-11" aria-label="Link to this section">#</a></h2></summary>
-  <p>The socket is the humanoid head. You win it per robot generation, and you defend it with certification — deterministic timing, once it is inside somebody's safety case, is a moat measured in years rather than months.</p>
-  <p>It is worth being explicit about why we price the bet on the ratio rather than on absolute real-time. World models are getting smaller quickly &mdash; 2.3&nbsp;B in LaWAM, 1&nbsp;B in Efficient-WAM, 500&nbsp;M in SmolVLA <span class="prov prov-x">[X]</span>. Absolute feasibility arrives eventually on its own, for us and for NVIDIA alike. What does not arrive on its own is energy per FLOP. Measured GPU performance per watt doubles roughly every three to four years, far slower than the headline throughput figure, and inside a fixed 40&nbsp;W head you cannot spend your way past it <span class="prov prov-x">[X]</span>. &eta; comes from deleting generality, and a process node is available to both parties, so the ratio survives what the absolute number does not.</p>
-  <p>Each competitor misses one constraint, and it is a different one each time. Thor stays general because CUDA is the product. Datacenter transformer ASICs are 20&times; off in power regime. Edge NPUs are roughly 100&times; too small for a 14&nbsp;B streaming model. The relative bar, 2&times; Thor in-head, rides entirely on &eta;. The absolute 5&nbsp;Hz loop is a joint model-and-silicon program, and we say so in public rather than only in private.</p>
-  </details>
-
   <details class="wp-sec" id="references">
   <summary><h2>References<a class="sec-link" href="#references" aria-label="Link to this section">#</a></h2></summary>
   <ol class="refs">
