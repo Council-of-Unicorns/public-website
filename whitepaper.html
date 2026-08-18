@@ -106,7 +106,7 @@
 
   <details class="wp-sec" id="sec-5">
   <summary><h2>5. What we would build<a class="sec-link" href="#sec-5" aria-label="Link to this section">#</a></h2></summary>
-  <p>The <b>RPU</b>: a head-resident inference engine, sized to the shapes above. Targets unless tagged otherwise <span class="prov prov-t">[T]</span>:</p>
+  <p>The <b>RPU</b>: a head-resident inference engine, sized to the shapes above. This is the design point our instrument currently scores &mdash; the existence proof behind the first-silicon numbers, chosen by the co-design machinery and revised by it as the model landscape moves, not a frozen commitment. Targets unless tagged otherwise <span class="prov prov-t">[T]</span>:</p>
   <ul>
     <li>About 1.9&nbsp;M FP4 multiply-accumulate units at ~1.05&nbsp;GHz (4&nbsp;PF dense) in 128&times;128 weight-streaming systolic tiles. The model's widths divide the array exactly: 5120&nbsp;=&nbsp;8&nbsp;&times;&nbsp;640, and 13&nbsp;824&nbsp;=&nbsp;8&nbsp;&times;&nbsp;1728.</li>
     <li>FP8 multiply into FP32 accumulators held in dedicated SRAM beneath the array — the narrow-multiply, wide-accumulate pattern from TPUv1 <span class="prov prov-x">[X]</span>.</li>
