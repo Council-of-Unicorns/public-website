@@ -5,7 +5,10 @@ separately attributable projects. Organizing principle: **each project is the un
 exactly one ladder rung, and its success criterion is that rung's multiplier** — so
 attribution is automatic (the ledger separates the rungs), gates are inherited rather
 than invented, and completeness is checkable: a project with no rung, or a rung with no
-project, is visible instantly. Checked complete against the union of WHITEPAPER,
+project, is visible instantly. One structural exception found and fixed on the union
+check: the deadline-miss-rate GUARANTEE is the success metric's other half and unlocks
+no multiplier — it carries its own row and project (P-D). Checked complete against the
+union of WHITEPAPER,
 ETA_REPORT 7g/7g-bis, PERF_LEVERS, CHIP_ROADMAP, and the three studies (CIM, radical,
 fixed-weight) on 2026-08-17.
 
@@ -21,6 +24,13 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 | **Frontier** | ≤ 20–44× | memory rebuilt around the model — 3D bank-local stacked DRAM (reads ~40 → ~8 pJ/B) and/or widened interface + compression — plus the compute substrate that converts it: attention engine, CIM-vs-hardening winner, hybrid tile | P4-M1 Memory widening + compression · P4-M2 3D bank-local · P6 Attention engine · P5/P5′ CIM vs hardening (rivals) · P7 Hybrid tile |
 | **Horizon** | undefined | the model designed together with the silicon: memory shaped to its reuse, operators as pipelines, precision only where needed | P-W Workload levers (Ledger B), quality-gated → co-design at convergence |
 
+The ladder is the multiplier half of the success metric. The other half is a
+guarantee, not a multiplier, and gets its own row:
+
+| Deliverable | Target | What unlocks it | Projects necessary |
+|---|---|---|---|
+| **Deadline guarantee** | miss-rate < 10⁻⁴ | the schedule etch: CFG pair-sharing in hardware, rolling-KV shift-register window, deterministic end-to-end timing, microcode mode sequencer, programmable update engine, thermal co-design with a shipped reference design | P-D Deterministic schedule & safety (= CHIP_ROADMAP Phase 3) |
+
 ## Project index (one line each; status points into the studies)
 
 - **I0 Ledger+** — extend `rpu/ledger.py` with per-tensor lifetimes, bit-mm, Sankey (ledger exists; NoC distance is the gap).
@@ -31,11 +41,12 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 - **P3 Dataflow A/B** — stationary vs streamed vs broadcast on exact shapes (= CHIP_ROADMAP gate 1); sets the bar P5/P5′ must beat.
 - **P-V Low-voltage** — sub-V_min domains, droop scheduling; measured adverse on stock silicon; unlocked only by the test tile; never counted in bars.
 - **P4-M1 Memory widening + compression** — 512-bit-class interface, weight-stream compression 62–83%, LPDDR6, PIM-for-KV (~1.1–1.4×).
-- **P4-M2 3D bank-local** — hybrid-bonded stacked DRAM, 8–16 GB over 100–200 MB SRAM; ledger-priced ×1.16 today; bank-local 1.3–2× [T]; thermal + supply kill questions open.
+- **P4-M2 3D integration** — hybrid-bonded stacked DRAM (8–16 GB over 100–200 MB SRAM; ledger-priced ×1.16 today; bank-local 1.3–2× [T]) AND vertical register-to-register operator pipelining across stacked compute tiers (3D-Flow-class, ~1.5× [X*, 7g]); thermal + supply kill questions open, shared by both halves.
 - **P5 / P5′ Static substrate** — weight-resident CIM vs FixedWeight hardening, rivals for one slot; screened 1.19× / 1.28× over B1; ≥2× on the complete linear layer or the slot stays digital.
 - **P6 Attention engine** — substrate-agnostic g_A, the load-bearing term in every study; screened 1.20× (CIM variant); success implies P4.
 - **P7 Hybrid tile** — recombination of P5/P5′ + P6 winners; screened 1.48× central, Gen-3 band 6.0–9.7×; reopens on I1 macros.
 - **P-W Workload levers** — Ledger B (certified reuse floors, tile attention, token merging, distillation); fenced: robot-measured quality only.
+- **P-D Deterministic schedule & safety** — the guarantee project (= Phase 3): CFG hardware sharing, rolling-KV window, deterministic timing, miss-rate certification (Tier-3 + DRAM sim), thermal co-design, the flow-ODE/CEM update engine. Unlocks deployability, not a multiplier — which is why a rung-only map missed it (union check, 2026-08-17).
 
 ## Binding couplings (the branches are a partial order, not a menu)
 
