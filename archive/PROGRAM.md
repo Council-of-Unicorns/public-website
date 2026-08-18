@@ -5,23 +5,20 @@ each ladder level lists its multiplier, its honest range, and the work that unlo
 Projects are separate simulator branches evaluated by one ledger; combined
 architectures are recomputed, never multiplied.
 
-| Level | Predicted | Likely range (90%) | What unlocks it |
-|---|---|---|---|
-| **First silicon** | 2.9× | 2.7–6.7× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
-| **Mature compiler** | 4.2× | 3.9–9.7× | same silicon; compiler extraction 0.55 → 0.80 |
-| **Optimized** | ~8× [T] | 6.0–9.7× [T] | memory rebuilt around the model, plus the compute substrate that converts it into speed |
-| **Codesign** | ~12× [T] | 7–19× [T] | the model designed together with the silicon |
-| **Ceiling** | — | ~35–47× | physics only: every joule in FP4 arithmetic at its floor — the absolute bound at matched precision; beyond it, gains must come from the model |
+| Level | Predicted | Likely range (90%) | Ceiling | What unlocks it |
+|---|---|---|---|---|
+| **First silicon** | 2.9× | 2.7–6.7× | 9.1× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
+| **Mature compiler** | 4.2× | 3.9–9.7× | 15.7×; 22× gated — the north star | same silicon; compiler extraction 0.55 → 0.80 |
+| **Optimized** | ~8× [T] | 6.0–9.7× [T] | ≤ 20–44× | memory rebuilt around the model, plus the compute substrate that converts it into speed |
+| **Codesign** | ~12× [T] | 7–19× [T] | ~35–47× — the FP4 physics wall | the model designed together with the silicon |
 
 Likely = the central 90% of the identity sampled over the stated input intervals at
-each compiler stage [S]. Outer bounds (every input at its corner): 9.1× first silicon;
-15.7×, 22× gated, mature — the top of the mature bound is the north star; ≤ 20–44×
-optimized (the mature corner × the 1.3–2× locality band, × gated circuits at the top).
-The ceiling row is not a level: no work unlocks it — it is the FP4 arithmetic wall. Optimized-level
-numbers are mechanistic-study outputs, gated on the phase-0 macro measurements.
-Codesign = optimized × the co-design residual (1.2–2×, the efficiency a model shaped to
-this silicon holds that a GPU cannot copy) [T]; ~45× is the FP4 physics wall — beyond
-it a ratio is a model-capability claim, measured on robots.
+each compiler stage [S]. Ceilings are corner bounds — every input at its extreme
+simultaneously; the optimized ceiling is the mature corner × the 1.3–2× locality band
+(× gated circuits at the top); the codesign ceiling is physics, not ours — every joule
+in FP4 arithmetic at its floor, beyond which gains must come from the model.
+Optimized-level numbers are mechanistic-study outputs, gated on the phase-0 macro
+measurements. Codesign = optimized × the co-design residual (1.2–2×) [T].
 
 ## Technical Roadmap
 
