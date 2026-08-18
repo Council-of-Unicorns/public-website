@@ -58,6 +58,13 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 
 ### North star (15.7× / 22× gated)
 
+Unlike every other level, this work does not ADD a multiplier — the north star is a
+bound, not a destination. The predictions (2.9×/4.2×) are computed with deliberately
+conservative values for four unknowns; these measurements resolve where in the
+1.9–15.7× range the design actually sits. Favorable results raise the PREDICTIONS
+toward the bound; they never raise the bound. The one true unlock here is the
+sub-V_min tile, which arms (or kills) the ×1.4 that turns 15.7 into 22.
+
 - Capture FP8/FP4 anchors on the local RTX proxy to collapse the precision-scaling
   prior.
 - Measure FP4 arithmetic energy at the target node (datasheet + synthesized tile).
