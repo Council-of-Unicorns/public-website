@@ -39,12 +39,12 @@ which a kill test gates every funding tier.
 
 The ladder, with each number's standing:
 
-| Level | Predicted | Likely range (90%) | Ceiling | What unlocks it |
-|---|---|---|---|---|
-| First silicon | 2.9× | 2.7–6.7× [S] | 9.1× | zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler (0.55 extraction) |
-| Mature compiler | 4.2× | 3.9–9.7× [S] | 15.7×; 22× gated — the north star | same silicon; compiler extraction 0.55 → 0.80 via scheduling, tail fusion, DMA overlap, idle gating |
-| Optimized | ~8× [T] | 6.0–9.7× [T] | ≤ 20–44× | model resident in hybrid-bonded stacked DRAM (reads ~40 → ~8 pJ/B); bank-local compute; moves the memory roofline |
-| Codesign | ~12× [T] | 7–19× [T] | ~35–47× — the FP4 physics wall | the model designed with the silicon: memory shaped to its reuse, operators as pipelines, precision only where needed |
+| Level | Likely range (90%) | Ceiling | What unlocks it |
+|---|---|---|---|
+| First silicon | 2.7–6.7× [S] | 9.1× | zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler (0.55 extraction) |
+| Mature compiler | 3.9–9.7× [S] | 15.7×; 22× gated — the north star | same silicon; compiler extraction 0.55 → 0.80 via scheduling, tail fusion, DMA overlap, idle gating |
+| Optimized | 6.0–9.7× [T] | ≤ 20–44× | model resident in hybrid-bonded stacked DRAM (reads ~40 → ~8 pJ/B); bank-local compute; moves the memory roofline |
+| Codesign | 7–19× [T] | ~35–47× — the FP4 physics wall | the model designed with the silicon: memory shaped to its reuse, operators as pipelines, precision only where needed |
 
 ## 1. Robot control converged on a workload that has no chip
 

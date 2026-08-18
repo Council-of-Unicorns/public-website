@@ -5,12 +5,12 @@ each ladder level lists its multiplier, its honest range, and the work that unlo
 Projects are separate simulator branches evaluated by one ledger; combined
 architectures are recomputed, never multiplied.
 
-| Level | Predicted | Likely range (90%) | Ceiling | What unlocks it |
-|---|---|---|---|---|
-| **First silicon** | 2.9× | 2.7–6.7× | 9.1× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
-| **Mature compiler** | 4.2× | 3.9–9.7× | 15.7×; 22× gated — the north star | same silicon; compiler extraction 0.55 → 0.80 |
-| **Optimized** | ~8× [T] | 6.0–9.7× [T] | ≤ 20–44× | memory rebuilt around the model, plus the compute substrate that converts it into speed |
-| **Codesign** | ~12× [T] | 7–19× [T] | ~35–47× — the FP4 physics wall | the model designed together with the silicon |
+| Level | Likely range (90%) | Ceiling | What unlocks it |
+|---|---|---|---|
+| **First silicon** | 2.7–6.7× | 9.1× | the etch: zero-instruction static schedule; FP4 systolic + FP8 attention datapath; weight-stream conveyor with CFG-pair sharing; fused attention; v1 compiler |
+| **Mature compiler** | 3.9–9.7× | 15.7×; 22× gated — the north star | same silicon; compiler extraction 0.55 → 0.80 |
+| **Optimized** | 6.0–9.7× [T] | ≤ 20–44× | memory rebuilt around the model, plus the compute substrate that converts it into speed |
+| **Codesign** | 7–19× [T] | ~35–47× — the FP4 physics wall | the model designed together with the silicon |
 
 Likely = the central 90% of the identity sampled over the stated input intervals at
 each compiler stage [S]. Ceilings are corner bounds — every input at its extreme
