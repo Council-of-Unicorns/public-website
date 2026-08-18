@@ -25,7 +25,7 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 | **Horizon** | undefined | the model designed together with the silicon |
 | **Deadline guarantee** | miss-rate < 10⁻⁴ (not a multiplier — the success metric's other half) | the schedule etch |
 
-## The work required, per level
+## Technical Roadmap
 
 ### First silicon (2.9×)
 
@@ -37,10 +37,17 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 - Run a scaled RPU on FPGA; validate predicted vs real activity counts.
 - Schedule the full transformer block as one streaming computation, intermediates freed
   at their consumer.
-- Bank SRAM by tensor class with producer→consumer placement; compare interconnect
-  topologies by bit-mm.
+- Bank SRAM by tensor class with producer→consumer placement (including
+  transpose-capable buffers); compare interconnect topologies by bit-mm.
 - Compare weight-stationary vs streamed vs broadcast dataflows on the exact shapes
   (MACs per fetched weight byte).
+- Ingest a memory-bound B200/WAN profiling anchor; identify realized bandwidth
+  utilization, re-locate the compute/bandwidth crossover, and set the MACs-vs-channels
+  provisioning ratio.
+- Stand up the tiered simulation harness (SCALE-Sim-class array sim + Accelergy-class
+  energy + Ramulator-class DRAM) that every later gate uses.
+- Score every candidate across model families (world-action, VLA, JEPA-class) through
+  identical accounting — generality is tested, never assumed.
 
 ### Mature compiler (4.2×)
 
@@ -51,6 +58,8 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 
 ### North star (15.7× / 22× gated)
 
+- Capture FP8/FP4 anchors on the local RTX proxy to collapse the precision-scaling
+  prior.
 - Measure FP4 arithmetic energy at the target node (datasheet + synthesized tile).
 - Derive the datapath fraction from the itemized post-PDK ledger.
 - Bench Thor's achieved fraction of its dense peak.
@@ -59,7 +68,7 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
 ### Frontier (≤ 20–44×)
 
 - Widen the interface to 512-bit class; implement lossless weight-stream compression
-  with one-weight-per-clock decode.
+  with one-weight-per-clock decode; evaluate processing-in-memory for the KV window.
 - Desk-study 3D thermals (refresh vs temperature, fanless head) and the custom-DRAM
   supply chain.
 - Hybrid-bond stacked DRAM with per-bank compute clusters (bank → local SRAM → cluster).
@@ -68,12 +77,14 @@ multiplied multipliers. Combined architectures are recomputed (S15/§22 discipli
   on the same block ledger.
 - Measure complete-linear-layer energy of the CIM and ROM/shared-product macros against
   the best systolic implementation.
+- Define the programmable adapter region (W = W_fixed + AB) and the mask-respin update
+  path for hardened weights.
 - Recombine the winning substrates into one dual-mode tile; rerun the full-system ledger.
 
 ### Horizon (undefined)
 
-- Certify quality floors for cross-chunk reuse, sliding-tile attention, and token
-  merging on robot evaluations.
+- Certify quality floors for cross-chunk reuse, sliding-tile attention, token merging,
+  and step distillation on robot evaluations.
 - Co-train model variants shaped to the memory hierarchy; measure quality on robots,
   never proxies.
 
