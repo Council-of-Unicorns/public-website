@@ -59,13 +59,13 @@
     <tbody>
     <tr><td>1. Compute-block energy model, dataflow comparison, memory measurement</td><td>the first computed multiplier for our datapath</td><td>~$0, weeks</td><td>under 2.2&times;, or less than 35&#8202;% of energy reaching the arithmetic</td></tr>
     <tr><td>2. Measure a real Jetson Thor</td><td>the incumbent&rsquo;s real number &mdash; the denominator of every claim on this site</td><td>~$3&nbsp;k, days</td><td>our model misses the measurement badly</td></tr>
-    <tr><td>3. Core datapath on an FPGA</td><td>a measured multiplier, bit-exact against the model</td><td>~$1&ndash;2&nbsp;M, 2&ndash;3 quarters</td><td>measurement below the gate-1 claim</td></tr>
-    <tr><td>4. Test-chip shuttle, including a low-voltage tile</td><td>the multiplier on our own silicon at our own voltage</td><td>low millions, ~1 year</td><td>silicon below the FPGA projection</td></tr>
+    <tr><td>3. Core datapath on an FPGA</td><td>a measured multiplier, bit-exact against the model</td><td>~$100&nbsp;k, 2&ndash;3 quarters</td><td>measurement below the gate-1 claim</td></tr>
+    <tr><td>4. Test-chip shuttle, including a low-voltage tile</td><td>the multiplier on our own silicon at our own voltage</td><td>~$2&nbsp;M, ~1 year</td><td>silicon below the FPGA projection</td></tr>
     <tr><td>5. Production tapeout</td><td>the product</td><td>$30&ndash;50&nbsp;M</td><td>&mdash; only reached if gates 1&ndash;4 pass</td></tr>
     </tbody>
   </table></div>
 
-  <p>Funding follows the gates rather than the other way round: a $3&ndash;4&nbsp;M pre-seed runs gates 1 through 3 to an FPGA-proven multiplier and the signed letters of intent; $8&ndash;15&nbsp;M funds the test chip; $30&ndash;60&nbsp;M funds production. First-year equipment is unglamorous: Thor devkits, FPGA boards, cloud GPUs, and a bench that measures power properly. The gates are an evidence order, not a calendar: when the early gates pass decisively, the test shuttle overlaps the production work rather than queueing in front of it &mdash; that is the compression the timeline below assumes.</p>
+  <p>Funding follows the gates rather than the other way round: a ~$500&nbsp;k pre-seed runs gates 1 through 3 &mdash; an FPGA-proven multiplier, a full power/performance/area case, and the signed letters of intent &mdash; establishing almost the entire architectural case before we take any semiconductor-manufacturing risk. From there, ~$2&nbsp;M funds the test-chip tile, ~$5&nbsp;M the product design, and $30&ndash;50&nbsp;M production. First-year equipment is unglamorous: Thor devkits, FPGA boards, cloud GPUs, and a bench that measures power properly. The gates are an evidence order, not a calendar: when the early gates pass decisively, the test shuttle overlaps the production work rather than queueing in front of it &mdash; that is the compression the timeline below assumes.</p>
 
   <h2>How we design the chip</h2>
 
