@@ -81,9 +81,13 @@ that. Arithmetic intensity is ≈ 1.6 × 10⁴ FLOP/byte, far above every edge r
 the loop is compute-bound in the classical roofline sense [S]. Section 9 explains why that
 margin still requires engineering.
 
-## 3. At head power, energy rate sets latency
+## 3. At head power, energy — not bandwidth — sets latency
 
-A fanless head rejects ~40 W through the neck [S: thermal model]. That ceiling is a
+The edge inverts the datacenter's constraint. In a datacenter power is abundant,
+compute has outgrown memory bandwidth for a decade, and large-model serving is
+bandwidth-bound — the innovation race is HBM, KV management, batching. This workload
+at batch 1 is compute-dense (≈1.6×10⁴ FLOP/byte, §2), and the binding limit is power:
+a fanless head rejects ~40 W through the neck [S: thermal model]. That ceiling is a
 transport property of the neck path; Section 6.1 treats it as a design surface, and this
 section holds it fixed for every contender. Chunk time obeys four bounds, and the fourth
 dominates:
@@ -100,6 +104,12 @@ S = η · (TDP_dut / TDP_base),
 where η is the per-FLOP energy advantage of the design point over the calibrated GPU
 datapath [S]. At parity a part with η = 1 exactly ties Thor, and every point of speedup
 is a point of efficiency. The entire product question compresses into one number.
+
+η is winnable because of where general-purpose energy goes: Hameed et al. [X, ISCA'10]
+measured ~6% of a general-purpose chip's energy reaching the functional units — the
+rest is fetch, decode, scheduling, register files, movement — with even aggressive
+in-processor specialization capped near 35%; published DNN accelerators land at 3–11%
+[X]. The multiplier is, mechanically, a larger share of 40 W reaching the multipliers.
 
 ## 4. The instrument earned its extrapolation rights on measured silicon
 
