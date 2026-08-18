@@ -901,9 +901,18 @@ cheaper and wider.
 (8 pJ/B, 1.6 TB/s, residency by capacity+lifetime) captures the repricing-and-bandwidth
 part of this and evaluates it at **×1.16–1.17 whole-system** at the frozen 14B
 (external/90 MB → package/150 MB, v1 and near-ideal software alike — DRAM falls
-1.77 → 0.35 J of a ~11–14 J chunk). That is the mechanistically-modeled floor of the
-idea, at the low edge of the research hypothesis below because the bank-local deletions
-are not yet modeled.
+1.77 → 0.35 J of a ~11–14 J chunk). Decomposition (added 2026-08-17 on an external
+reviewer's audit request): ×1.11 is the direct repricing (DRAM is ~12% of chunk energy,
+read 5× cheaper — plain Amdahl), and the remaining ×1.04 is time-side feedback — the
+package channel shortens exposed memory time, the energy-rate bound shortens the chunk,
+and static energy (power × time) falls with it. That is the mechanistically-modeled
+floor of the idea, at the low edge of the research hypothesis below because the
+bank-local deletions are not yet modeled. **The energy multiplier is also not the whole
+strategic value**: at the contract interface, any compute substrate — CIM, analog,
+anything — converts at most ~1.95× of additional efficiency into speed before the
+chunk goes memory-bound (CIM study, ideal row). 3D memory is the lever that MOVES that
+roofline, keeping future compute-side gains convertible into throughput; its modeled
+1.16× understates it for the same reason a key understates a door.
 
 **Research bands beyond the modeled part** [T, gated on the two 7g kill questions]:
 3D memory alone ~1.2–1.5× whole-system (central ~1.3×) once bank-local PHY/controller

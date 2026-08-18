@@ -183,8 +183,14 @@
   weight read drops from roughly 40 to 8 picojoules per byte over short, wide vertical
   connections, with 8&ndash;16&nbsp;GB of stacked DRAM over 100&ndash;200&nbsp;MB of distributed
   SRAM and each memory bank feeding its own compute cluster, so weights never cross a central
-  interface. Our energy ledger prices the cheaper reads at about 1.16&times; whole-system today;
-  the full bank-local redesign targets 1.3&ndash;2&times;, an estimate. Because any overlap with
+  interface. Our energy ledger prices the cheaper reads at about 1.16&times; whole-system today
+  (decomposed: &times;1.11 from repricing the &sim;12&nbsp;% of chunk energy that is DRAM, and
+  &times;1.04 from shorter exposed-memory time feeding back into static energy); the full
+  bank-local redesign targets 1.3&ndash;2&times;, an estimate. The energy number also
+  understates the strategic value: at the current memory interface, any compute improvement
+  &mdash; however radical &mdash; converts at most about 2&times; of additional efficiency into
+  speed before the chunk becomes memory-bound. Stacked memory is what moves that ceiling,
+  keeping future compute gains convertible into throughput. Because any overlap with
   the ceiling&rsquo;s own overhead assumptions can only shrink the result, the product is a
   rigorous upper bound: an envelope of roughly 20&ndash;31&times; for the 3D-DRAM redesign and
   29&ndash;44&times; compounded with the gated circuit techniques &mdash; bounds the recomputation
