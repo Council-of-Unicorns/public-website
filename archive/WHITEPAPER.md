@@ -498,7 +498,12 @@ resident in hybrid-bonded DRAM stacked on the compute die: each weight read drop
 100–200 MB of distributed SRAM and each bank feeding its own compute cluster
 (`DRAM bank → local SRAM → compute cluster`), so weights never cross one central
 PHY/controller/NoC. The ledger prices the cheaper reads at **×1.16–1.17 whole-system**
-today [S over T coefficients]; the full bank-local redesign targets ~1.3–2× [T].
+today [S over T coefficients] (decomposed: ×1.11 direct repricing of the ~12% DRAM
+share, ×1.04 time-side static feedback); the full bank-local redesign targets ~1.3–2×
+[T]. Second job, as important as the joules: at the current interface any compute
+substrate converts at most ~1.95× of further efficiency into speed before going
+memory-bound (CIM study, ideal row) — 3D memory moves that roofline, keeping future
+compute gains convertible into throughput.
 Because any overlap with f_ours only shrinks the recomputed result, the product is a
 rigorous upper-bound envelope: **~20–31× for the 3D-DRAM redesign, ~29–44× compounded
 with the gated circuit techniques** — bounds the recomputation cannot exceed, not
