@@ -221,6 +221,13 @@ the solid bar; at the η = 3 target Quality reaches 2.97×. No mode meets an abs
 200 ms; the analytical model puts that at η ≈ 12 (η ≈ 6.4 in Deadline mode), outside
 every evidence band. Closing the absolute gap belongs to the workload levers below.
 
+**The 2D design point is validated, which is itself a result.** Every measured commercial
+deviation from a static-scheduled weight-stationary array — grids of independently
+controlled cores, reconfigurable fabrics, exposed datapaths — pays for its flexibility in
+measured TOPS/W [X*]. Groq's deterministic streaming silicon independently validates the
+control-architecture bet at batch 1 [X*]. We are not leaving 2D gains on the table; the
+published record says we hold the winning point.
+
 ### 6.1 Heat removal carries the same leverage as η
 
 Speed at head power scales one-for-one with rejected watts (Section 3), so the thermal
@@ -421,81 +428,20 @@ no aggressive quantization streams ~15.5 GB per step and fits inside the compute
 512-bit LPDDR5X [S]. MAC area trades ~linearly for PHY channels, so the compute-to-bandwidth
 ratio is a gate-1 decision against the ingested anchor, and never an afterthought.
 
+The interface architecture itself is near-term spec work with no new physics: the
+streams are perfectly sequential, permitting many slow channels with minimal-reach
+PHYs — the physics separating GDDR5's 14 pJ/bit from HBM2's 4 [X]. At DRAM's
+18-37 % share of chunk energy this is worth ~1.1-1.4× at system level, gated on a
+channel/package specification that does not yet exist.
+
 **Verdict: a solution exists at every priced severity; gate 1 selects the rung.** The
 worst case forces the 512-bit interface plus entropy coding, both ordinary engineering,
 and every rung honors the no-aggressive-quantization constraint [F]. The single open item
 is a measurement: ingest the founder's B200 profiling at gate 1 and read off which rung
 the real workload needs.
 
-## 9. Open problems: what you would own
 
-Every problem below is open, carries load, and comes with instrumentation that measures progress.
-
-1. **The attention energy path.** Design the streamer that makes 62 % of dynamic energy
-   cheap: division-free online softmax, fused exp-multiply, static max bounds, and the
-   dataflow split between fabric passes. The thesis fails without it (Section 5).
-2. **The dataflow A/B.** Weight-stationary vs output-stationary vs broadcast-tree on our
-   exact shapes, per pass, in Timeloop; a stall-free conveyor removes output-stationary's
-   usual advantage and nobody has published this comparison for chunk diffusion.
-3. **The Tier-2 energy ledger.** Build the Accelergy-class tile model and produce our
-   Hameed-Table-3: per-component mJ/chunk. Kill criterion: mapped η < 2.2 or FU fraction
-   < 35 % ends the project before tapeout money; the 2.2 line sits just above the
-   derived 2.15 solid-criterion η*, so the kill test and the success test have nearly
-   merged.
-4. **The memory-bound anchor.** Ingest real B200/WAN profiling, identify bw_util (the realized
-   bandwidth-utilization coefficient), place
-   the crossover, and set the MACs-versus-channels ratio.
-5. **Sub-Vmin operation.** Etched claims half-voltage math blocks in A0 silicon; the
-   near-threshold literature offers split domains, 8T SRAM, and Razor-class margin
-   recovery (~47 % measured). Prove it on a test tile or leave it out of η forever.
-6. **The certified reuse floor.** Co-design train-time chunking with the scheduler so
-   cross-chunk reuse carries a trained, certifiable minimum, converting a heuristic into
-   deadline credit.
-7. **The robot memory engine.** Persistent latent state, episodic retrieval, fast-weight
-   layers, and bounded context in hardware. A write-capable weight path breaks the
-   read-only conveyor assumption, so scope it before RTL freezes that assumption.
-8. **The compiler.** `rpu-schedule` today; a PyTorch→StableHLO→MLIR backend as the
-   platform grows. The moat is compiler plus scheduling plus memory hierarchy, and the
-   cost model already exists as the calibrated simulator.
-9. **Deadline-mode existence.** Distill to 1-step at reduced tokens with task success
-   intact. Without it, Deadline mode has silicon and no workload [F-adjacent, model team].
-10. **The thermal reference design.** Co-design the package, neck transport, and torso
-    rejection around the schedule's power trace; quantify the guardband a compile-time
-    trace recovers; and test whether embedded microfluidics makes the gen-2 3D-DRAM
-    supply step thermally viable (Section 6.1) [T].
-11. **HBM, reconsidered.** The early rejection of HBM rests on power, cost, and the
-    conveyor's modest bandwidth need, and it predates the calibrated model [T].
-    Single-stack HBM3E stays an explicit fallback in the memory ladder; re-price it
-    against the gate-1 anchor alongside the LPDDR rungs so the ruling rests on measured
-    numbers.
-
-## 9b. Future extensions: where the multiplier could go next
-
-A completed research program (three parallel surveys plus an external deep-dive,
-2026-08-06; working detail in [`ARCH_RESEARCH_HANDOFF.md`](../ARCH_RESEARCH_HANDOFF.md),
-synthesis in [`ETA_REPORT.md`](ETA_REPORT.md) §7g) maps what lies beyond the current
-design. **Nothing in this section is counted in the 2.05 / 2.15 / 3.0 bars.** Each item
-is a labeled bet that enters the headline only when demonstrated — the same rule that
-governs sub-Vmin operation.
-
-**The 2D design point is validated, which is itself a result.** Every measured commercial
-deviation from a static-scheduled weight-stationary array — grids of independently
-controlled cores, reconfigurable fabrics, exposed datapaths — pays for its flexibility in
-measured TOPS/W [X*]. Groq's deterministic streaming silicon independently validates the
-control-architecture bet at batch 1 [X*]. We are not leaving 2D gains on the table; the
-published record says we hold the winning point.
-
-**Near-term extensions (spec work, no new physics):**
-- *Memory-interface architecture.* Our streams are perfectly sequential, which permits
-  many slow channels with minimal-reach PHYs — the same physics that separates GDDR5's
-  14 pJ/bit from HBM2's 4 [X]. At DRAM's 18-37 % share of chunk energy, worth ~1.1-1.4×
-  at system level. Gated on channel/package specification that does not yet exist.
-- *SRAM organization.* Bank geometry for the 90 MB is unspecified; access energy spans
-  64× with organization [X]. Includes a measured, portable transpose-capable buffer
-  design worth 12-20 % utilization [X*].
-- *Fleet interconnect.* The one term that could subtract: our geometry optimum currently
-  assumes free interconnect between arrays. Pricing it (roadmap Phase 4.5) precedes
-  trusting any array-size decision.
+### The 3D rungs, priced
 
 **The 3D direction — the highest-upside unexplored family.** Hybrid-bonded bank-local
 DRAM with vertical register-to-register operator pipelining would collapse all three
@@ -550,6 +496,65 @@ transformer-family bet — it does not add a new single-model bet.** A third gat
 beside the two kill questions: hybrid-bond **reliability under robot conditions** —
 thermal cycling and vibration in a head, where automotive-grade qualification for
 hybrid bonding is still nascent.
+
+## 9. Open problems: what you would own
+
+Every problem below is open, carries load, and comes with instrumentation that measures progress.
+
+1. **The attention energy path.** Design the streamer that makes 62 % of dynamic energy
+   cheap: division-free online softmax, fused exp-multiply, static max bounds, and the
+   dataflow split between fabric passes. The thesis fails without it (Section 5).
+2. **The dataflow A/B.** Weight-stationary vs output-stationary vs broadcast-tree on our
+   exact shapes, per pass, in Timeloop; a stall-free conveyor removes output-stationary's
+   usual advantage and nobody has published this comparison for chunk diffusion.
+3. **The Tier-2 energy ledger.** Build the Accelergy-class tile model and produce our
+   Hameed-Table-3: per-component mJ/chunk. Kill criterion: mapped η < 2.2 or FU fraction
+   < 35 % ends the project before tapeout money; the 2.2 line sits just above the
+   derived 2.15 solid-criterion η*, so the kill test and the success test have nearly
+   merged.
+4. **The memory-bound anchor.** Ingest real B200/WAN profiling, identify bw_util (the realized
+   bandwidth-utilization coefficient), place
+   the crossover, and set the MACs-versus-channels ratio.
+5. **Sub-Vmin operation.** Etched claims half-voltage math blocks in A0 silicon; the
+   near-threshold literature offers split domains, 8T SRAM, and Razor-class margin
+   recovery (~47 % measured). Prove it on a test tile or leave it out of η forever.
+6. **The certified reuse floor.** Co-design train-time chunking with the scheduler so
+   cross-chunk reuse carries a trained, certifiable minimum, converting a heuristic into
+   deadline credit.
+7. **The robot memory engine.** Persistent latent state, episodic retrieval, fast-weight
+   layers, and bounded context in hardware. A write-capable weight path breaks the
+   read-only conveyor assumption, so scope it before RTL freezes that assumption.
+8. **The compiler.** `rpu-schedule` today; a PyTorch→StableHLO→MLIR backend as the
+   platform grows. The moat is compiler plus scheduling plus memory hierarchy, and the
+   cost model already exists as the calibrated simulator.
+9. **Deadline-mode existence.** Distill to 1-step at reduced tokens with task success
+   intact. Without it, Deadline mode has silicon and no workload [F-adjacent, model team].
+10. **The thermal reference design.** Co-design the package, neck transport, and torso
+    rejection around the schedule's power trace; quantify the guardband a compile-time
+    trace recovers; and test whether embedded microfluidics makes the gen-2 3D-DRAM
+    supply step thermally viable (Section 6.1) [T].
+11. **HBM, reconsidered.** The early rejection of HBM rests on power, cost, and the
+    conveyor's modest bandwidth need, and it predates the calibrated model [T].
+    Single-stack HBM3E stays an explicit fallback in the memory ladder; re-price it
+    against the gate-1 anchor alongside the LPDDR rungs so the ruling rests on measured
+    numbers.
+12. **SRAM organization and the fleet interconnect.** Bank geometry for the 90 MB is
+    unspecified and access energy spans 64× with organization [X], including a measured,
+    portable transpose-capable buffer worth 12-20 % utilization [X*]; and the geometry
+    optimum currently assumes free interconnect between arrays — the one term that could
+    subtract. Pricing both (roadmap Phase 4.5) precedes trusting any array-size decision.
+
+
+## 9b. Monitored, not pursued
+
+A completed research program (three parallel surveys plus an external deep-dive,
+2026-08-06; working detail in [`ARCH_RESEARCH_HANDOFF.md`](../ARCH_RESEARCH_HANDOFF.md),
+synthesis in [`ETA_REPORT.md`](ETA_REPORT.md) §7g) mapped what lies beyond the current
+design. Its priced results now live with their subjects (audited 2026-08-18: the
+validated 2D design point in Section 6, the memory ladder and the 3D rungs in
+Section 8, the banking/interconnect work in Section 9) — they are roadmap, not
+extensions. What remains here is the set we monitor but do not pursue, each excluded
+for a stated physical reason and revisited only if that reason moves.
 
 **Monitored, not pursued:** analog in-memory attention (violates bit-exactness), photonic
 tensor cores (sub-4-bit effective precision), weight-resident non-volatile memory
