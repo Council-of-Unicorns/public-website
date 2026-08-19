@@ -43,7 +43,7 @@ The ladder, with each number's standing:
 |---|---|---|---|
 | First silicon | 2.7–6.7× [S] | 9.1× | the etch: zero instructions fetched or kernels launched — the ~1,200 GPU kernel launches per chunk become a schedule wired into silicon; FP4 systolic arrays with tree accumulation plus a dedicated FP8 attention engine; a weight-stream conveyor reading the 14.8 GB working set once per step, the guidance pair sharing one stream; fused attention that never materializes the ~233 MB/head score matrix (56.7× less traffic); v1 compiler at 0.55 extraction |
 | Mature compiler | 3.9–9.7× [S] | 15.7×; 22× gated — the north star | same silicon — the compiler climbs 0.55 → 0.80 extraction: schedules that keep the arrays filled, the operator tail (norms, RoPE, activations) fused, DMA overlap near full hiding, idle bubbles clock-gated; matured against FPGA and partner workloads |
-| Optimized | 6.0–9.7× [T] | ≤ 20–44× | the model held resident in hybrid-bonded 3D DRAM stacked on the compute die — weight reads drop ~40 → ~8 pJ/byte, 8–16 GB stacked over 100–200 MB distributed SRAM, each bank feeding its own compute cluster with no central interface — moving the memory roofline that otherwise caps compute gains near 2×; plus the winning compute substrate: the dynamic-attention engine and the CIM-vs-hardened-weights decision |
+| Model-resident | 6.0–9.7× [T] | ≤ 20–44× | the model held resident in hybrid-bonded 3D DRAM stacked on the compute die — weight reads drop ~40 → ~8 pJ/byte, 8–16 GB stacked over 100–200 MB distributed SRAM, each bank feeding its own compute cluster with no central interface — moving the memory roofline that otherwise caps compute gains near 2×; plus the winning compute substrate: the dynamic-attention engine and the CIM-vs-hardened-weights decision |
 | Codesign | 7–19× [T] | ~35–47× — the FP4 physics wall | the converged model and the silicon designed as one system: base weights hardened into the fabric (a new checkpoint is a mask respin; adapters W = W_fixed + AB carry field updates), memory shaped to the model's actual reuse, repeated operator chains as dedicated pipelines, precision and programmability only where the model needs them |
 
 ## 1. Robot control converged on a workload that has no chip
@@ -77,8 +77,17 @@ cross-attention term previously charged the K and V projections over the 3120-to
 chunk instead of the 256-token text sequence, overstating it. An independent
 cycle-level model now reproduces this split exactly.) With CFG fan-out the step
 reads 14.8 GB once and computes both guidance branches; naive double-fetch would double
-that. Arithmetic intensity is ≈ 1.6 × 10⁴ FLOP/byte, far above every edge ridge point, so
-the loop is compute-bound in the classical roofline sense [S]. Section 9 explains why that
+that. Arithmetic intensity under the fused traffic model is ≈ 1.6 × 10⁴ FLOP/byte [S]. Against
+Thor's published-spec ridge — dense FP4 MAXN peak of 1,035 TFLOP/s over 273 GB/s peak
+LPDDR5X bandwidth [X, NVIDIA Jetson Thor Series Modules datasheet]:
+
+    I_ridge = 1,035 TFLOP/s ÷ 273 GB/s ≈ 3,800 FLOP/byte
+
+the modeled loop sits ≈ 16,000 / 3,800 ≈ 4.2× to the compute-bound side. This is a
+first-order, published-spec comparison, generous to Thor: the dense-FP4 ceiling is a
+simple bound for a mixed FP4/FP8 workload, not an operator-by-operator model, and MAXN
+is not a measured 40 W operating point. It also says nothing about realized GPU traffic,
+which can far exceed the fused byte count (Section 8). Section 9 explains why that
 margin still requires engineering.
 
 ## 3. At head power, energy — not bandwidth — sets latency
@@ -89,21 +98,35 @@ bandwidth-bound — the innovation race is HBM, KV management, batching. This wo
 at batch 1 is compute-dense (≈1.6×10⁴ FLOP/byte, §2), and the binding limit is power:
 a fanless head rejects ~40 W through the neck [S: thermal model]. That ceiling is a
 transport property of the neck path; Section 6.1 treats it as a design surface, and this
-section holds it fixed for every contender. Chunk time obeys four bounds, and the fourth
-dominates:
+section holds it fixed for every contender. Chunk time is gated by independent
+lower bounds, and the fourth dominates:
 
-t = max( t_compute, t_memory, t_comm, E_chunk / (TDP · (1 − f_static)) ).
+t_chunk ≥ max( t_compute, t_memory, t_comm, t_energy ),   t_energy = E_chunk / P_dynamic,
 
-At the three-step operating point the energy bound exceeds the roofline bound by an order
-of magnitude on Thor and on the RPU alike [S]. Raising peak FLOPS without lowering
-joules per FLOP moves nothing. When both devices sit on the energy bound with shared
-coefficients, throughput cancels and the speedup reduces to an identity:
+with P_dynamic = P_budget · (1 − f_static): the sustained power actually available to the
+workload (the 40 W head budget less the static fraction). These are resource lower
+bounds, not a schedule — the max makes no claim that compute, memory traffic, and
+communication overlap perfectly; operator dependencies, double buffering, and the
+overlap the architecture actually realizes are the cycle model's job. At the three-step
+operating point the energy bound exceeds each individual non-energy bound by more than
+an order of magnitude on both rows (minimum ratio ≈11×, Thor's compute bound; every
+other ratio ≥43×), and it exceeds even the pessimistic no-overlap serialization
+T_C + T_M + T_comm by ≈9× on Thor and ≈25× on the RPU [S, verified 2026-08-19 against
+the calibrated fit at 40 W]. Raising peak FLOPS without lowering joules per FLOP moves
+nothing.
 
-S = η · (TDP_dut / TDP_base),
+An energy-limited device's throughput is R = P_dynamic / E_chunk, so between two such
+devices
 
-where η is the per-FLOP energy advantage of the design point over the calibrated GPU
-datapath [S]. At parity a part with η = 1 exactly ties Thor, and every point of speedup
-is a point of efficiency. The entire product question compresses into one number.
+S = R_dut / R_base = η · (P_dut / P_base),   η ≡ E_base / E_dut,
+
+where η is the energy advantage of the design point over the calibrated GPU datapath on
+the same chunk [S]. Both rows are scored at the same 40 W, so the power ratio is one and
+S = η exactly — an identity that holds only while both devices sit on the energy bound,
+which the margins above establish; outside that regime it is not claimed. Fewer joules
+per chunk is more chunks per second at fixed watts: at parity a part with η = 1 exactly
+ties Thor, and every point of efficiency is a point of speed. The entire product
+question compresses into one number.
 
 η is winnable because of where general-purpose energy goes: Hameed et al. [X, ISCA'10]
 measured ~6% of a general-purpose chip's energy reaching the functional units — the
@@ -121,7 +144,12 @@ fitted compute utilization is 0.80 and per-FLOP energy 1.43 pJ at FP16 [S]. Two 
 the four fitted coefficients, byte energy and realized bandwidth utilization, rest on
 their box bounds: compute-bound anchors carry no signal about them, so the fit reports
 them as unidentified rather than calibrated (Section 9, item 4). Placeholder anchors for Thor and B200 fail the
-gate at 40–65 % error and carry no authority [S].
+gate at 40–65 % error and carry no authority [S]. Calibration transfers only what the
+architectures share — the workload's operation and byte counts and the energy-to-speed
+identity; it does not validate the RPU's own energy coefficients (L13). Those come from
+an independently built cycle-level model of the RPU dataflow plus circuit-level
+analysis, enter every result as [T] ranges, and are replaced by measured silicon at
+gate 1, which kills the project if they miss.
 
 Two further measurements killed our own easiest stories [M]:
 

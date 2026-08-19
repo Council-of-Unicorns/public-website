@@ -9,16 +9,16 @@ architectures are recomputed, never multiplied.
 |---|---|---|---|
 | **First silicon** | 2.7–6.7× | 9.1× | the etch: zero instructions fetched or kernels launched — the ~1,200 GPU kernel launches per chunk become a schedule wired into silicon; FP4 systolic arrays with tree accumulation plus a dedicated FP8 attention engine; a weight-stream conveyor reading the 14.8 GB working set once per step, the guidance pair sharing one stream; fused attention that never materializes the ~233 MB/head score matrix (56.7× less traffic); v1 compiler at 0.55 extraction |
 | **Mature compiler** | 3.9–9.7× | 15.7×; 22× gated — the north star | same silicon — the compiler climbs 0.55 → 0.80 extraction: schedules that keep the arrays filled, the operator tail (norms, RoPE, activations) fused, DMA overlap near full hiding, idle bubbles clock-gated; matured against FPGA and partner workloads |
-| **Optimized** | 6.0–9.7× [T] | ≤ 20–44× | the model held resident in hybrid-bonded 3D DRAM stacked on the compute die — weight reads drop ~40 → ~8 pJ/byte, 8–16 GB stacked over 100–200 MB distributed SRAM, each bank feeding its own compute cluster with no central interface — moving the memory roofline that otherwise caps compute gains near 2×; plus the winning compute substrate: the dynamic-attention engine and the CIM-vs-hardened-weights decision |
+| **Model-resident** | 6.0–9.7× [T] | ≤ 20–44× | the model held resident in hybrid-bonded 3D DRAM stacked on the compute die — weight reads drop ~40 → ~8 pJ/byte, 8–16 GB stacked over 100–200 MB distributed SRAM, each bank feeding its own compute cluster with no central interface — moving the memory roofline that otherwise caps compute gains near 2×; plus the winning compute substrate: the dynamic-attention engine and the CIM-vs-hardened-weights decision |
 | **Codesign** | 7–19× [T] | ~35–47× — the FP4 physics wall | the converged model and the silicon designed as one system: base weights hardened into the fabric (a new checkpoint is a mask respin; adapters W = W_fixed + AB carry field updates), memory shaped to the model's actual reuse, repeated operator chains as dedicated pipelines, precision and programmability only where the model needs them |
 
 Likely = the central 90% of the identity sampled over the stated input intervals at
 each compiler stage [S]. Ceilings are corner bounds — every input at its extreme
-simultaneously; the optimized ceiling is the mature corner × the 1.3–2× locality band
+simultaneously; the model-resident ceiling is the mature corner × the 1.3–2× locality band
 (× gated circuits at the top); the codesign ceiling is physics, not ours — every joule
 in FP4 arithmetic at its floor, beyond which gains must come from the model.
-Optimized-level numbers are mechanistic-study outputs, gated on the phase-0 macro
-measurements. Codesign = optimized × the co-design residual (1.2–2×) [T].
+Model-resident (renamed from Optimized, 2026-08-19: the level's two levers — 3D-stacked DRAM and CIM — share one idea, the weights stop traveling) numbers are mechanistic-study outputs, gated on the phase-0 macro
+measurements. Codesign = model-resident × the co-design residual (1.2–2×) [T].
 
 ## Technical Roadmap
 
@@ -55,7 +55,7 @@ measurements. Codesign = optimized × the co-design residual (1.2–2×) [T].
 - Fabricate the sub-V_min test-structure tile; measure error rates and recovered energy
   (arms the gated ×1.4).
 
-### Optimized (~8× [T]; likely 6.0–9.7×)
+### Model-resident (~8× [T]; likely 6.0–9.7×)
 
 - Widen the interface to 512-bit class; implement lossless weight-stream compression
   with one-weight-per-clock decode; evaluate processing-in-memory for the KV window.

@@ -383,14 +383,14 @@ svg .die-lbl { fill: var(--ink) !important; }
     an upper-bound envelope of roughly 20&ndash;44&times; that becomes the ceiling only by
     recomputation, never by multiplication &mdash; and its second job is moving the memory
     roofline, without which no compute substrate converts more than about 2&times; of further
-    efficiency into speed. And <b>codesign</b> &mdash; planning band 7&ndash;19&times;, an estimate, capped near the ~45&times; physics wall. In its highest-quality planning mode, at our design target, the chip
+    efficiency into speed. And <b>codesign</b> &mdash; planning band 7&ndash;19&times;, an estimate, capped near the ~45&times; physics wall &mdash; the speedup if every joule reached FP4 arithmetic at its floor energy, the most any FP4 chip can win at equal power. In its highest-quality planning mode, at our design target, the chip
     finishes a two-second imagined trajectory in 4.5 seconds where Thor needs 13.</p>
 
     <div class="tbl"><table>
     <tr><th>Level</th><th>Likely range</th><th>Ceiling</th><th>What unlocks it</th></tr>
     <tr><td>First silicon</td><td>2.7&ndash;6.7&times;</td><td>9.1&times;</td><td>the etch: zero instructions fetched or kernels launched &mdash; the ~1,200 GPU kernel launches per chunk become a schedule wired into silicon; FP4 systolic arrays with tree accumulation plus a dedicated FP8 attention engine; a weight-stream conveyor reading the 14.8 GB working set once per step, the guidance pair sharing one stream; fused attention that never materializes the ~233 MB/head score matrix (56.7&times; less traffic); v1 compiler at 0.55 extraction</td></tr>
     <tr><td>Mature compiler</td><td>3.9&ndash;9.7&times;</td><td>15.7&times;; 22&times; gated &mdash; the north star</td><td>same silicon &mdash; the compiler climbs 0.55 &rarr; 0.80 extraction: schedules that keep the arrays filled, the operator tail (norms, RoPE, activations) fused, DMA overlap near full hiding, idle bubbles clock-gated; matured against FPGA and partner workloads</td></tr>
-    <tr><td>Optimized</td><td>6.0&ndash;9.7&times; [T]</td><td>&le; 20&ndash;44&times;</td><td>the model held resident in hybrid-bonded 3D DRAM stacked on the compute die &mdash; weight reads drop ~40 &rarr; ~8 pJ/byte, 8&ndash;16 GB stacked over 100&ndash;200 MB distributed SRAM, each bank feeding its own compute cluster with no central interface &mdash; moving the memory roofline that otherwise caps compute gains near 2&times;; plus the winning compute substrate: the dynamic-attention engine and the CIM-vs-hardened-weights decision</td></tr>
+    <tr><td>Model-resident</td><td>6.0&ndash;9.7&times; [T]</td><td>&le; 20&ndash;44&times;</td><td>Model held resident in DRAM stacked onto the compute die.</td></tr>
     <tr><td>Codesign</td><td>7&ndash;19&times; [T]</td><td>~35&ndash;47&times; &mdash; the FP4 physics wall</td><td>the converged model and the silicon designed as one system: base weights hardened into the fabric (a new checkpoint is a mask respin; adapters W = W_fixed + AB carry field updates), memory shaped to the model&rsquo;s actual reuse, repeated operator chains as dedicated pipelines, precision and programmability only where the model needs them</td></tr>
     </table></div>
 
