@@ -37,13 +37,13 @@
 
   <section class="hero" id="top">
     <div class="hero-copy">
-      <p class="label">RPU (Robot Processing Unit)</p>
-      <h1>We etch the robot&rsquo;s world model into silicon.</h1>
-      <p class="lede">Real&#8209;time world&#8209;model inference, inside the head, on 40&nbsp;watts.</p>
+      <p class="label">RPU &mdash; Robot Processing Unit</p>
+      <h1>We build the chip around the robot&rsquo;s world model.</h1>
+      <p class="lede">Real&#8209;time world&#8209;model inference, inside the robot, at 40&nbsp;watts.</p>
       <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Humanoid control is converging on world models: a fourteen&#8209;billion&#8209;parameter diffusion transformer that imagines the next two seconds, acts, and re&#8209;plans five times a second. Today that takes a datacenter. We build the chip that runs it in the head.</p>
+          <p>Frontier robot policies are becoming too large for general-purpose edge GPUs. A DreamZero-class model has roughly 14&nbsp;billion parameters, imagines future trajectories, and must re-plan several times per second. Today, workloads at this scale still require datacenter-class compute. We are building the RPU: a companion accelerator and compiler designed to run them in the robot&rsquo;s head.</p>
         </div>
       </details>
     </div>
@@ -165,24 +165,24 @@
   <section class="band" id="realtime">
     <p class="label">01 &mdash; The requirement</p>
     <h2>Real time, on board,<br />in any environment.</h2>
-    <p class="claim">A two&#8209;hundred&#8209;millisecond hard deadline inside a robot head &mdash; deterministic, with no jitter.</p>
+    <p class="claim">A robot cannot put a datacenter or a wireless connection inside its control loop. It needs to observe, reason, and act on a predictable schedule wherever it operates.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Being fast on average is not the requirement. The answer has to arrive on the same schedule every time, and it has to behave the same in a warehouse, a basement, or a field with no signal. A robot&rsquo;s competence should not depend on its connection.</p>
-          <p class="muted">That budget has to be met in a head whose neck path can reject roughly forty watts. Throughput is the easy half. The hard part is that the deadline and the power ceiling pull against each other.</p>
+          <p>The target is a 200&nbsp;ms control cycle inside a head that can dissipate roughly 40&nbsp;W. At the edge, compute is scarce because power limits how much of it we can sustain.</p>
+          <p class="muted">The hardware problem is therefore power efficiency: how much useful inference we can extract from every watt.</p>
         </div>
       </details>
     <ul class="specs">
-      <li><span class="fig">200&#8202;ms</span><span class="cap">reaction latency<span class="info"><button type="button" class="info-mark" aria-label="What 200 ms reaction latency means" aria-describedby="tip-0">*</button><span class="tip" role="tooltip" id="tip-0">Glass-to-action &mdash; from camera capture to the action reaching the control loop, matched to human reaction time.</span></span></span></li>
-      <li><span class="fig">5&#8202;Hz</span><span class="cap">re-plan rate</span></li>
-      <li><span class="fig">40&#8202;W</span><span class="cap">module power in-head, matched to the Jetson Thor module</span></li>
-      <li><span class="fig">14&#8202;B</span><span class="cap">parameters to serve</span></li>
+      <li><span class="fig">200&#8202;ms</span><span class="cap">reaction-latency target<span class="info"><button type="button" class="info-mark" aria-label="What 200 ms reaction latency means" aria-describedby="tip-0">*</button><span class="tip" role="tooltip" id="tip-0">Glass-to-action &mdash; from camera capture to the action reaching the control loop, matched to human reaction time.</span></span></span></li>
+      <li><span class="fig">5&#8202;Hz</span><span class="cap">re-planning</span></li>
+      <li><span class="fig">40&#8202;W</span><span class="cap">in-head module power</span></li>
+      <li><span class="fig">14&#8202;B</span><span class="cap">class world models</span></li>
     </ul>
   </section>
 
   <section class="band alt" id="today">
-    <p class="label">02 &mdash; What it costs today</p>
+    <p class="label">02 &mdash; Remote inference cannot scale beyond demos</p>
     <h2>We built the wrong<br />solution first.</h2>
     <p class="claim">Control rate took two B200s in a datacenter and a custom QUIC relay. That puts the network inside the control loop.</p>
     <details class="more">
@@ -195,14 +195,14 @@
   </section>
 
   <section class="band" id="bet">
-    <p class="label">03 &mdash; The bet</p>
-    <h2>Etch the dataflow.<br />Start with a systolic array.</h2>
-    <p class="claim">Fixed graph, fixed shapes, weights resident, deterministic latency. The bet Google made with the TPU &mdash; aimed at the head.</p>
+    <p class="label">03 &mdash; The RPU</p>
+    <h2>Trade generality<br />for useful compute.</h2>
+    <p class="claim">A GPU must be able to run almost anything. A robot repeatedly runs a narrow inference graph at batch one under a hard power budget.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>There is nothing exotic about the first chip. It is a systolic array at the edge, the same bet Etched made for the datacenter and Groq made with the LPU. Nobody has made it for the robot. A fixed graph and fixed tensor shapes buy static scheduling, no kernel dispatch, and timing you can put in a safety case.</p>
-          <p class="muted">The generality is what costs you. A general&#8209;purpose SoC spends die area and power on rasterization, display, and a CPU complex a fixed policy will never call. Reallocate that to tensor arrays and on&#8209;chip SRAM and the same watts do a lot more useful work.</p>
+          <p>The RPU exploits that difference. The compiler knows the graph, tensor shapes, operator order, and memory-access pattern ahead of time. The chip can statically schedule execution, stream weights predictably, keep intermediates local, and build its datapath around the operations that dominate the model.</p>
+          <p class="muted">The first RPU is a companion accelerator, not a replacement for the robot&rsquo;s main computer. The existing SoC keeps cameras, networking, safety, and conventional control; the RPU runs the world model. Models and schedules stay loadable, so the chip can follow an architecture that is still changing.</p>
         </div>
       </details>
     <div class="die-legend">
@@ -218,23 +218,27 @@
   </section>
 
   <section class="band alt" id="evidence">
-    <p class="label">04 &mdash; Evidence</p>
-    <h2>At forty watts,<br />only joules matter.</h2>
-    <p class="claim">The datacenter fights the memory wall. A robot head fights power. At 40&nbsp;watts this workload is compute-bound, so the only lever that matters is energy per useful operation &mdash; not more bandwidth.</p>
+    <p class="label">04 &mdash; Why specialization wins at 40&nbsp;W</p>
+    <h2>At the edge,<br />saving energy is performance.</h2>
+    <p class="claim">At fixed power, throughput is just P&#8202;/&#8202;E: fewer joules per trajectory mean more trajectories per second. A specialized chip attacks those joules directly.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Counting a DreamZero-class model gives about 16,000 FLOPs per byte fetched, against a Jetson Thor roofline near 3,800 &mdash; roughly 4&times; inside the compute-bound regime. Adding memory bandwidth does not move the constraint; energy does.</p>
-          <p class="muted">The gain comes from deleting the overhead of programmability. On a general-purpose chip only about 6&#8202;% of energy reaches the units doing arithmetic, and a single control chunk launches roughly 1,200 GPU kernels. A purpose-built chip hard-codes that schedule, streams weights predictably, and keeps intermediates local. TPUv4 already delivered 1.6&ndash;3.2&times; higher performance per watt than an A100 on the same process node, so the near-term ask has been done before.</p>
+          <p>A DreamZero-class control chunk requires roughly 7&times;10&sup1;&#8308; operations and, under perfectly fused execution, about 44&nbsp;GB of off-chip traffic [S] &mdash; roughly 16,000 FLOPs per byte. Jetson Thor&rsquo;s 1,035 dense FP4 TFLOP/s and 273&nbsp;GB/s of bandwidth put its nominal roofline near 3,800 FLOPs per byte [X].</p>
+          <p>We deliberately give Thor the best case: the 44&nbsp;GB figure assumes perfect fusion and counts only traffic the computation intrinsically requires. Even then, the workload sits about 4&times; on the compute side of Thor&rsquo;s roofline. Real GPU execution moves more data and narrows that margin, but those additional bytes only make the baseline slower.</p>
+          <p>The deeper constraint is power. A chunk that consumes E joules cannot execute faster than E/P seconds at power P. In our modeled 40&nbsp;W configurations, this energy floor sits more than an order of magnitude above the raw compute, memory, and communication floors [S]. At fixed power, throughput = P&#8202;/&#8202;E<sub>chunk</sub> &mdash; so fewer joules per trajectory mean more trajectories per second.</p>
+          <p>Specialized chips attack those joules directly. Our workload launches roughly 1,200 GPU kernels per trajectory chunk [S]. The RPU replaces dynamic scheduling and general-purpose execution with a fixed dataflow, local storage, predictable movement, and deeper fusion. TPUv4 is a measured precedent, delivering 1.6&ndash;3.2&times; higher performance per watt than A100 on tested workloads at the same process node [X].</p>
+          <p class="muted">Our first product targets 5&times; Thor&rsquo;s performance at the same 40&nbsp;W [T]. The calibrated instrument currently brackets first silicon at 2.7&ndash;6.7&times;, with a 2.9&times; central estimate [S]. The target is aggressive by design; the simulator, FPGA, and test silicon exist to tell us whether we have earned it.</p>
         </div>
       </details>
     <p class="readmore"><a href="whitepaper.html#sec-2">Read the whitepaper &rarr;</a></p>
   </section>
 
   <section class="band horizon" id="horizon">
-    <p class="label">05 &mdash; Horizon</p>
-    <h2>A brain holds a hundred trillion synapses<br />on about twenty watts.</h2>
-    <p class="claim">We are not claiming to reproduce it in one chip. It tells us how much room is left. General&#8209;purpose computing will never get close to that much intelligence per joule.</p>
+    <p class="label">05 &mdash; The horizon</p>
+    <h2>The first chip is the beginning<br />of the specialization curve.</h2>
+    <p class="claim">Robot models are still changing too quickly to hard-wire one architecture permanently. First silicon preserves enough programmability to follow the workload while removing the generality we already know it does not need.</p>
+    <p class="horizon-note">As the models stabilize, we specialize more aggressively: rebuild the memory system around the model, fix more of the datapath, harden stable operator chains, and eventually harden the stable weights themselves. The endpoint is not simply a faster processor running a world model. It is <strong>an ASIC whose architecture is the world model</strong>.</p>
   </section>
 
 </main>

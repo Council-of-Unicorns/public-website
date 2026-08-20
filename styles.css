@@ -462,6 +462,8 @@ p { margin: 0; max-width: var(--measure); }
 /* --------------------------------------------------------------- horizon */
 
 .horizon h2 { color: var(--warm-0); }
+.horizon-note { margin-top: var(--s4); line-height: 1.6; color: var(--text-2); max-width: 60ch; }
+.horizon-note strong { color: var(--warm-0); font-weight: 500; }
 
 /* --------------------------------------------------------------- contact */
 
