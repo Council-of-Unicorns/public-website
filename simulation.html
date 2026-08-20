@@ -365,8 +365,8 @@ svg .die-lbl { fill: var(--ink) !important; }
     seconds, no matter how fast the chip claims to be. Both chips hit this wall in our
     simulations, and it makes the comparison nearly exact: with the same watts and the
     same job, speed is energy efficiency, up to a small memory-energy term the charts
-    carry honestly &mdash; it is why the curve below reads 2.95&times; rather than a clean
-    3&times; at our target. We call the ratio the efficiency advantage.</p>
+    carry honestly &mdash; it is why the curve below reads 4.84&times; rather than a clean
+    5&times; at our target. We call the ratio the efficiency advantage.</p>
 
     <h3>The result</h3>
 
@@ -375,7 +375,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     current design points read <b>2.9&times; at first silicon and 4.2&times; once the compiler
     matures</b>, inside a bounded range of 1.9 to 15.7&times; &mdash; 22&times; if gated
     low-voltage circuit techniques prove out &mdash; that spans every input the evidence
-    does not exclude. The top of that range is the north star; the 3&times; design target is what we build toward. Above the ceiling
+    does not exclude. The top of that range is the north star; the 5&times; first-product target is what we build toward. Above the ceiling
     sit two more levels. The <b>frontier: 3D DRAM</b> &mdash; the full model held in
     hybrid-bonded memory stacked on the compute die, cutting each weight read from roughly 40 to
     8 picojoules per byte, with each memory bank feeding its own compute cluster; our energy
@@ -400,7 +400,7 @@ svg .die-lbl { fill: var(--ink) !important; }
     <div class="tbl"><table>
     <tr><th>Efficiency advantage we build</th><th>What it gets us</th></tr>
     <tr><td>1&times; (no advantage)</td><td>a tie with Thor, by physics</td></tr>
-    <tr><td>3&times; (our design target)</td><td>a 2.95&times; Thor median in the Monte-Carlo, and still a win if Thor turns out 25% better than we assume</td></tr>
+    <tr><td>5&times; (our first-product target)</td><td>a 4.84&times; Thor median in the Monte-Carlo &mdash; and still a decisive win if Thor turns out 25% better than we assume</td></tr>
     </table></div>
 
     <p><b>What we design for is a 3&times; efficiency advantage.</b> Because both chips are held
@@ -409,11 +409,11 @@ svg .die-lbl { fill: var(--ink) !important; }
     Thor proves 25% better than we assume. That target is the number every gate below is
     designed to test.</p>
 
-    <h3>Why 3&times; is credible</h3>
+    <h3>Why 5&times; is credible</h3>
 
     <p>Purpose-built AI chips have done this before. Google&rsquo;s TPUv4 delivered 1.6 to 3.2
     times the performance per watt of NVIDIA&rsquo;s A100, measured on real deployments and
-    published in a peer-reviewed paper. Our 3&times; target sits at the top of that range. On top of the
+    published in a peer-reviewed paper. Our 5&times; target deliberately exceeds what TPUv4 demonstrated: the overhead available on this workload is larger &mdash; batch is one, a GPU launches ~1,200 kernels per chunk here, and the modeled first-silicon range reaches 6.7&times;. The target is aggressive by construction; the floor if every assumption breaks against us is still 1.9&times;. On top of the
     architecture sit gains we deliberately do
     not count in the headline: the utilization advantage fixed-schedule chips hold under
     strict deadlines (Google measured its TPU sustaining 80 percent of peak under a latency
@@ -1175,21 +1175,21 @@ const FLOW = (() => {
   const W = 1040, H = 330, m = { t: 18, r: 30, b: 44, l: 64 };
   const iw = W - m.l - m.r, ih = H - m.t - m.b;
   const X = (eta) => m.l + (eta - 1) / 4 * iw;
-  const yMax = 4.0;
+  const yMax = 6.0;
   const Y = (v) => m.t + ih - Math.min(v, yMax) / yMax * ih;
 
   let gEls = null;
   function drawChart() {
     chart.innerHTML = "";
-    for (const v of [0, 1, 2, 3, 4]) {
+    for (const v of [0, 1, 2, 3, 4, 5, 6]) {
       el("line", { x1: m.l, x2: m.l + iw, y1: Y(v), y2: Y(v), class: "grid" }, chart);
       txt(chart, m.l - 8, Y(v) + 4, v + "×", "tick", "end");
     }
     for (const e of etaVals) txt(chart, X(e), m.t + ih + 18, "η=" + e, "tick", "middle");
     txt(chart, m.l + iw / 2, H - 8, "etch efficiency advantage over measured Blackwell (η)", "tick", "middle");
     // success + phase-1 gate rules
-    el("line", { x1: m.l, x2: m.l + iw, y1: Y(3), y2: Y(3), stroke: css("--good"), "stroke-width": 1.5 }, chart);
-    txt(chart, m.l + iw, Y(3) - 6, "TARGET = 3×", "d-lbl", "end");
+    el("line", { x1: m.l, x2: m.l + iw, y1: Y(5), y2: Y(5), stroke: css("--good"), "stroke-width": 1.5 }, chart);
+    txt(chart, m.l + iw, Y(5) - 6, "TARGET = 5×", "d-lbl", "end");
     el("line", { x1: m.l, x2: m.l + iw, y1: Y(1.6), y2: Y(1.6), stroke: "var(--ink-3)", "stroke-width": 1, "stroke-dasharray": "" }, chart);
     txt(chart, m.l + iw, Y(1.6) - 6, "phase-1 gate 1.6×", "tick", "end");
     const curve = DATA.speedup[base];
@@ -1272,14 +1272,14 @@ function ftxt(p,x,y,s,c,an){const t=fel("text",{x,y,class:c||"tick"},p);if(an)t.
   const svg=document.getElementById("bet");
   const W=880,H=380,m={t:26,r:30,b:56,l:56};
   const iw=W-m.l-m.r,ih=H-m.t-m.b;
-  const X=(e)=>m.l+(e-1)/3*iw, Y=(v)=>m.t+ih-Math.min(v,4.0)/4.0*ih;
+  const X=(e)=>m.l+(e-1)/4*iw, Y=(v)=>m.t+ih-Math.min(v,6.0)/6.0*ih;
   fel("rect",{x:X(1.6),y:m.t,width:X(3.2)-X(1.6),height:ih,fill:fcss("--good"),opacity:.08},svg);
   ftxt(svg,X(2.4),m.t+16,"what Google's TPU has delivered vs same-generation GPUs (1.6–3.2×)","lbl","middle");
-  for(const v of[0,1,2,3,4]){fel("line",{x1:m.l,x2:m.l+iw,y1:Y(v),y2:Y(v),class:"grid"},svg);ftxt(svg,m.l-9,Y(v)+4,v+"×","tick","end");}
-  for(const e of[1,1.5,2,2.5,3,3.5,4])ftxt(svg,X(e),m.t+ih+20,e+"×","tick","middle");
+  for(const v of[0,1,2,3,4,5,6]){fel("line",{x1:m.l,x2:m.l+iw,y1:Y(v),y2:Y(v),class:"grid"},svg);ftxt(svg,m.l-9,Y(v)+4,v+"×","tick","end");}
+  for(const e of[1,1.5,2,2.5,3,3.5,4,4.5,5])ftxt(svg,X(e),m.t+ih+20,e+"×","tick","middle");
   ftxt(svg,m.l+iw/2,H-10,"our chip's energy-efficiency advantage, at the same 40 watts","tick","middle");
-  fel("line",{x1:m.l,x2:m.l+iw,y1:Y(3),y2:Y(3),stroke:fcss("--good"),"stroke-width":1.6},svg);
-  ftxt(svg,m.l+iw,Y(3)-7,"target: 3× Thor","lbl","end");
+  fel("line",{x1:m.l,x2:m.l+iw,y1:Y(5),y2:Y(5),stroke:fcss("--good"),"stroke-width":1.6},svg);
+  ftxt(svg,m.l+iw,Y(5)-7,"target: 5× Thor","lbl","end");
   const up=FEAS.curve.map(d=>`${X(d.e).toFixed(1)},${Y(d.hi).toFixed(1)}`);
   const dn=[...FEAS.curve].reverse().map(d=>`${X(d.e).toFixed(1)},${Y(d.lo).toFixed(1)}`);
   fel("polygon",{points:[...up,...dn].join(" "),fill:fcss("--rpu"),opacity:.15},svg);
