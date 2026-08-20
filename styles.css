@@ -42,7 +42,7 @@
   --read:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --pixel-native: 8px;
 
-  --measure: 64ch;
+  --measure: 80ch;
   --wrap: 1088px;
   --gutter: var(--s4);
 
@@ -584,7 +584,7 @@ footer {
   padding-inline: var(--pad-inline);
 }
 
-.doc article { max-width: 74ch; }
+.doc article { max-width: 90ch; }
 
 .doc h1 {
   font-size: clamp(28px, 4.4vw, 46px);
