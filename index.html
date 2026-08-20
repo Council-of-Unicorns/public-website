@@ -191,7 +191,7 @@
         <summary>Detail</summary>
         <div class="more-body">
           <p>We have built inference stacks at frontier humanoid robotics companies. Real-time control required aggressive optimizations: step distillation, classifier&#8209;free guidance split across two B200s, velocity caching between diffusion steps, decoupled noise schedules, graph capture to suppress kernel&#8209;launch overhead, and train&#8209;time chunking to fit the streaming regime. It worked &mdash; at two kilowatt&#8209;class GPUs per robot.</p>
-          <p class="muted">So we built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. Building both is what made the mistake obvious. No amount of transport engineering makes a wireless round trip predictable enough to design against. Robotics cannot scale beyond the demo if every robot depends on a remote GPU cluster and perfect connectivity.</p>
+          <p class="muted">So we built the other half of the obvious answer too, down to a custom media&#8209;over&#8209;QUIC layer streaming observations up and action chunks back. But no amount of transport engineering makes a wireless round trip predictable enough to design against. Robotics cannot scale beyond the demo if every robot depends on a remote GPU cluster and perfect connectivity.</p>
         </div>
       </details>
   </section>
