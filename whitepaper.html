@@ -65,7 +65,7 @@
   <p>Hameed et&nbsp;al. found that only about <strong>6&#8202;%</strong> of a general-purpose processor&rsquo;s energy reached its functional units, with much of the rest spent on clocking, caches, register files, control, and data movement <span class="prov prov-x">[X: ISCA 2010]</span>. Batch-one world-model inference is unusually easy to specialize: the graph, tensor shapes, operator order, and memory-access pattern are largely fixed, yet our workload launches roughly <strong>1,200 GPU kernels per trajectory chunk</strong> <span class="prov prov-s">[S]</span>. An RPU can hard-code that schedule, stream weights predictably, keep intermediates local, and tailor the memory hierarchy to the workload.</p>
   <p>The same overhead appears in memory traffic. WAN-class video models can become memory-bandwidth-bound even on B200 <span class="prov prov-f">[F]</span> because real execution moves more data than the fused minimum. An unfused attention path moves roughly <strong>25&times; more data</strong> than our fused model <span class="prov prov-s">[S]</span>, while batch-one inference must refetch weights for every request.</p>
   </details>
-  <details class="wp-sec" id="sec-3">
+  <details class="wp-sec" open id="sec-3">
   <summary><h2>3. Technical Roadmap<a class="sec-link" href="#sec-3" aria-label="Link to this section">#</a></h2></summary>
   <div class="tbl"><table>
     <thead><tr><th scope="col">Level</th><th scope="col">Likely range (90%)</th><th scope="col">Ceiling</th><th scope="col">What unlocks it</th></tr></thead>
