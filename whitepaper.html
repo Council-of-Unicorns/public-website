@@ -83,8 +83,7 @@
     <tr><td>Codesign</td><td>7&ndash;19&times; <span class="prov prov-t">[T]</span></td><td>~35&ndash;47&times;</td><td>Harden stable weights and operator chains while preserving programmability where the model still changes.</td></tr>
     </tbody>
   </table></div>
-  <p><b>Note:</b> the model-resident rung changes the machine most. Stacking memory directly on compute cuts each weight read from ~40 to ~8&nbsp;pJ/byte and moves the roofline that otherwise caps compute gains near 2&times;, raising the bound to ~20&ndash;31&times; &mdash; 29&ndash;44&times; with gated circuit techniques <span class="prov prov-t">[T]</span>. We make that bet only after three answers: does the stack survive a fanless head, can we buy the capacity, and do hybrid bonds tolerate vibration? It also deepens our commitment to transformers, so it stays out of first silicon. The codesign ceiling above it is just arithmetic: put every joule of the 40&nbsp;W into FP4 multiply-accumulate at its floor (~0.0038&nbsp;pJ/FLOP <span class="prov prov-t">[T]</span>) against Thor&rsquo;s achieved 0.13&ndash;0.18, and you get 35&ndash;47&times; &mdash; the most any FP4 chip can win at equal power. Past that, gains must come from the model.</p>
-  <p>The first-silicon design point, targets unless tagged otherwise <span class="prov prov-t">[T]</span>:</p>
+  <h3>First-silicon specs <span class="prov prov-t">[T]</span></h3>
   <ul>
     <li><b>1.9&nbsp;M FP4 MACs at ~1.05&nbsp;GHz</b> (4&nbsp;PF dense) in 128&times;128 weight-streaming systolic tiles; the model widths divide the array exactly (5120&nbsp;=&nbsp;8&nbsp;&times;&nbsp;640, 13,824&nbsp;=&nbsp;8&nbsp;&times;&nbsp;1728).</li>
     <li><b>FP8 multiply into FP32 accumulators</b> in dedicated SRAM beneath the array &mdash; TPUv1&rsquo;s narrow-multiply, wide-accumulate pattern <span class="prov prov-x">[X]</span>.</li>
@@ -96,6 +95,18 @@
     <li><b>Schedule ROM</b> with one-, two-, and three-step modes, generated offline by the calibrated simulator with a worst-case deadline certificate; weights, scales, token counts, and schedules load from an image &mdash; tile geometry and number formats stay fixed in the mask.</li>
     <li><b>~2&#8202;% of the datapath programmable</b> for flow-ODE or CEM-style planning; a JEPA-family workload costs 1.9&#8202;% of DreamZero-path performance per watt, and both stream ~7&nbsp;GB, so one memory tier serves both <span class="prov prov-s">[S]</span>.</li>
     <li><b>No further conventional-architecture multiplier.</b> Grids of small cores, reconfigurable fabrics, and exposed datapaths preserve more flexibility but pay for it in measured efficiency <span class="prov prov-s">[S]</span>.</li>
+  </ul>
+  <h3>Model-resident specs <span class="prov prov-t">[T]</span></h3>
+  <ul>
+    <li><b>Memory stacked directly on compute</b> cuts each weight read from ~40 to ~8&nbsp;pJ/byte and moves the roofline that otherwise caps compute gains near 2&times;.</li>
+    <li><b>Bound rises to ~20&ndash;31&times;</b>, or 29&ndash;44&times; with gated circuit techniques.</li>
+    <li><b>Three questions gate the bet:</b> does the stack survive a fanless head, can we buy the capacity, and do hybrid bonds tolerate vibration?</li>
+    <li><b>Deepens our commitment to transformers</b> &mdash; so it stays out of first silicon.</li>
+  </ul>
+  <h3>Codesign specs <span class="prov prov-t">[T]</span></h3>
+  <ul>
+    <li><b>The ceiling is arithmetic, not a design claim:</b> put every joule of the 40&nbsp;W into FP4 multiply-accumulate at its floor (~0.0038&nbsp;pJ/FLOP) against Thor&rsquo;s achieved 0.13&ndash;0.18, and you get 35&ndash;47&times; &mdash; the most any FP4 chip can win at equal power.</li>
+    <li><b>Past that, gains must come from the model</b>, not the silicon.</li>
   </ul>
   <h3>The memory-bandwidth margin</h3>
   <p>Memory bandwidth is the tightest specification and the part of the model we trust least because we have not yet calibrated against a memory-bound workload. The current design sits only about 1.5&times; on the compute side of the roofline crossover, and hot-token refresh consumes part of that margin. A moderate traffic-accounting error could therefore make the chip memory-bound <span class="prov prov-s">[S]</span>.</p>
