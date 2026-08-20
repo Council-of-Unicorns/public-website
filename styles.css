@@ -584,12 +584,14 @@ footer {
 
 .doc {
   padding-block: var(--s6) var(--s8);
-  padding-inline: var(--pad-inline);
-  font-size: 19px;
+  /* Doc pages read wider than the shared --wrap so long-form text and tables
+     use more of the screen; falls back to the gutter on narrow viewports. */
+  padding-inline: max(var(--gutter), calc((100% - 1240px) / 2));
+  font-size: 20px;
 }
 @media (max-width: 600px) { .doc { font-size: 17px; } }
 
-.doc article { max-width: 96ch; }
+.doc article { max-width: 104ch; }
 
 .doc h1 {
   font-size: clamp(28px, 4.4vw, 46px);
