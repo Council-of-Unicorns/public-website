@@ -44,10 +44,26 @@
 
   <h2>How we work</h2>
 
+  <p>We spend in stages, and each stage unlocks the next.</p>
   <ul>
-    <li><strong>We spend in stages.</strong> Every stage ends with a test that can end the project cheaply, and we do not spend tapeout money until the preceding gates have passed. Customers are one of those tests, not a hope: before we commit a design to manufacturing, we require two or three signed letters of intent from design partners &mdash; frontier robotics teams in humanoids, manipulation, warehouse automation, heavy machinery, or surgical robotics &mdash; built on real workloads and plain terms: hit this speed at this power, support these models, and we will integrate it.</li>
-    <li><strong>We ship a companion chip first,</strong> not a replacement for the robot&rsquo;s main computer. The robot keeps its existing processor for cameras, networking, safety, and conventional control; the RPU runs the AI model. So a customer can try us without walking away from their NVIDIA or Qualcomm investment: their model goes into our compiler, comes out running on the RPU, and anything we do not yet support keeps running where it already runs.</li>
-    <li><strong>We do not bet on one model architecture.</strong> Robot AI is young &mdash; the architecture the industry finally settles on probably does not exist yet, and a chip hardwired to today&rsquo;s would be obsolete before it shipped. What we are building is the machinery that makes co-design cheap: a calibrated simulator and compiler that can take any new model and tell us, within days, how fast it runs on any candidate chip. Every stage of this plan is tested against three different model families, and the same machinery will shape the silicon around whichever architecture wins. The chip is a product of that flywheel &mdash; the tooling we use to design every generation, not just the first.</li>
+    <li>Every stage ends in a test that can kill the project cheaply &mdash; and no tapeout money until the earlier gates pass.</li>
+    <li>Customers are a test, not a hope: a few signed letters of intent before we commit to manufacturing.</li>
+    <li>The partners are frontier robotics teams, and the terms are plain: hit this speed at this power, run these models, and we integrate.</li>
+  </ul>
+
+  <p>Our first product targets a modest improvement.</p>
+  <ul>
+    <li>A general-purpose GPU sits at one end, the model etched into silicon at the other. We take the easy, proven steps first.</li>
+    <li>The target: a modest but game-changing 3&times; in power efficiency &mdash; the first rung of the <a href="whitepaper.html#sec-3">technical roadmap</a>.</li>
+    <li>A companion chip, not a replacement: the robot keeps its own processor, so a customer can try us without ripping anything out.</li>
+  </ul>
+
+  <p>We position ourselves for the long-term bet.</p>
+  <ul>
+    <li>We don&rsquo;t bet on one model architecture &mdash; the winner probably doesn&rsquo;t exist yet.</li>
+    <li>Our simulator and compiler score any model on any chip in days, so we can shape the silicon around whichever architecture wins.</li>
+    <li>As models and hardware converge, the two stop being separate designs and become one.</li>
+    <li>Win the early stages and we own the layer those models reach hardware through &mdash; what the company ultimately sells.</li>
   </ul>
 
   <h2>The five gates</h2>
