@@ -105,17 +105,6 @@
   <h3>The memory-bandwidth margin</h3>
   <p>Memory bandwidth is the next bottleneck if we succeed at making compute more efficient. The current design sits only about <b>1.5&times; on the compute side of the roofline crossover</b> (vs 4&times; against Thor&rsquo;s roofline), and hot-token refresh eats into that margin. Because we have not yet calibrated the simulator against a memory-bound workload, a moderate error in traffic accounting could move the chip across that boundary <span class="prov prov-s">[S]</span>.</p>
   <p>Fortunately, bandwidth is a conventional problem to solve. Lossless weight-stream compression reduces traffic to <b>62&ndash;83&#8202;%</b>, while widening LPDDR5X to 512 bits provides roughly <b>614&nbsp;GB/s</b>; Apple already ships 546&nbsp;GB/s on-package <span class="prov prov-x">[X]</span>. Even a conservative FP8 case streaming ~15.5&nbsp;GB per step remains below modeled compute time <span class="prov prov-s">[S]</span>. We can also trade MAC area for more memory channels or use short-reach on-package memory to reduce cost per bit <span class="prov prov-s">[S]</span>. And the model-resident design in the technical roadmap is the long term structural fix: stacking the model in 3D-DRAM on the compute die multiplies effective bandwidth while cutting energy per byte.</p>
-  <h3>Still open</h3>
-  <p>Seven questions can still change the architecture:</p>
-  <ol>
-    <li><strong>Attention datapath.</strong> Measure the full FP8 streaming path; if attention cannot hold the energy share &eta; needs, the architecture fails.</li>
-    <li><strong>Dataflow.</strong> Weight-stationary vs output-stationary vs broadcast-tree on our exact shapes &mdash; unpublished for chunk diffusion.</li>
-    <li><strong>Energy ledger.</strong> Every millijoule accounted at tile level; mapped &eta; below 2.2 or functional units under 35&#8202;% stops the project before tapeout.</li>
-    <li><strong>Sub-Vmin operation.</strong> Published claims shrink to ~20&#8202;% at system level under scrutiny; prove it on a test tile or leave it out of &eta;.</li>
-    <li><strong>Robot memory engine.</strong> Write-capable weights break the read-only conveyor; scope it before RTL freezes that assumption.</li>
-    <li><strong>Compiler.</strong> A scheduling tool today, a PyTorch&rarr;StableHLO&rarr;MLIR backend later; the calibrated simulator is already its cost model.</li>
-    <li><strong>HBM, reconsidered.</strong> Rejected on power grounds before the calibrated model existed; retest it.</li>
-  </ol>
   </details>
 
   <details class="wp-sec" id="sec-4">
