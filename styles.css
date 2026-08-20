@@ -430,6 +430,20 @@ p { margin: 0; max-width: var(--measure); }
 /* True heavy bold (UA 'bolder' only reaches ~400 against the light body). */
 .xbold { font-weight: 700; }
 
+/* ------------------------------------------------------ careers / jobs */
+.jobs { list-style: none; padding: 0; margin: 0 0 var(--s5); }
+.job { padding: var(--s4) 0; border-top: var(--hairline) solid var(--ground-2); }
+.job:first-child { border-top: 0; padding-top: var(--s2); }
+.job-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s2) var(--s4); margin-bottom: var(--s2); }
+.job-head h3 { margin: 0; }
+.job-meta {
+  font-family: var(--pixel);
+  font-size: var(--pixel-native);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--warm-0);
+}
+
 /* --------------------------------------------------------------- horizon */
 
 .horizon h2 { color: var(--warm-0); }
