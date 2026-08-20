@@ -73,30 +73,6 @@
     <li><strong>Automate.</strong> Our long-term mission is to create a company-as-a-machine that allows us to capitalize on the convergence of model architecture and co-design an unbeatable chip.</li>
   </ol>
 
-  <h2>The next six months</h2>
-
-  <p>The first three months are about people: recruit the founding team &mdash; an exceptional chip architect and a compiler architect, as cofounders &mdash; and bring on advisors who have built in this industry, in both robotics and silicon. Those people gate everything downstream. Customer discovery runs in parallel &mdash; we are already in discussions with executives at frontier robotics companies &mdash; finding the teams for whom this sentence is already true, <em>&ldquo;the larger model is much better, but Thor cannot run it onboard at the speed and power we need,&rdquo;</em> and turning those conversations into the signed letters of intent the plan requires.</p>
-
-  <p>We already have a performance simulator that reproduces our lab measurements of NVIDIA&rsquo;s latest silicon to within a few percent on both speed and energy &mdash; with a second simulator, built independently with no shared code, agreeing to better than one percent. Early measurements have already changed our assumptions: slowing the clock saves no energy, halving precision delivered 1.77&times; where marketing says 2&times;, and NVIDIA&rsquo;s headline number assumed a feature our workload cannot use, so the honest comparison is better for us than the marketing one. When we measure, we write down the predicted result first. The next six months extend that record to real hardware:</p>
-
-  <ul>
-    <li>Buy Jetson Thor hardware and measure it directly at 40 watts on our frozen workloads, with our predictions written down before the first run &mdash; replacing every estimate about the incumbent with a measurement.</li>
-    <li>Build the chip&rsquo;s core compute block with real silicon-design tools and measure its energy directly, then add the memory and data-movement costs the same way &mdash; numbers from tools, not from a spreadsheet.</li>
-    <li>Get a scaled-down RPU running on reprogrammable hardware (an FPGA).</li>
-  </ul>
-
-  <p>If the measured compute block cannot clear 2.2&times; &mdash; the level below which our 2&times; bar can no longer be met with confidence in every operating mode, well under the 2.9&times; we expect &mdash; that is the end of it: a finding that costs weeks and a software license, not a fab run.</p>
-
-  <h2>Six to twelve months</h2>
-
-  <p>Prove the parts a spreadsheet cannot: that the chip&rsquo;s memory system and data movement behave the way the compiler predicts, demonstrated on the FPGA. Sweep all three model families across model size, context length, and software quality. Then freeze a first chip design &mdash; chosen by the machinery against the models of that moment &mdash; with partner workloads compiling end to end and speed and power predicted before anything ships.</p>
-
-  <p>Around the one-year mark we make the biggest call: commit the design to manufacturing, or walk away. By then nothing about that decision is hypothetical &mdash; the advantage is measured rather than modeled, it has been tested across the model families that plausibly come next, and our design partners have seen the numbers.</p>
-
-  <h2>The second year</h2>
-
-  <p>If those gates pass, year two is tapeout: we commit the design to manufacturing early in the year, raise the silicon round against the pre-silicon evidence, and build the team to carry the design through physical implementation and bring-up. While the chip is being fabricated the compiler keeps improving against the FPGA and partner models, where most of the multiplier&rsquo;s growth lives. By the end of the year: first chips running, first partner integrations as companion modules, and the real-world profiling data that pushes the compiler toward maturity &mdash; a first-generation RPU around the 2.9&times; design point, shipped to the initial partners.</p>
-
   <h2>Year two onwards: the real bet</h2>
 
   <p>The moment the first chip is in production, the company&rsquo;s center of gravity shifts entirely to the flywheel: the process and tooling for co-designing the next chip together with the model architecture the industry converges on.</p>
