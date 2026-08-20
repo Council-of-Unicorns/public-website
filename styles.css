@@ -42,7 +42,7 @@
   --read:  "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --pixel-native: 8px;
 
-  --measure: 80ch;
+  --measure: 64ch;
   --wrap: 1088px;
   --gutter: var(--s4);
 
@@ -315,6 +315,9 @@ p { margin: 0; max-width: var(--measure); }
   max-width: 54ch;
 }
 
+/* Sections 02–05 read wider; hero and 01 keep their tighter measure. */
+#today .claim, #bet .claim, #evidence .claim, #horizon .claim { max-width: 72ch; }
+
 .more { margin-top: var(--s4); }
 
 .more summary {
@@ -582,9 +585,11 @@ footer {
 .doc {
   padding-block: var(--s6) var(--s8);
   padding-inline: var(--pad-inline);
+  font-size: 19px;
 }
+@media (max-width: 600px) { .doc { font-size: 17px; } }
 
-.doc article { max-width: 90ch; }
+.doc article { max-width: 96ch; }
 
 .doc h1 {
   font-size: clamp(28px, 4.4vw, 46px);
