@@ -165,12 +165,12 @@
   <section class="band" id="realtime">
     <p class="label">01 &mdash; The requirement</p>
     <h2>Real time, on board,<br />in any environment.</h2>
-    <p class="claim">A robot cannot put a datacenter or a wireless connection inside its control loop. It needs to observe, reason, and act on a predictable schedule wherever it operates.</p>
+    <p class="claim">The RPU has to run a 14-billion-parameter world model in real time, inside the robot&rsquo;s head, on roughly 40 watts &mdash; and hold that timing predictably, anywhere.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>The target is a 200&nbsp;ms control cycle inside a head that can dissipate roughly 40&nbsp;W. At the edge, compute is scarce because power limits how much of it we can sustain.</p>
-          <p class="muted">The hardware problem is therefore power efficiency: how much useful inference we can extract from every watt.</p>
+          <p>That means meeting a 200&nbsp;ms reaction-latency budget on every cycle, not on average, and re-planning several times a second &mdash; at batch one, with no network or datacenter in the control loop.</p>
+          <p class="muted">The timing also has to hold in a warehouse, a basement, or a field with no signal. Predictable, jitter-free latency is a requirement, not a bonus: it is what lets the chip sit inside a safety case.</p>
         </div>
       </details>
     <ul class="specs">
