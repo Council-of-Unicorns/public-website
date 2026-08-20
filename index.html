@@ -174,7 +174,7 @@
         </div>
       </details>
     <ul class="specs">
-      <li><span class="fig">200&#8202;ms</span><span class="cap">hard control deadline<span class="info"><button type="button" class="info-mark" aria-label="What this figure excludes" aria-describedby="tip-0">*</button><span class="tip" role="tooltip" id="tip-0">Reaction latency minus camera capture rate and data transport time (IPC, bus).</span></span></span></li>
+      <li><span class="fig">200&#8202;ms</span><span class="cap">reaction latency<span class="info"><button type="button" class="info-mark" aria-label="What 200 ms reaction latency means" aria-describedby="tip-0">*</button><span class="tip" role="tooltip" id="tip-0">Glass-to-action &mdash; from camera capture to the action reaching the control loop, matched to human reaction time.</span></span></span></li>
       <li><span class="fig">5&#8202;Hz</span><span class="cap">re-plan rate</span></li>
       <li><span class="fig">40&#8202;W</span><span class="cap">module power in-head, matched to the Jetson Thor module</span></li>
       <li><span class="fig">14&#8202;B</span><span class="cap">parameters to serve</span></li>
@@ -346,15 +346,15 @@
   <section class="band alt" id="evidence">
     <p class="label">04 &mdash; Evidence</p>
     <h2>At forty watts,<br />only joules matter.</h2>
-    <p class="claim">Peak FLOPS cancels out of the comparison. What is left is one number: how much less energy our datapath spends per FLOP than a GPU does.</p>
+    <p class="claim">The datacenter fights the memory wall. A robot head fights power. At 40&nbsp;watts this workload is compute-bound, so the only lever that matters is energy per useful operation &mdash; not more bandwidth.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Call that number &eta;. Our bar, frozen before we explored the design space, is 2&times; a Jetson Thor at the same 40 W, and we hold ourselves to it at the pessimistic end of the uncertainty in every operating mode, not just on average. The current design points read 2.9&times; at first silicon and 4.2&times; once the compiler matures; the honest bound &mdash; every input at its favorable end &mdash; is 15.7&times;, or 22&times; with low-voltage circuit techniques we deliberately do not count yet, and that bound is our north star. Beyond it, the optimized RPU: the chip rebuilt around 3D DRAM &mdash; and past that, codesign: model and silicon designed together. TPUv4 already delivered 1.6&ndash;3.2&times; over an A100 on the same process node, so the near-term ask has been done before rather than being something new. Before claiming any of it we built a simulator that has to reproduce real silicon first. It matches measured Blackwell to within 0.5&ndash;3.9&#8202;% on latency and 0.8&ndash;2.5&#8202;% on energy, and every hardware row shares one utilization model, so a comparison cannot quietly flatter the part we want to build.</p>
-          <p class="muted">It also tells us things we would rather not hear. Roughly 62&#8202;% of the energy goes to attention rather than matrix multiply, so the world&rsquo;s best MAC array on its own caps out at 1.59&times;. We checked in August 2026 whether our attention work is a differentiator and found that the specific techniques we had cited &mdash; fused scores, FP8, FP4 &mdash; are already standard on the GPUs we compare against. What remains is implementation efficiency, and the whole claim reduces to one ratio: the share of energy each design delivers to its multipliers. Running wide and slow buys nothing at all. And hitting 5&#8202;Hz on the nose will need the model to compress as well as the silicon, which is a measurement rather than an opinion. We would rather publish the ceiling than discover it in fab.</p>
+          <p>Counting a DreamZero-class model gives about 16,000 FLOPs per byte fetched, against a Jetson Thor roofline near 3,800 &mdash; roughly 4&times; inside the compute-bound regime. Adding memory bandwidth does not move the constraint; energy does.</p>
+          <p class="muted">The gain comes from deleting the overhead of programmability. On a general-purpose chip only about 6&#8202;% of energy reaches the units doing arithmetic, and a single control chunk launches roughly 1,200 GPU kernels. A purpose-built chip hard-codes that schedule, streams weights predictably, and keeps intermediates local. TPUv4 already delivered 1.6&ndash;3.2&times; higher performance per watt than an A100 on the same process node, so the near-term ask has been done before.</p>
         </div>
       </details>
-    <p class="readmore"><a href="whitepaper.html">Read the whitepaper &rarr;</a></p>
+    <p class="readmore"><a href="whitepaper.html#sec-2">Read the whitepaper &rarr;</a></p>
   </section>
 
   <section class="band horizon" id="horizon">
