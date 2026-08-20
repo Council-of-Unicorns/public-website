@@ -427,6 +427,9 @@ p { margin: 0; max-width: var(--measure); }
 .hovertip:hover > .tip,
 .hovertip:focus-within > .tip { visibility: visible; }
 
+/* True heavy bold (UA 'bolder' only reaches ~400 against the light body). */
+.xbold { font-weight: 700; }
+
 /* --------------------------------------------------------------- horizon */
 
 .horizon h2 { color: var(--warm-0); }
