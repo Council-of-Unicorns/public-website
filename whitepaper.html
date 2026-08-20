@@ -114,13 +114,13 @@
   <h3>Still open</h3>
   <p>Seven questions can still change the architecture:</p>
   <ol>
-    <li><strong>Attention datapath.</strong> Measure the full FP8 streaming path &mdash; online softmax, exponential, accumulation, local storage. If attention cannot hold the energy share &eta; needs, the architecture fails.</li>
-    <li><strong>Dataflow.</strong> Weight-stationary vs output-stationary vs broadcast-tree on the exact model shapes. A stall-free conveyor weakens output-stationary&rsquo;s usual advantage, and nobody has published this comparison for chunk diffusion.</li>
-    <li><strong>Energy ledger.</strong> Account for every millijoule at tile level. Mapped &eta; below 2.2, or under 35&#8202;% of energy reaching the functional units, stops the project before tapeout.</li>
-    <li><strong>Sub-Vmin operation.</strong> The near-threshold literature mostly does not survive scrutiny: the cited ~47&#8202;% Razor gain is measured against signoff margin rather than energy per inference, measured accelerators show ~3.3&times; where idealized simulations claim ~9&times;, and with fixed-voltage memory the system-level gain may be ~20&#8202;%. Prove it on a test tile or leave it out of &eta;.</li>
-    <li><strong>Robot memory engine.</strong> Persistent state, episodic retrieval, and fast weights need a write-capable weight path &mdash; which breaks the read-only conveyor. Scope it before RTL freezes that assumption.</li>
-    <li><strong>Compiler.</strong> A scheduling tool today; a PyTorch&rarr;StableHLO&rarr;MLIR backend as the platform grows. The calibrated simulator is already its cost model.</li>
-    <li><strong>HBM, reconsidered.</strong> We rejected it on power grounds before the calibrated model existed. If specialization frees enough power, HBM ends the bandwidth question &mdash; retest it.</li>
+    <li><strong>Attention datapath.</strong> Measure the full FP8 streaming path; if attention cannot hold the energy share &eta; needs, the architecture fails.</li>
+    <li><strong>Dataflow.</strong> Weight-stationary vs output-stationary vs broadcast-tree on our exact shapes &mdash; unpublished for chunk diffusion.</li>
+    <li><strong>Energy ledger.</strong> Every millijoule accounted at tile level; mapped &eta; below 2.2 or functional units under 35&#8202;% stops the project before tapeout.</li>
+    <li><strong>Sub-Vmin operation.</strong> Published claims shrink to ~20&#8202;% at system level under scrutiny; prove it on a test tile or leave it out of &eta;.</li>
+    <li><strong>Robot memory engine.</strong> Write-capable weights break the read-only conveyor; scope it before RTL freezes that assumption.</li>
+    <li><strong>Compiler.</strong> A scheduling tool today, a PyTorch&rarr;StableHLO&rarr;MLIR backend later; the calibrated simulator is already its cost model.</li>
+    <li><strong>HBM, reconsidered.</strong> Rejected on power grounds before the calibrated model existed; retest it.</li>
   </ol>
   </details>
 
