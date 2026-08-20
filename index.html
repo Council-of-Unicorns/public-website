@@ -197,149 +197,23 @@
   <section class="band" id="bet">
     <p class="label">03 &mdash; The bet</p>
     <h2>Etch the dataflow.<br />Start with a systolic array.</h2>
-    <div class="split">
-      <div class="split-copy">
-        <p class="claim">Fixed graph, fixed shapes, weights resident, deterministic latency. The bet Google made with the TPU &mdash; aimed at the head.</p>
-        <details class="more">
+    <p class="claim">Fixed graph, fixed shapes, weights resident, deterministic latency. The bet Google made with the TPU &mdash; aimed at the head.</p>
+    <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
           <p>There is nothing exotic about the first chip. It is a systolic array at the edge, the same bet Etched made for the datacenter and Groq made with the LPU. Nobody has made it for the robot. A fixed graph and fixed tensor shapes buy static scheduling, no kernel dispatch, and timing you can put in a safety case.</p>
           <p class="muted">The generality is what costs you. A general&#8209;purpose SoC spends die area and power on rasterization, display, and a CPU complex a fixed policy will never call. Reallocate that to tensor arrays and on&#8209;chip SRAM and the same watts do a lot more useful work.</p>
         </div>
       </details>
-      </div>
-      <div class="split-art" role="img" aria-label="Pixel-art systolic array: operands enter from the top and left edges and a diagonal wavefront of multiply-accumulate moves through the grid">
-        <svg class="array" viewBox="0 0 64 64" shape-rendering="crispEdges" aria-hidden="true" focusable="false">
-        <g class="feed">
-          <rect x="10" y="2" width="3" height="3" style="--d:0"/>
-          <rect x="2" y="10" width="3" height="3" style="--d:0"/>
-          <rect x="19" y="2" width="3" height="3" style="--d:1"/>
-          <rect x="2" y="19" width="3" height="3" style="--d:1"/>
-          <rect x="28" y="2" width="3" height="3" style="--d:2"/>
-          <rect x="2" y="28" width="3" height="3" style="--d:2"/>
-          <rect x="37" y="2" width="3" height="3" style="--d:3"/>
-          <rect x="2" y="37" width="3" height="3" style="--d:3"/>
-          <rect x="46" y="2" width="3" height="3" style="--d:4"/>
-          <rect x="2" y="46" width="3" height="3" style="--d:4"/>
-          <rect x="55" y="2" width="3" height="3" style="--d:5"/>
-          <rect x="2" y="55" width="3" height="3" style="--d:5"/>
-        </g>
-        <g class="pe-base">
-          <rect x="8" y="8" width="7" height="7"/>
-          <rect x="17" y="8" width="7" height="7"/>
-          <rect x="26" y="8" width="7" height="7"/>
-          <rect x="35" y="8" width="7" height="7"/>
-          <rect x="44" y="8" width="7" height="7"/>
-          <rect x="53" y="8" width="7" height="7"/>
-          <rect x="8" y="17" width="7" height="7"/>
-          <rect x="17" y="17" width="7" height="7"/>
-          <rect x="26" y="17" width="7" height="7"/>
-          <rect x="35" y="17" width="7" height="7"/>
-          <rect x="44" y="17" width="7" height="7"/>
-          <rect x="53" y="17" width="7" height="7"/>
-          <rect x="8" y="26" width="7" height="7"/>
-          <rect x="17" y="26" width="7" height="7"/>
-          <rect x="26" y="26" width="7" height="7"/>
-          <rect x="35" y="26" width="7" height="7"/>
-          <rect x="44" y="26" width="7" height="7"/>
-          <rect x="53" y="26" width="7" height="7"/>
-          <rect x="8" y="35" width="7" height="7"/>
-          <rect x="17" y="35" width="7" height="7"/>
-          <rect x="26" y="35" width="7" height="7"/>
-          <rect x="35" y="35" width="7" height="7"/>
-          <rect x="44" y="35" width="7" height="7"/>
-          <rect x="53" y="35" width="7" height="7"/>
-          <rect x="8" y="44" width="7" height="7"/>
-          <rect x="17" y="44" width="7" height="7"/>
-          <rect x="26" y="44" width="7" height="7"/>
-          <rect x="35" y="44" width="7" height="7"/>
-          <rect x="44" y="44" width="7" height="7"/>
-          <rect x="53" y="44" width="7" height="7"/>
-          <rect x="8" y="53" width="7" height="7"/>
-          <rect x="17" y="53" width="7" height="7"/>
-          <rect x="26" y="53" width="7" height="7"/>
-          <rect x="35" y="53" width="7" height="7"/>
-          <rect x="44" y="53" width="7" height="7"/>
-          <rect x="53" y="53" width="7" height="7"/>
-        </g>
-        <g class="pe-hot">
-          <rect x="8" y="8" width="7" height="7" style="--d:0"/>
-          <rect x="17" y="8" width="7" height="7" style="--d:1"/>
-          <rect x="26" y="8" width="7" height="7" style="--d:2"/>
-          <rect x="35" y="8" width="7" height="7" style="--d:3"/>
-          <rect x="44" y="8" width="7" height="7" style="--d:4"/>
-          <rect x="53" y="8" width="7" height="7" style="--d:5"/>
-          <rect x="8" y="17" width="7" height="7" style="--d:1"/>
-          <rect x="17" y="17" width="7" height="7" style="--d:2"/>
-          <rect x="26" y="17" width="7" height="7" style="--d:3"/>
-          <rect x="35" y="17" width="7" height="7" style="--d:4"/>
-          <rect x="44" y="17" width="7" height="7" style="--d:5"/>
-          <rect x="53" y="17" width="7" height="7" style="--d:6"/>
-          <rect x="8" y="26" width="7" height="7" style="--d:2"/>
-          <rect x="17" y="26" width="7" height="7" style="--d:3"/>
-          <rect x="26" y="26" width="7" height="7" style="--d:4"/>
-          <rect x="35" y="26" width="7" height="7" style="--d:5"/>
-          <rect x="44" y="26" width="7" height="7" style="--d:6"/>
-          <rect x="53" y="26" width="7" height="7" style="--d:7"/>
-          <rect x="8" y="35" width="7" height="7" style="--d:3"/>
-          <rect x="17" y="35" width="7" height="7" style="--d:4"/>
-          <rect x="26" y="35" width="7" height="7" style="--d:5"/>
-          <rect x="35" y="35" width="7" height="7" style="--d:6"/>
-          <rect x="44" y="35" width="7" height="7" style="--d:7"/>
-          <rect x="53" y="35" width="7" height="7" style="--d:8"/>
-          <rect x="8" y="44" width="7" height="7" style="--d:4"/>
-          <rect x="17" y="44" width="7" height="7" style="--d:5"/>
-          <rect x="26" y="44" width="7" height="7" style="--d:6"/>
-          <rect x="35" y="44" width="7" height="7" style="--d:7"/>
-          <rect x="44" y="44" width="7" height="7" style="--d:8"/>
-          <rect x="53" y="44" width="7" height="7" style="--d:9"/>
-          <rect x="8" y="53" width="7" height="7" style="--d:5"/>
-          <rect x="17" y="53" width="7" height="7" style="--d:6"/>
-          <rect x="26" y="53" width="7" height="7" style="--d:7"/>
-          <rect x="35" y="53" width="7" height="7" style="--d:8"/>
-          <rect x="44" y="53" width="7" height="7" style="--d:9"/>
-          <rect x="53" y="53" width="7" height="7" style="--d:10"/>
-        </g>
-        <g class="pe-core">
-          <rect x="10" y="10" width="3" height="3"/>
-          <rect x="19" y="10" width="3" height="3"/>
-          <rect x="28" y="10" width="3" height="3"/>
-          <rect x="37" y="10" width="3" height="3"/>
-          <rect x="46" y="10" width="3" height="3"/>
-          <rect x="55" y="10" width="3" height="3"/>
-          <rect x="10" y="19" width="3" height="3"/>
-          <rect x="19" y="19" width="3" height="3"/>
-          <rect x="28" y="19" width="3" height="3"/>
-          <rect x="37" y="19" width="3" height="3"/>
-          <rect x="46" y="19" width="3" height="3"/>
-          <rect x="55" y="19" width="3" height="3"/>
-          <rect x="10" y="28" width="3" height="3"/>
-          <rect x="19" y="28" width="3" height="3"/>
-          <rect x="28" y="28" width="3" height="3"/>
-          <rect x="37" y="28" width="3" height="3"/>
-          <rect x="46" y="28" width="3" height="3"/>
-          <rect x="55" y="28" width="3" height="3"/>
-          <rect x="10" y="37" width="3" height="3"/>
-          <rect x="19" y="37" width="3" height="3"/>
-          <rect x="28" y="37" width="3" height="3"/>
-          <rect x="37" y="37" width="3" height="3"/>
-          <rect x="46" y="37" width="3" height="3"/>
-          <rect x="55" y="37" width="3" height="3"/>
-          <rect x="10" y="46" width="3" height="3"/>
-          <rect x="19" y="46" width="3" height="3"/>
-          <rect x="28" y="46" width="3" height="3"/>
-          <rect x="37" y="46" width="3" height="3"/>
-          <rect x="46" y="46" width="3" height="3"/>
-          <rect x="55" y="46" width="3" height="3"/>
-          <rect x="10" y="55" width="3" height="3"/>
-          <rect x="19" y="55" width="3" height="3"/>
-          <rect x="28" y="55" width="3" height="3"/>
-          <rect x="37" y="55" width="3" height="3"/>
-          <rect x="46" y="55" width="3" height="3"/>
-          <rect x="55" y="55" width="3" height="3"/>
-        </g>
-      </svg>
-      </div>
+    <div class="die-legend">
+      <span class="die-key"><span class="die-box" style="background:#E8A552"></span>datapath (does math)</span>
+      <span class="die-key"><span class="die-box" style="background:#6FB3AE"></span>memory / streaming</span>
+      <span class="die-key"><span class="die-box" style="background:#C0998C"></span>generality tax</span>
+      <span class="die-key"><span class="die-box" style="background:#BDB6C6"></span>fixed-function</span>
+    </div>
+    <div class="die-duo">
+      <div class="die-panel"><svg role="img" aria-label="Illustrative GPU floorplan: most of the die is generality overhead" id="die-gpu" viewBox="0 0 500 430"><text x="250" y="20" text-anchor="middle" fill="rgb(244, 239, 228)" font-size="12px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="700" letter-spacing="0.72px">GENERAL GPU (Thor-class)</text><text x="250" y="36" text-anchor="middle" fill="rgb(148, 140, 171)" font-size="10.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">1.03 PF FP4 · 273 GB/s · 40–130 W</text><rect x="20" y="48" width="460" height="360" rx="6" fill="#171522" stroke="#2E2941"></rect><g><rect x="34" y="62" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="38" y="66" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="38" y="81" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="91" y="81" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="134" y="62" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="138" y="66" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="138" y="81" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="191" y="81" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="234" y="62" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="238" y="66" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="238" y="81" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="291" y="81" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="334" y="62" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="338" y="66" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="338" y="81" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="391" y="81" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="34" y="124" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="38" y="128" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="38" y="143" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="91" y="143" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="134" y="124" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="138" y="128" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="138" y="143" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="191" y="143" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="234" y="124" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="238" y="128" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="238" y="143" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="291" y="143" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="334" y="124" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="338" y="128" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="338" y="143" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="391" y="143" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="34" y="186" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="38" y="190" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="38" y="205" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="91" y="205" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="134" y="186" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="138" y="190" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="138" y="205" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="191" y="205" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="234" y="186" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="238" y="190" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="238" y="205" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="291" y="205" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="334" y="186" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="338" y="190" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="338" y="205" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="391" y="205" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="34" y="248" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="38" y="252" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="38" y="267" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="91" y="267" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="134" y="248" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="138" y="252" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="138" y="267" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="191" y="267" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="234" y="248" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="238" y="252" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="238" y="267" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="291" y="267" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="334" y="248" width="90" height="52" rx="3" fill="#BDB6C6" stroke="#2E2941"></rect><rect x="338" y="252" width="82" height="12" rx="2" fill="#C0998C"></rect><rect x="338" y="267" width="50" height="29" rx="2" fill="#E8A552"></rect><rect x="391" y="267" width="29" height="29" rx="2" fill="#C0998C"></rect></g><g><rect x="34" y="316" width="200" height="34" rx="3" fill="#C0998C" stroke="#2E2941" stroke-width="1"></rect><text x="134" y="330" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">L2 + coherent cache</text><text x="134" y="344" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">generality: any access pattern</text></g><g><rect x="244" y="316" width="120" height="34" rx="3" fill="#BDB6C6" stroke="#2E2941" stroke-width="1"></rect><text x="304" y="330" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">CPU + ISP + etc.</text><text x="304" y="344" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">SoC generality</text></g><g><rect x="374" y="316" width="90" height="34" rx="3" fill="#6FB3AE" stroke="#2E2941" stroke-width="1"></rect><text x="419" y="330" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">LPDDR5X PHY</text><text x="419" y="344" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">273 GB/s</text></g><g><rect x="34" y="360" width="430" height="34" rx="3" fill="#C0998C" stroke="#2E2941" stroke-width="1"></rect><text x="249" y="374" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">GigaThread / launch / dispatch / virtualization</text><text x="249" y="388" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">every kernel, every 55 µs</text></g></svg></div>
+      <div class="die-panel"><svg role="img" aria-label="Illustrative RPU floorplan: most of the die is multiply-accumulate and streaming memory" id="die-rpu" viewBox="0 0 500 430"><text x="250" y="20" text-anchor="middle" fill="rgb(244, 239, 228)" font-size="12px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="700" letter-spacing="0.72px">RPU (phase-1 candidate)</text><text x="250" y="36" text-anchor="middle" fill="rgb(148, 140, 171)" font-size="10.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">4 PF FP4 · 1.9M MACs @ 1.05 GHz wide-and-slow · 40 W</text><rect x="20" y="48" width="460" height="360" rx="6" fill="#171522" stroke="#2E2941"></rect><g><rect x="34" y="62" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="74" y="85" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text><text x="74" y="99" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">FP4 systolic</text></g><g><rect x="122" y="62" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="162" y="92" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="210" y="62" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="250" y="92" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="298" y="62" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="338" y="92" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="34" y="122" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="74" y="152" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="122" y="122" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="162" y="152" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="210" y="122" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="250" y="152" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="298" y="122" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="338" y="152" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="34" y="182" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="74" y="212" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="122" y="182" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="162" y="212" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="210" y="182" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="250" y="212" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="298" y="182" width="80" height="52" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="338" y="212" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">MAC tile</text></g><g><rect x="390" y="62" width="74" height="112" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="427" y="115" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">attn</text><text x="427" y="129" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">engine 3120Q × 18.7k KV</text></g><g><rect x="390" y="182" width="74" height="60" rx="3" fill="#BDB6C6" stroke="#2E2941" stroke-width="1"></rect><text x="427" y="209" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">update</text><text x="427" y="223" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">flow/CEM</text></g><g><rect x="34" y="244" width="200" height="40" rx="3" fill="#E8A552" stroke="#2E2941" stroke-width="1"></rect><text x="134" y="261" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">FP4 dequant → FP8 path</text><text x="134" y="275" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">hardwired mixed precision</text></g><g><rect x="244" y="244" width="220" height="40" rx="3" fill="#6FB3AE" stroke="#2E2941" stroke-width="1"></rect><text x="354" y="261" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">KV window SRAM ring + stream buffers</text><text x="354" y="275" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">shift-in-place per chunk</text></g><g><rect x="34" y="294" width="430" height="40" rx="3" fill="#6FB3AE" stroke="#2E2941" stroke-width="1"></rect><text x="249" y="311" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">conveyor DRAM interface</text><text x="249" y="325" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">201 GB/s needed — sequential, exact prefetch</text></g><g><rect x="34" y="344" width="200" height="40" rx="3" fill="#BDB6C6" stroke="#2E2941" stroke-width="1"></rect><text x="134" y="361" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">sensor in / action out</text><text x="134" y="375" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">no PCIe host loop</text></g><g><rect x="244" y="344" width="220" height="40" rx="3" fill="#BDB6C6" stroke="#2E2941" stroke-width="1"></rect><text x="354" y="361" text-anchor="middle" fill="rgb(20, 18, 28)" font-size="11px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace" font-weight="600">static pipeline sequencer</text><text x="354" y="375" text-anchor="middle" fill="rgb(36, 31, 48)" font-size="9.5px" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace">the etched schedule (no instructions)</text></g></svg></div>
     </div>
   </section>
 
