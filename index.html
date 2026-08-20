@@ -165,7 +165,7 @@
   <section class="band" id="realtime">
     <p class="label">01 &mdash; The requirement</p>
     <h2>Real time, on board,<br />in any environment.</h2>
-    <p class="claim">The RPU has to run a 14-billion-parameter world model in real time, inside the robot&rsquo;s head, on roughly 40 watts &mdash; and hold that timing predictably, anywhere.</p>
+    <p class="claim">The RPU has to run a 14-billion-parameter world model inside the robot&rsquo;s head on roughly 40 watts, re-planning faster than a human&rsquo;s ~200&nbsp;ms reaction time &mdash; and hold that timing predictably, anywhere.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
@@ -174,10 +174,12 @@
         </div>
       </details>
     <ul class="specs">
-      <li><span class="fig">200&#8202;ms</span><span class="cap">reaction-latency target<span class="info"><button type="button" class="info-mark" aria-label="What 200 ms reaction latency means" aria-describedby="tip-0">*</button><span class="tip" role="tooltip" id="tip-0">Glass-to-action &mdash; from camera capture to the action reaching the control loop, matched to human reaction time.</span></span></span></li>
-      <li><span class="fig">5&#8202;Hz</span><span class="cap">re-planning</span></li>
       <li><span class="fig">40&#8202;W</span><span class="cap">in-head module power</span></li>
-      <li><span class="fig">14&#8202;B</span><span class="cap">class world models</span></li>
+      <li><span class="fig">5&times;</span><span class="cap">power efficiency over Thor &mdash; target</span></li>
+      <li><span class="fig">4&#8202;PF</span><span class="cap">dense FP4 compute</span></li>
+      <li><span class="fig">16&#8202;GB</span><span class="cap">model resident in memory</span></li>
+      <li><span class="fig">307&#8202;GB/s</span><span class="cap">LPDDR5X bandwidth</span></li>
+      <li><span class="fig">0</span><span class="cap">instructions fetched &mdash; no OS</span></li>
     </ul>
   </section>
 
