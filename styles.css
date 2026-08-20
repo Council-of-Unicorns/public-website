@@ -44,6 +44,7 @@
 
   --measure: 64ch;
   --wrap: 1088px;
+  --wrap-doc: 960px;   /* long-form pages: wider text column, kept in register with the footer */
   --gutter: var(--s4);
 
   /* One shared content column for every top-level region. Deriving it from
@@ -584,14 +585,18 @@ footer {
 
 .doc {
   padding-block: var(--s6) var(--s8);
-  /* Doc pages read wider than the shared --wrap so long-form text and tables
-     use more of the screen; falls back to the gutter on narrow viewports. */
-  padding-inline: max(var(--gutter), calc((100% - 1240px) / 2));
+  /* Doc pages read on their own wider column (--wrap-doc); the footer matches
+     it (rule below) so their edges stay in register. Gutter on narrow screens. */
+  padding-inline: max(var(--gutter), calc((100% - var(--wrap-doc)) / 2));
   font-size: 20px;
 }
 @media (max-width: 600px) { .doc { font-size: 17px; } }
 
-.doc article { max-width: 104ch; }
+/* The column fills its band, so text, headings, tables and footer all align. */
+.doc article { max-width: none; }
+
+/* Keep the footer on doc pages in register with the wider doc column. */
+main.doc ~ .site-foot { max-width: var(--wrap-doc); }
 
 .doc h1 {
   font-size: clamp(28px, 4.4vw, 46px);
