@@ -40,11 +40,23 @@
 
   <p class="doc-lede">Substrate builds the RPU &mdash; the Robot Processing Unit, an accelerator specialized to run world models at 40 watts on the edge.</p>
 
+  <h2>Milestones</h2>
+
+  <div class="tbl"><table>
+    <thead><tr><th scope="col">Milestone</th><th scope="col">Cost</th><th scope="col">Requirements</th></tr></thead>
+    <tbody>
+    <tr><td>1. Simulate virtually and on FPGA</td><td>$100&nbsp;k, 3&ndash;6 months</td><td>Demonstrate a realistic path to a &gt;5&times; power-efficiency multiplier.</td></tr>
+    <tr><td>2. Physical prototype + compiler stack</td><td>$1&ndash;5&nbsp;M, 1 year</td><td>Validate the hardware on a test-chip shuttle; secure letters of intent.</td></tr>
+    <tr><td>3. Production tapeout + integration</td><td>$30&ndash;100&nbsp;M, 2 years</td><td>Mature the product into a drop-in replacement for Jetson Thor.</td></tr>
+    <tr><td>4. Co-design</td><td>&mdash;</td><td>Co-design the chip with the converged model architecture of the future; dominate the market for robotics compute.</td></tr>
+    </tbody>
+  </table></div>
+
   <h2>How we work</h2>
 
   <p>We spend in stages, and each stage unlocks the next.</p>
   <ul>
-    <li>Every stage ends in a test that can kill the project cheaply &mdash; and no tapeout money until the earlier gates pass.</li>
+    <li>Every stage ends in a test that can kill the project cheaply &mdash; and no tapeout money until the earlier milestones pass.</li>
     <li>Customers are a test, not a hope: a few signed letters of intent before we commit to manufacturing.</li>
     <li>The partners are frontier robotics teams, and the terms are plain: hit this speed at this power, run these models, and we integrate.</li>
   </ul>
@@ -64,23 +76,6 @@
     <li>Win the early stages and we own the layer those models reach hardware through &mdash; what the company ultimately sells.</li>
   </ul>
 
-  <h2>The five gates</h2>
-
-  <p>Concretely, the staged spending looks like this. Each gate settles one question, and each has a written-down result that ends the project.</p>
-
-  <div class="tbl"><table>
-    <thead><tr><th scope="col">Gate</th><th scope="col">What it settles</th><th scope="col">Cost</th><th scope="col">What kills it</th></tr></thead>
-    <tbody>
-    <tr><td>1. Compute-block energy model, dataflow comparison, memory measurement</td><td>the first computed multiplier for our datapath</td><td>~$0, weeks</td><td>under 2.2&times;, or less than 35&#8202;% of energy reaching the arithmetic</td></tr>
-    <tr><td>2. Measure a real Jetson Thor</td><td>the incumbent&rsquo;s real number &mdash; the denominator of every claim on this site</td><td>~$3&nbsp;k, days</td><td>our model misses the measurement badly</td></tr>
-    <tr><td>3. Core datapath on an FPGA</td><td>a measured multiplier, bit-exact against the model</td><td>~$100&nbsp;k, 2&ndash;3 quarters</td><td>measurement below the gate-1 claim</td></tr>
-    <tr><td>4. Test-chip shuttle, including a low-voltage tile</td><td>the multiplier on our own silicon at our own voltage</td><td>~$2&nbsp;M, ~1 year</td><td>silicon below the FPGA projection</td></tr>
-    <tr><td>5. Production tapeout</td><td>the product</td><td>$30&ndash;50&nbsp;M</td><td>&mdash; only reached if gates 1&ndash;4 pass</td></tr>
-    </tbody>
-  </table></div>
-
-  <p>Funding follows the gates rather than the other way round: a ~$100&nbsp;k pre-seed runs gates 1 through 3 to an FPGA-proven multiplier and the signed letters of intent &mdash; almost the entire architectural case before we take any semiconductor-manufacturing risk; ~$2&nbsp;M funds the test chip; $30&ndash;50&nbsp;M funds production. First-year equipment is unglamorous: Thor devkits, FPGA boards, cloud GPUs, and a bench that measures power properly. The gates are an evidence order, not a calendar: when the early gates pass decisively, the test shuttle overlaps the production work rather than queueing in front of it &mdash; that is the compression the timeline below assumes.</p>
-
   <h2>How we design the chip</h2>
 
   <p>Our design process follows the five-step algorithm Elon Musk drilled into SpaceX and Tesla (<a href="https://www.inc.com/jeff-haden/elon-musks-algorithm-a-5-step-process-to-dramatically-improve-nearly-everything-is-both-simple-brilliant.html" target="_blank" rel="noopener">his own description here</a>), in order &mdash; because chip design punishes exactly the failure mode the ordering exists to prevent: optimizing, or automating, a thing that should not exist.</p>
@@ -89,7 +84,7 @@
     <li><strong>Make the requirements less dumb.</strong> Challenge every assumption, starting with the biggest one we inherited: that real-time robot control can depend on remote inference. We built those systems at frontier robotics companies &mdash; datacenter GPUs thousands of miles from the robot, held together by heroic streaming infrastructure (the <a href="whitepaper.html">whitepaper</a> tells that story) &mdash; and the engineering was excellent while the requirement was wrong. A robot&rsquo;s control loop should not include a datacenter. Everything else in this plan follows from deleting that dependency.</li>
     <li><strong>Delete the part.</strong> Most of a GPU&rsquo;s area and energy exists so it can run anything. A robot runs one thing. The RPU executes the model with zero instructions fetched and zero kernels launched &mdash; the schedule is wired into the silicon, and the machinery of generality is simply gone.</li>
     <li><strong>Simplify and optimize</strong> &mdash; only what survives deletion: one dataflow, memory managed by the compiler instead of caches guessing, and optimization spent where the joules actually go.</li>
-    <li><strong>Accelerate cycle time.</strong> This is the flywheel above: a new model or a new candidate design gets scored in days by simulation, and proven on reprogrammable hardware before any silicon is manufactured.</li>
+    <li><strong>Accelerate cycle time.</strong> This is the flywheel: a new model or a new candidate design gets scored in days by simulation, and proven on reprogrammable hardware before any silicon is manufactured.</li>
     <li><strong>Automate.</strong> The compiler is the automation &mdash; and so is our evidence: every number on this site is generated by the instrument, and the pages check themselves against it.</li>
   </ol>
 
