@@ -720,6 +720,14 @@ main.doc ~ .site-foot { max-width: var(--wrap-doc); }
 .tbl tr:last-child td { border-bottom: 0; }
 .tbl td:first-child { color: var(--text-1); }
 
+/* Feature tables — the Milestones and Technical Roadmap tables are page
+   centerpieces: larger body text, roomier rows, and a stronger lead column.
+   Header labels stay at the pixel-native size (integer scaling). */
+.tbl table.feature { font-size: 18px; }
+.tbl table.feature th { padding: var(--s4); }
+.tbl table.feature td { padding: var(--s4); line-height: 1.5; }
+.tbl table.feature td:first-child { color: var(--text-0); font-weight: 500; }
+
 /* Provenance chips — the paper's [M]/[S]/[F]/[X]/[T] discipline, made visible. */
 .prov {
   font-family: var(--pixel);
