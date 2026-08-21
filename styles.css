@@ -799,7 +799,7 @@ main.doc ~ .site-foot { max-width: var(--wrap-doc); }
 .person-copy { min-width: 0; }
 
 .pname { color: var(--text-0); font-weight: 500; margin: 0 0 var(--s1); }
-.pbio  { color: var(--text-2); font-size: 14px; line-height: 1.5; margin: 0 0 var(--s2); max-width: 44ch; }
+.pbio  { color: var(--text-2); font-size: 17px; line-height: 1.55; margin: 0 0 var(--s2); max-width: 44ch; }
 
 .pmail {
   font-family: var(--pixel);
