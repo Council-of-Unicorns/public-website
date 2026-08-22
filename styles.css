@@ -814,6 +814,17 @@ main.doc ~ .site-foot { max-width: var(--wrap-doc); }
 }
 .pmail:hover { color: var(--text-0); border-bottom-color: var(--warm-1); }
 
+/* Physical Intelligence set in an editorial serif to evoke their wordmark;
+   neutral (not the amber body-link color) so it reads as a logotype. */
+.doc .pi-word {
+  font-family: "Fraunces", Georgia, "Times New Roman", serif;
+  font-weight: 500;
+  color: var(--text-1);
+  text-decoration: none;
+  border-bottom: var(--hairline) solid var(--ground-3);
+}
+.doc .pi-word:hover { color: var(--text-0); border-bottom-color: var(--warm-1); }
+
 .about { padding-bottom: var(--s8); }
 
 /* ======================================================================= */
