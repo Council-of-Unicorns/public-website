@@ -4,11 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Substrate — Whitepaper</title>
-<meta name="description" content="A measured case for etching world-model inference into a robot's head." />
+<meta name="description" content="A measured case for etching world-action-model inference into a robot's head." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta property="og:title" content="Substrate — Whitepaper" />
-<meta property="og:description" content="A measured case for etching world-model inference into a robot's head." />
+<meta property="og:description" content="A measured case for etching world-action-model inference into a robot's head." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -36,8 +36,8 @@
 <main id="main" tabindex="-1" class="doc">
   <article>
     <p class="label">Whitepaper &mdash; August 2026</p>
-    <h1>A measured case for etching world-model inference into a robot&rsquo;s head</h1>
-                                      <p class="doc-lede">The ChatGPT moment for robotics requires running world models on the edge.</p>
+    <h1>A measured case for etching world-action-model inference into a robot&rsquo;s head</h1>
+                                      <p class="doc-lede">The ChatGPT moment for robotics requires running robot policies on the edge.</p>
 
   <p class="prov-note">Source tags: <span class="prov prov-m">[M]</span> measured ourselves &middot; <span class="prov prov-s">[S]</span> computed by our simulator &middot; <span class="prov prov-f">[F]</span> measured in production at a robotics company &middot; <span class="prov prov-x">[X]</span> published elsewhere &middot; <span class="prov prov-t">[T]</span> a target, not yet reached.</p>
 
@@ -62,7 +62,7 @@
   <p>Jetson Thor provides 1,035 dense FP4 TFLOP/s and 273&nbsp;GB/s of memory bandwidth, putting its nominal roofline near <strong>3,800 FLOPs/byte</strong> <span class="prov prov-x">[X: NVIDIA Jetson Thor Series Modules datasheet]</span>. The workload therefore sits about <strong>4&times; inside the compute-bound regime</strong> on paper. Real GPU traffic can narrow that margin, but simply adding bandwidth does not address the dominant constraint in our current design.</p>
   <h3>Why a purpose-built chip can beat a GPU at 40&nbsp;W</h3>
   <p>Specialization can deliver large efficiency gains: TPUv4 achieved <strong>1.6&ndash;3.2&times; higher performance per watt than A100</strong> on measured workloads at the same process node <span class="prov prov-x">[X: ISCA 2023]</span>. The opportunity is reducing the overhead of programmability.</p>
-  <p>Hameed et&nbsp;al. found that only about <strong>6&#8202;%</strong> of a general-purpose processor&rsquo;s energy reached its functional units, with much of the rest spent on clocking, caches, register files, control, and data movement <span class="prov prov-x">[X: ISCA 2010]</span>. Batch-one world-model inference is unusually easy to specialize: the graph, tensor shapes, operator order, and memory-access pattern are largely fixed, yet our workload launches roughly <strong>1,200 GPU kernels per trajectory chunk</strong> <span class="prov prov-s">[S]</span>. An RPU can hard-code that schedule, stream weights predictably, keep intermediates local, and tailor the memory hierarchy to the workload.</p>
+  <p>Hameed et&nbsp;al. found that only about <strong>6&#8202;%</strong> of a general-purpose processor&rsquo;s energy reached its functional units, with much of the rest spent on clocking, caches, register files, control, and data movement <span class="prov prov-x">[X: ISCA 2010]</span>. Batch-one robot-policy inference is unusually easy to specialize: the graph, tensor shapes, operator order, and memory-access pattern are largely fixed, yet our workload launches roughly <strong>1,200 GPU kernels per trajectory chunk</strong> <span class="prov prov-s">[S]</span>. An RPU can hard-code that schedule, stream weights predictably, keep intermediates local, and tailor the memory hierarchy to the workload.</p>
   <p>The same overhead appears in memory traffic. WAN-class video models can become memory-bandwidth-bound even on B200 <span class="prov prov-f">[F]</span> because real execution moves more data than the fused minimum. An unfused attention path moves roughly <strong>25&times; more data</strong> than our fused model <span class="prov prov-s">[S]</span>, while batch-one inference must refetch weights for every request.</p>
   </details>
   <details class="wp-sec" open id="sec-3">
@@ -108,7 +108,7 @@
 
   <details class="wp-sec" id="sec-4">
   <summary><h2>4. Win the transition to edge inference<a class="sec-link" href="#sec-4" aria-label="Link to this section">#</a></h2></summary>
-  <p>Full edge inference will require model efficiency and hardware efficiency to improve together. As world models become smaller through distillation, quantization, token reduction, caching, and better architectures, our current RPU design will still remain several steps ahead of general-purpose platforms at every stage of that transition. That near-term lead wins deployments and gives us the workload knowledge, software stack, and customer relationships needed for the larger opportunity. When the model architecture finally stabilizes, we will be positioned to co-design the model and chip as a single system &mdash; creating an accelerator that NVIDIA&rsquo;s general-purpose architecture cannot match.</p>
+  <p>Full edge inference will require model efficiency and hardware efficiency to improve together. As robot policies become smaller through distillation, quantization, token reduction, caching, and better architectures, our current RPU design will still remain several steps ahead of general-purpose platforms at every stage of that transition. That near-term lead wins deployments and gives us the workload knowledge, software stack, and customer relationships needed for the larger opportunity. When the model architecture finally stabilizes, we will be positioned to co-design the model and chip as a single system &mdash; creating an accelerator that NVIDIA&rsquo;s general-purpose architecture cannot match.</p>
   </details>
 
   <details class="wp-sec" id="references">
