@@ -4,11 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Substrate — Whitepaper</title>
-<meta name="description" content="Why edge robot-policy inference is bottlenecked by energy efficiency, not memory bandwidth. Executive summary of Substrate's technical case." />
+<meta name="description" content="A measured case for etching world-action-model inference into a robot's head." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta property="og:title" content="Substrate — Whitepaper" />
-<meta property="og:description" content="Why edge robot-policy inference is bottlenecked by energy efficiency, not memory bandwidth. Executive summary of Substrate's technical case." />
+<meta property="og:description" content="A measured case for etching world-action-model inference into a robot's head." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -37,7 +37,7 @@
   <article>
     <p class="label">Whitepaper &mdash; August 2026</p>
     <h1>A measured case for etching world-action-model inference into a robot&rsquo;s head</h1>
-    <p class="doc-lede">The ChatGPT moment for robotics requires running robot policies on the edge.</p>
+                                      <p class="doc-lede">The ChatGPT moment for robotics requires running robot policies on the edge.</p>
 
   <p class="prov-note">Source tags: <span class="prov prov-m">[M]</span> measured ourselves &middot; <span class="prov prov-s">[S]</span> computed by our simulator &middot; <span class="prov prov-f">[F]</span> measured in production at a robotics company &middot; <span class="prov prov-x">[X]</span> published elsewhere &middot; <span class="prov prov-t">[T]</span> a target, not yet reached.</p>
 
@@ -45,12 +45,18 @@
   <summary><h2>Executive summary<a class="sec-link" href="#executive-summary" aria-label="Link to this section">#</a></h2></summary>
   <p>Humanoid robotics is converging on video-action diffusion transformers that predict several seconds of motion and must replan fast enough to achieve human-like reaction latency. Today&rsquo;s leading models are still too large to run inside a robot head, forcing teams to rely on kilowatt-class datacenter GPUs and continuous network connections. That puts latency, Wi-Fi jitter, and connectivity failures directly inside the robot&rsquo;s control loop <span class="prov prov-f">[F]</span>.</p>
   <p>Our first product targets <strong>5&times; Thor&rsquo;s performance at the same 40&nbsp;W</strong> <span class="prov prov-t">[T]</span>. Our <a href="simulation.html">simulation</a> puts first silicon at <strong>2.7&ndash;6.7&times;</strong>, with a 2.9&times; central estimate <span class="prov prov-s">[S]</span>, so 5&times; is aggressive but still within the modeled range. That gain would immediately support stronger robot demos, larger on-device models, lower inference cost, and more local control.</p>
-  <p>The upside grows as the model stabilizes. Rebuilding the memory system around the workload could push gains toward <strong>~8&times;</strong> <span class="prov prov-t">[T]</span>, while aggressive codesign approaches a <strong>35&ndash;47&times; FP4 physics limit</strong> by hardening stable weights and computation into silicon, similar to Taalas&rsquo;s approach for language models <span class="prov prov-x">[X]</span>.</p>
+  <p>The upside grows as the model stabilizes. Rebuilding the memory system around the workload could push gains toward <strong>~8&times;</strong> <span class="prov prov-t">[T]</span>, while aggressive codesign approaches a <strong>35&ndash;47&times; FP4 physics limit</strong> by hardening stable weights and computation into silicon, similar to Taalas&rsquo;s approach for language models <span class="prov prov-x">[X]</span>. Reference the <a href="#sec-3">technical roadmap</a>.</p>
   <p class="readmore"><a href="pitch.html">Read the pitch &rarr;</a></p>
   </details>
-
-  <details class="wp-sec" open id="sec-2">
-  <summary><h2>The bottleneck is energy efficiency, not memory bandwidth<a class="sec-link" href="#sec-2" aria-label="Link to this section">#</a></h2></summary>
+  <details class="wp-sec" id="sec-1">
+  <summary><h2>1. The workload arrived before the chip did<a class="sec-link" href="#sec-1" aria-label="Link to this section">#</a></h2></summary>
+  <p>State-of-the-art world-action models cannot run in real time on edge GPUs. Therefore, teams have been forced to build extraordinary infrastructure around remote inference &mdash; including low-latency video transport, datacenter accelerators, trajectory streaming, delay compensation, and local fallback control. <strong>But remote inference can never scale beyond the demo.</strong></p>
+  <p>The critical system-level metric is reaction latency: the elapsed time between capturing an observation and executing the corresponding action. Human visuomotor reaction time is roughly 200 milliseconds, and delays substantially beyond this range are readily perceived as sluggishness or hesitation. For a robot, this &ldquo;glass-to-action&rdquo; latency includes every stage of the pipeline: sensor capture and onboard IPC or bus transfers; transmission of camera frames and proprioceptive state to the datacenter; the model&rsquo;s inference loop; transmission of the generated trajectory back to the robot; and the final onboard processing required before the command reaches the control loop.</p>
+  <p>Remote inference introduces more than a fixed delay. By the time an action chunk reaches the robot, it was generated from observations that are already stale, and the amount of staleness changes from one cycle to the next. Buffering, local stabilization, and <a href="https://www.pi.website/research/real_time_chunking" target="_blank" rel="noopener">real-time chunking</a> can smooth the resulting discontinuities <span class="prov prov-x">[X]</span>, but only by trading reactivity for stability. They cannot recover changes in the world that happened after the observation was captured.</p>
+  <p>Wireless reliability creates an additional bottleneck. Wi-Fi can exhibit substantial jitter, intermittent packet loss, and abrupt degradation as the robot moves through a building. A system that performs well near an access point may fail when the robot enters a basement, passes through a doorway, or encounters network congestion. During evaluations of Sunday Robotics&rsquo; autonomous ACT-2 policy in real homes, unpredictable Wi-Fi latency and network jitter reportedly emerged as major bottlenecks and failure modes, motivating a shift toward local, edge-compute control <span class="prov prov-x">[X]</span>. An autonomous robot cannot treat continuous datacenter connectivity as a dependable part of its control loop.</p>
+  </details>
+  <details class="wp-sec" id="sec-2">
+  <summary><h2>2. The bottleneck is energy efficiency, not memory bandwidth<a class="sec-link" href="#sec-2" aria-label="Link to this section">#</a></h2></summary>
   <p>The datacenter and the edge are solving almost opposite engineering problems. Much of modern datacenter accelerator design is organized around the <b>memory-bandwidth wall</b>. On datacenter racks, compute has grown faster than memory bandwidth, so AI workloads are typically memory-bound, which motivates optimizations around HBM, caching, batching, operator fusion, and packaging. However, on edge chips, the same workload becomes compute-bound due to power constraints. To address this bottleneck, we must focus on energy efficiency.</p>
   <p>A DreamZero-class model makes the ratio concrete. Its 14 billion parameters across 40 layers require about <strong>7&times;10&sup1;&#8308; operations per control chunk</strong>. Each step must also stream the model state that cannot fit on-die: <strong>7.0&nbsp;GB of 4-bit weights</strong> plus a <strong>7.7&nbsp;GB FP8 context window</strong>, or about <strong>44&nbsp;GB per chunk</strong>. That gives an arithmetic intensity of roughly <strong>16,000 FLOPs per byte fetched</strong> <span class="prov prov-s">[S]</span>.</p>
   <p>Jetson Thor provides 1,035 dense FP4 TFLOP/s and 273&nbsp;GB/s of memory bandwidth, putting its nominal roofline near <strong>3,800 FLOPs/byte</strong> <span class="prov prov-x">[X: NVIDIA Jetson Thor Series Modules datasheet]</span>. The workload therefore sits about <strong>4&times; inside the compute-bound regime</strong> on paper. Real GPU traffic can narrow that margin, but simply adding bandwidth does not address the dominant constraint in our current design.</p>
@@ -59,9 +65,51 @@
   <p>Hameed et&nbsp;al. found that only about <strong>6&#8202;%</strong> of a general-purpose processor&rsquo;s energy reached its functional units, with much of the rest spent on clocking, caches, register files, control, and data movement <span class="prov prov-x">[X: ISCA 2010]</span>. Batch-one robot-policy inference is unusually easy to specialize: the graph, tensor shapes, operator order, and memory-access pattern are largely fixed, yet our workload launches roughly <strong>1,200 GPU kernels per trajectory chunk</strong> <span class="prov prov-s">[S]</span>. An RPU can hard-code that schedule, stream weights predictably, keep intermediates local, and tailor the memory hierarchy to the workload.</p>
   <p>The same overhead appears in memory traffic. WAN-class video models can become memory-bandwidth-bound even on B200 <span class="prov prov-f">[F]</span> because real execution moves more data than the fused minimum. An unfused attention path moves roughly <strong>25&times; more data</strong> than our fused model <span class="prov prov-s">[S]</span>, while batch-one inference must refetch weights for every request.</p>
   </details>
-
-  <p class="wp-gate">The rest of the whitepaper &mdash; the reliability case, the technical roadmap, the first-silicon design, and specifications &mdash; is shared privately.</p>
+  <details class="wp-sec" open id="sec-3">
+  <summary><h2>3. Technical Roadmap<a class="sec-link" href="#sec-3" aria-label="Link to this section">#</a></h2></summary>
+  <p>The technical roadmap &mdash; the mechanism, likely range, and ceiling at each stage, together with the first-silicon design and specifications &mdash; is shared privately.</p>
   <p class="readmore"><a href="mailto:info@substrate-semi.com?subject=Whitepaper%20access%20request">Ask for access &rarr;</a></p>
+  </details>
+
+  <details class="wp-sec" id="sec-4">
+  <summary><h2>4. Win the transition to edge inference<a class="sec-link" href="#sec-4" aria-label="Link to this section">#</a></h2></summary>
+  <p>Full edge inference will require model efficiency and hardware efficiency to improve together. As robot policies become smaller through distillation, quantization, token reduction, caching, and better architectures, our current RPU design will still remain several steps ahead of general-purpose platforms at every stage of that transition. That near-term lead wins deployments and gives us the workload knowledge, software stack, and customer relationships needed for the larger opportunity. When the model architecture finally stabilizes, we will be positioned to co-design the model and chip as a single system &mdash; creating an accelerator that NVIDIA&rsquo;s general-purpose architecture cannot match.</p>
+  </details>
+
+  <details class="wp-sec" id="references">
+  <summary><h2>References<a class="sec-link" href="#references" aria-label="Link to this section">#</a></h2></summary>
+  <ol class="refs">
+    <li>NVIDIA, &ldquo;Jetson Thor Series Modules Datasheet&rdquo; (T5000: dense FP4 1,035 TFLOP/s at MAXN; 273&nbsp;GB/s LPDDR5X).</li>
+    <li>DreamZero authors, &ldquo;World Action Models are Zero-shot Policies,&rdquo; arXiv:2602.15922, 2026.</li>
+    <li>Q. Shen et al., &ldquo;World Action Models: A Survey,&rdquo; arXiv:2606.20781, 2026.</li>
+    <li>N. Jouppi et al., &ldquo;In-Datacenter Performance Analysis of a Tensor Processing Unit,&rdquo; ISCA 2017.</li>
+    <li>N. Jouppi et al., &ldquo;TPU v4: An Optically Reconfigurable Supercomputer,&rdquo; ISCA 2023.</li>
+    <li>R. Hameed et al., &ldquo;Understanding Sources of Inefficiency in General-Purpose Chips,&rdquo; ISCA 2010.</li>
+    <li>FLASH-D, arXiv:2505.14201; ExpMul, arXiv:2505.14314.</li>
+    <li>WorldCache (content-aware caching for video world models), arXiv:2603.22286; Chorus (inter-request caching reuse), arXiv:2604.04451; Sliding Tile Attention, arXiv:2502.04507.</li>
+    <li>K. Black, M. Y. Galliker, and S. Levine (Physical Intelligence), &ldquo;Real-Time Execution of Action Chunking Flow Policies,&rdquo; arXiv:2506.07339, 2025.</li>
+    <li>Efficient-WAM (1&nbsp;B world-action model), arXiv:2606.10040; LaWAM (latent world action models), arXiv:2606.15768; NanoVLA, arXiv:2510.25122.</li>
+    <li>Epoch AI, &ldquo;Trends in GPU price-performance&rdquo; &mdash; measured FLOP/s per watt doubling time.</li>
+  </ol>
+  </details>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    <p class="readmore"><a href="about.html">Get in touch &rarr;</a></p>
   </article>
 </main>
 
@@ -69,5 +117,33 @@
   <span>Substrate</span>
   <span class="foot-tag">Inference silicon for embodied AI</span>
 </footer>
+
+<script>
+// Deep-linkable sections: open the targeted <details> and scroll it into view.
+(function () {
+  function reveal(hash, smooth) {
+    if (!hash) return;
+    var el = document.getElementById(decodeURIComponent(hash.replace(/^#/, "")));
+    if (!el) return;
+    var sec = el.closest ? el.closest(".wp-sec") : null;
+    if (sec) sec.open = true;
+    el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
+  }
+  // Clicking a section's "#" copies the address into the URL without toggling.
+  document.addEventListener("click", function (e) {
+    var a = e.target.closest && e.target.closest("a.sec-link");
+    if (!a) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var hash = a.getAttribute("href");
+    if (history.replaceState) history.replaceState(null, "", hash);
+    else location.hash = hash;
+    reveal(hash, true);
+  });
+  window.addEventListener("hashchange", function () { reveal(location.hash, true); });
+  reveal(location.hash, false);
+})();
+</script>
+
 </body>
 </html>

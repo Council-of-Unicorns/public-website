@@ -598,14 +598,6 @@ footer {
 /* Keep the footer on doc pages in register with the wider doc column. */
 main.doc ~ .site-foot { max-width: var(--wrap-doc); }
 
-/* Gate note marking where the public whitepaper ends. */
-.wp-gate {
-  margin-top: var(--s6);
-  padding-top: var(--s5);
-  border-top: var(--hairline) solid var(--ground-2);
-  color: var(--text-2);
-}
-
 .doc h1 {
   font-size: clamp(28px, 4.4vw, 46px);
   margin-bottom: var(--s5);
