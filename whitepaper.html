@@ -4,13 +4,12 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Substrate — Whitepaper</title>
-<meta name="description" content="Substrate's technical whitepaper is available on request." />
+<meta name="description" content="Why edge robot-policy inference is bottlenecked by energy efficiency, not memory bandwidth. Executive summary of Substrate's technical case." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta property="og:title" content="Substrate — Whitepaper" />
-<meta property="og:description" content="Substrate's technical whitepaper is available on request." />
+<meta property="og:description" content="Why edge robot-policy inference is bottlenecked by energy efficiency, not memory bandwidth. Executive summary of Substrate's technical case." />
 <meta property="og:type" content="website" />
-<meta name="robots" content="noindex" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Silkscreen&amp;family=IBM+Plex+Sans:wght@300;400;500&amp;display=swap" rel="stylesheet" />
@@ -36,10 +35,33 @@
 </header>
 <main id="main" tabindex="-1" class="doc">
   <article>
-    <p class="label">Whitepaper</p>
-    <h1>Available on request.</h1>
-    <p class="doc-lede">Our technical whitepaper is shared privately with robotics and ML engineers, silicon partners, and investors. Tell us who you are and we&rsquo;ll send it over.</p>
-    <p class="readmore"><a href="mailto:info@substrate-semi.com?subject=Whitepaper%20access%20request">Ask for access &rarr;</a></p>
+    <p class="label">Whitepaper &mdash; August 2026</p>
+    <h1>A measured case for etching world-action-model inference into a robot&rsquo;s head</h1>
+    <p class="doc-lede">The ChatGPT moment for robotics requires running robot policies on the edge.</p>
+
+  <p class="prov-note">Source tags: <span class="prov prov-m">[M]</span> measured ourselves &middot; <span class="prov prov-s">[S]</span> computed by our simulator &middot; <span class="prov prov-f">[F]</span> measured in production at a robotics company &middot; <span class="prov prov-x">[X]</span> published elsewhere &middot; <span class="prov prov-t">[T]</span> a target, not yet reached.</p>
+
+  <details class="wp-sec" open id="executive-summary">
+  <summary><h2>Executive summary<a class="sec-link" href="#executive-summary" aria-label="Link to this section">#</a></h2></summary>
+  <p>Humanoid robotics is converging on video-action diffusion transformers that predict several seconds of motion and must replan fast enough to achieve human-like reaction latency. Today&rsquo;s leading models are still too large to run inside a robot head, forcing teams to rely on kilowatt-class datacenter GPUs and continuous network connections. That puts latency, Wi-Fi jitter, and connectivity failures directly inside the robot&rsquo;s control loop <span class="prov prov-f">[F]</span>.</p>
+  <p>Our first product targets <strong>5&times; Thor&rsquo;s performance at the same 40&nbsp;W</strong> <span class="prov prov-t">[T]</span>. Our <a href="simulation.html">simulation</a> puts first silicon at <strong>2.7&ndash;6.7&times;</strong>, with a 2.9&times; central estimate <span class="prov prov-s">[S]</span>, so 5&times; is aggressive but still within the modeled range. That gain would immediately support stronger robot demos, larger on-device models, lower inference cost, and more local control.</p>
+  <p>The upside grows as the model stabilizes. Rebuilding the memory system around the workload could push gains toward <strong>~8&times;</strong> <span class="prov prov-t">[T]</span>, while aggressive codesign approaches a <strong>35&ndash;47&times; FP4 physics limit</strong> by hardening stable weights and computation into silicon, similar to Taalas&rsquo;s approach for language models <span class="prov prov-x">[X]</span>.</p>
+  <p class="readmore"><a href="pitch.html">Read the pitch &rarr;</a></p>
+  </details>
+
+  <details class="wp-sec" open id="sec-2">
+  <summary><h2>The bottleneck is energy efficiency, not memory bandwidth<a class="sec-link" href="#sec-2" aria-label="Link to this section">#</a></h2></summary>
+  <p>The datacenter and the edge are solving almost opposite engineering problems. Much of modern datacenter accelerator design is organized around the <b>memory-bandwidth wall</b>. On datacenter racks, compute has grown faster than memory bandwidth, so AI workloads are typically memory-bound, which motivates optimizations around HBM, caching, batching, operator fusion, and packaging. However, on edge chips, the same workload becomes compute-bound due to power constraints. To address this bottleneck, we must focus on energy efficiency.</p>
+  <p>A DreamZero-class model makes the ratio concrete. Its 14 billion parameters across 40 layers require about <strong>7&times;10&sup1;&#8308; operations per control chunk</strong>. Each step must also stream the model state that cannot fit on-die: <strong>7.0&nbsp;GB of 4-bit weights</strong> plus a <strong>7.7&nbsp;GB FP8 context window</strong>, or about <strong>44&nbsp;GB per chunk</strong>. That gives an arithmetic intensity of roughly <strong>16,000 FLOPs per byte fetched</strong> <span class="prov prov-s">[S]</span>.</p>
+  <p>Jetson Thor provides 1,035 dense FP4 TFLOP/s and 273&nbsp;GB/s of memory bandwidth, putting its nominal roofline near <strong>3,800 FLOPs/byte</strong> <span class="prov prov-x">[X: NVIDIA Jetson Thor Series Modules datasheet]</span>. The workload therefore sits about <strong>4&times; inside the compute-bound regime</strong> on paper. Real GPU traffic can narrow that margin, but simply adding bandwidth does not address the dominant constraint in our current design.</p>
+  <h3>Why a purpose-built chip can beat a GPU at 40&nbsp;W</h3>
+  <p>Specialization can deliver large efficiency gains: TPUv4 achieved <strong>1.6&ndash;3.2&times; higher performance per watt than A100</strong> on measured workloads at the same process node <span class="prov prov-x">[X: ISCA 2023]</span>. The opportunity is reducing the overhead of programmability.</p>
+  <p>Hameed et&nbsp;al. found that only about <strong>6&#8202;%</strong> of a general-purpose processor&rsquo;s energy reached its functional units, with much of the rest spent on clocking, caches, register files, control, and data movement <span class="prov prov-x">[X: ISCA 2010]</span>. Batch-one robot-policy inference is unusually easy to specialize: the graph, tensor shapes, operator order, and memory-access pattern are largely fixed, yet our workload launches roughly <strong>1,200 GPU kernels per trajectory chunk</strong> <span class="prov prov-s">[S]</span>. An RPU can hard-code that schedule, stream weights predictably, keep intermediates local, and tailor the memory hierarchy to the workload.</p>
+  <p>The same overhead appears in memory traffic. WAN-class video models can become memory-bandwidth-bound even on B200 <span class="prov prov-f">[F]</span> because real execution moves more data than the fused minimum. An unfused attention path moves roughly <strong>25&times; more data</strong> than our fused model <span class="prov prov-s">[S]</span>, while batch-one inference must refetch weights for every request.</p>
+  </details>
+
+  <p class="wp-gate">The rest of the whitepaper &mdash; the reliability case, the technical roadmap, the first-silicon design, and specifications &mdash; is shared privately.</p>
+  <p class="readmore"><a href="mailto:info@substrate-semi.com?subject=Whitepaper%20access%20request">Ask for access &rarr;</a></p>
   </article>
 </main>
 
