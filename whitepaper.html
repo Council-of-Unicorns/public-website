@@ -67,6 +67,15 @@
   </details>
   <details class="wp-sec" open id="sec-3">
   <summary><h2>3. Technical Roadmap<a class="sec-link" href="#sec-3" aria-label="Link to this section">#</a></h2></summary>
+  <p>A high-level summary of the first-silicon design:</p>
+  <ul>
+    <li><b>Built for batch-one continuous transformer inference.</b> A single always-on model gives us predictable execution, persistent state, and deterministic latency.</li>
+    <li><b>Static execution instead of GPU-style runtime machinery.</b> The model is compiled into a fixed hardware schedule, eliminating much of the control overhead required for arbitrary workloads.</li>
+    <li><b>A workload-specific low-precision datapath.</b> An output-stationary systolic array keeps partial sums local and is optimized around the numerical formats and accumulation structure these models actually use.</li>
+    <li><b>Memory movement is explicitly managed.</b> Compiler-managed on-chip SRAM, predictable access patterns, and reuse of weights and model state minimize expensive DRAM traffic and replace much of the cache-driven behavior of a general-purpose GPU.</li>
+    <li><b>High-traffic operations stay fused on chip.</b> Attention and other intermediates remain local wherever possible, avoiding unnecessary movement through external memory.</li>
+    <li><b>Core thesis:</b> when the model structure, precision, state reuse, and execution order are known ahead of time, the hardware should exploit that knowledge everywhere.</li>
+  </ul>
   <p class="readmore"><a href="mailto:info@substrate-semi.com?subject=Whitepaper%20access%20request">Ask for access &rarr;</a></p>
   </details>
 
