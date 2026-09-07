@@ -71,7 +71,16 @@
   </details>
 
   <details class="wp-sec" id="sec-4">
-  <summary><h2>4. Win the transition to edge inference<a class="sec-link" href="#sec-4" aria-label="Link to this section">#</a></h2></summary>
+  <summary><h2>4. Addressing Jensen&rsquo;s Law<a class="sec-link" href="#sec-4" aria-label="Link to this section">#</a></h2></summary>
+  <p>Jensen&rsquo;s Law holds that the incumbent&rsquo;s hardware improves by roughly <strong>2&times; a year</strong> &mdash; a rate that is, if anything, too generous. To address it, we first have to ask where those gains come from. Most of them are advances that benefit everyone: better silicon, denser SRAM, faster DRAM, improved packaging, and lower-voltage transistors. We ride the same wave as the incumbents.</p>
+  <p>Consider the TPU. Since 2013, GPUs have improved by roughly <strong>100&times;</strong>, but the TPU never needed to target 100&times; up front. It only had to be consistently a few times better at every stage &mdash; a multiplicative architectural factor on top of the same technology curve &mdash; which it achieves purely through the topology of the chip.</p>
+  <p>In our view the right framing is two questions: given access to the same physical primitives, what is our chip&rsquo;s performance multiplier? And what multiplier makes people willing to switch? The TPU shows it can be as low as <strong>3&times;</strong>; Groq&rsquo;s LPU and Etched suggest it may be closer to <strong>10&times;</strong>.</p>
+  <p>Our goal is the same: to stay consistently some multiple better than the incumbent at every stage, riding the same wave of general improvement. We target a modest <strong>5&times;</strong> for our first product <span class="prov prov-t">[T]</span>; the long-term vision is to co-design the RPU once model architectures converge, reaching <strong>&gt;15&times;</strong> in energy efficiency <span class="prov prov-t">[T]</span>.</p>
+  <p>We believe these multipliers can emerge purely from removing the generality tax of GPUs, which spend <strong>less than 10&#8202;%</strong> of their energy on arithmetic <span class="prov prov-x">[X: ISCA 2010]</span> and more energy than necessary on each operation. Energy efficiency is the product of these two factors, and it is the right metric because edge inference is bottlenecked by compute, not memory bandwidth &mdash; and diffusion transformers are more compute-dense than autoregressive LLMs.</p>
+  </details>
+
+  <details class="wp-sec" id="sec-5">
+  <summary><h2>5. Win the transition to edge inference<a class="sec-link" href="#sec-5" aria-label="Link to this section">#</a></h2></summary>
   <p>Full edge inference will require model efficiency and hardware efficiency to improve together. As robot policies become smaller through distillation, quantization, token reduction, caching, and better architectures, our current RPU design will still remain several steps ahead of general-purpose platforms at every stage of that transition. That near-term lead wins deployments and gives us the workload knowledge, software stack, and customer relationships needed for the larger opportunity. When the model architecture finally stabilizes, we will be positioned to co-design the model and chip as a single system &mdash; creating an accelerator that NVIDIA&rsquo;s general-purpose architecture cannot match.</p>
   </details>
 
