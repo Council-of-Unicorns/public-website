@@ -165,12 +165,12 @@
   <section class="band" id="realtime">
     <p class="label">01 &mdash; The requirement</p>
     <h2>Real time, on board,<br />in any environment.</h2>
-    <p class="claim">Real-world deployment is safety-critical, so the real-time control loop has to stay on board: a 14-billion-parameter policy running inside the robot&rsquo;s head, re-planning faster than a human&rsquo;s ~200&nbsp;ms reaction time &mdash; and holding that timing predictably, in any environment.</p>
+    <p class="claim">Robots work around people, so control has to run on board. The policy re-plans about every 200&nbsp;ms, as fast as a person reacts, and holds that timing anywhere.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Safety-critical means hitting that deadline on every cycle, not on average &mdash; and without depending on a network link. That is batch-one inference: one control request at a time, with no batch to hide latency behind. Because the graph and tensor shapes never change, the schedule can be wired into the silicon: no operating system, no kernel dispatch, no caches guessing at the access pattern.</p>
-          <p class="muted">And all of it has to fit a head that can shed only about 40&nbsp;W. That power ceiling &mdash; not peak throughput or memory bandwidth &mdash; is what the chip is designed against, so the metric that matters is useful inference per watt.</p>
+          <p>Every cycle must make the deadline. The robot asks for one action at a time, so there is no batch to hide latency behind. Diffusion transformers run the same operations in the same order every time, so we bake the schedule into the silicon: no operating system, no kernel launches, no caches guessing what comes next.</p>
+          <p class="muted">All of it fits in a head that sheds about 40&nbsp;W. We design against that power ceiling, not peak throughput, so the number that matters is useful work per watt.</p>
         </div>
       </details>
     <ul class="specs">
