@@ -165,11 +165,11 @@
   <section class="band" id="realtime">
     <p class="label">01 &mdash; The requirement</p>
     <h2>Real time, on board,<br />in any environment.</h2>
-    <p class="claim">The RPU has to run a 14-billion-parameter robot policy inside the robot&rsquo;s head on roughly 40 watts, re-planning faster than a human&rsquo;s ~200&nbsp;ms reaction time &mdash; and hold that timing predictably, anywhere.</p>
+    <p class="claim">Real-world deployment is safety-critical, so the real-time control loop has to stay on board: a 14-billion-parameter policy running inside the robot&rsquo;s head, re-planning faster than a human&rsquo;s ~200&nbsp;ms reaction time &mdash; and holding that timing predictably, in any environment.</p>
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>That is batch-one inference &mdash; one control request at a time, with no batch to hide latency behind &mdash; and the chip has to return an action within the deadline on every cycle, not on average. Because the graph and tensor shapes never change, the schedule can be wired into the silicon: no operating system, no kernel dispatch, no caches guessing at the access pattern.</p>
+          <p>Safety-critical means hitting that deadline on every cycle, not on average &mdash; and without depending on a network link. That is batch-one inference: one control request at a time, with no batch to hide latency behind. Because the graph and tensor shapes never change, the schedule can be wired into the silicon: no operating system, no kernel dispatch, no caches guessing at the access pattern.</p>
           <p class="muted">And all of it has to fit a head that can shed only about 40&nbsp;W. That power ceiling &mdash; not peak throughput or memory bandwidth &mdash; is what the chip is designed against, so the metric that matters is useful inference per watt.</p>
         </div>
       </details>
