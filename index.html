@@ -4,11 +4,11 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Substrate — Inference silicon for embodied AI</title>
-<meta name="description" content="A specialized chip for robotics. We are building the RPU (robot processing unit), a processor and compiler optimized for diffusion transformer inference, within a 100-watt power budget." />
+<meta name="description" content="A specialized chip for humanoid robotics. We are building the RPU (robot processing unit), a processor and compiler optimized for diffusion transformer inference, within a 100-watt power budget." />
 <link rel="icon" type="image/svg+xml" href="favicon.svg" />
 <meta name="theme-color" content="#100E18" />
 <meta property="og:title" content="Substrate — Inference silicon for embodied AI" />
-<meta property="og:description" content="A specialized chip for robotics. We are building the RPU (robot processing unit), a processor and compiler optimized for diffusion transformer inference, within a 100-watt power budget." />
+<meta property="og:description" content="A specialized chip for humanoid robotics. We are building the RPU (robot processing unit), a processor and compiler optimized for diffusion transformer inference, within a 100-watt power budget." />
 <meta property="og:type" content="website" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -38,7 +38,7 @@
   <section class="hero" id="top">
     <div class="hero-copy">
       <p class="label">RPU &mdash; Robot Processing Unit</p>
-      <h1>A Specialized Chip<br />for Robotics.</h1>
+      <h1>A Specialized Chip<br />for Humanoid Robotics.</h1>
       <p class="lede">The ChatGPT moment of robotics requires true, embodied intelligence that runs onboard with strict, deterministic latency. We are building the <strong>RPU (robot processing unit)</strong>, a processor and compiler optimized for diffusion transformer inference. Our goal is to run more capable robot policies onboard, within a 100&#8209;watt power budget.</p>
       <details class="more">
         <summary>Detail</summary>
@@ -195,12 +195,9 @@
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Diffusion transformers process many tokens together. They reuse weights across those tokens and perform substantial arithmetic within each layer. Even at batch one, these workloads can be limited by compute and power.</p>
-          <p>The compiler plans computation and data movement in advance. The hardware follows that schedule, keeps partial results close to the arithmetic, and reuses data before fetching it again.</p>
-          <p>Our design combines a systolic array, low-precision arithmetic, compiler-managed memory, and fused attention. Together, these reduce the energy spent moving data and coordinating execution.</p>
-          <p>RPU is a companion accelerator. The robot&rsquo;s existing computer continues to handle sensors, networking, independent safety functions, and conventional control. RPU accelerates policy inference.</p>
-          <p>Our measure of success is lower energy per completed inference at the required latency and model quality. We target roughly 3&times; Thor&rsquo;s performance per watt with first silicon and 5&times; as the compiler improves.</p>
-          <p class="muted">Weights and execution schedules remain loadable, so developers can update supported models without replacing the chip.</p>
+          <p>Diffusion transformers reuse weights across many tokens at once and perform substantial arithmetic in each layer. Even at batch one, these workloads can be limited by compute and power.</p>
+          <p>The compiler plans computation and data movement in advance, and the hardware follows that schedule. A systolic array, low-precision arithmetic, compiler-managed memory, and fused attention together reduce the energy spent moving data and coordinating execution. We target roughly 3&times; Thor&rsquo;s performance per watt with first silicon and 5&times; as the compiler improves.</p>
+          <p class="muted">RPU is a companion accelerator. The robot&rsquo;s existing computer continues to handle sensors, networking, independent safety functions, and conventional control.</p>
         </div>
       </details>
     <div class="die-legend">
