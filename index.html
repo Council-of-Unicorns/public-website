@@ -195,7 +195,7 @@
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>Diffusion transformers reuse weights across many tokens at once and perform substantial arithmetic in each layer. Even at batch one, these workloads can be limited by compute and power.</p>
+          <p>Robots need low-latency, batch-1 inference, acting on their latest observations without waiting to assemble a batch. But batch 1 does not imply low compute intensity. A diffusion transformer processes thousands of latent tokens together, reusing its weights across those tokens. That demands far more arithmetic per byte fetched than generating one token at a time.</p>
           <p>The compiler plans computation and data movement in advance, and the hardware follows that schedule. A systolic array, low-precision arithmetic, compiler-managed memory, and fused attention together reduce the energy spent moving data and coordinating execution. We target roughly 3&times; Thor&rsquo;s performance per watt with first silicon and 5&times; as the compiler improves.</p>
           <p class="muted">RPU is a companion accelerator. The robot&rsquo;s existing computer continues to handle sensors, networking, independent safety functions, and conventional control.</p>
         </div>
