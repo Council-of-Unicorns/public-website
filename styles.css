@@ -362,7 +362,7 @@ p { margin: 0; max-width: var(--measure); }
   gap: var(--s3);
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-@media (min-width: 620px) { .specs { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .specs { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 .specs li {
   position: relative;   /* tooltip anchors to the card, not to the asterisk,
