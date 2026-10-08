@@ -170,10 +170,10 @@
     <details class="more">
         <summary>Detail</summary>
         <div class="more-body">
-          <p>We focus on the fast perception-and-action loop: System&nbsp;1. It must process new observations and respond with low, predictable latency. Slower planning &mdash; System&nbsp;2 &mdash; can use remote compute.</p>
-          <p>Our reaction-time goal is roughly 200 milliseconds, from observation to action. Inference must fit within that deadline alongside sensing, communication within the robot, and control.</p>
-          <p>An action generated remotely reflects an earlier observation. Network jitter makes the age of that observation unpredictable. Buffering can smooth motion, but it cannot tell the robot what changed while it waited.</p>
-          <p class="muted">Local safety controllers remain essential. The robot needs an answer from its latest observations and cannot wait to assemble a batch, so we design for batch-one inference under a strict power limit.</p>
+          <p>We must not have datacenter latency and network jitter in the real-time control loop. Robots must operate in safety critical environments like households, workplaces, and public spaces. Safety requires low latency, deterministic control with ultra high reliability.</p>
+          <p>Some amount of remote inference may be unavoidable, but we believe it should be relegated to System&nbsp;2 (non-real-time planning). Remote inference for System&nbsp;1 (real-time control) introduces additional engineering requirements, including low-latency observation and action streaming, coordination with local execution, and handling network delays and interruptions.</p>
+          <p>For System&nbsp;1, the critical metric is reaction latency: the elapsed time between capturing an observation and executing the corresponding action. Human visuomotor reaction time is roughly 200 milliseconds, and delays substantially beyond this range are readily perceived as sluggishness or hesitation.</p>
+          <p class="muted">Remote inference introduces more than a fixed delay. By the time an action chunk reaches the robot, it was generated from observations that are already stale, and the amount of staleness changes from one cycle to the next.</p>
         </div>
       </details>
     <p class="label">Design goals</p>
